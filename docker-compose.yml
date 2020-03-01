@@ -16,7 +16,7 @@ services:
       - '9092:9092'
     volumes:
       - 'kafka_data:/bitnami'
-    environment:
+    environment: # https://rmoff.net/2018/08/02/kafka-listeners-explained/
       - KAFKA_LISTENERS=LISTENER_BOB://kafka:29092,LISTENER_FRED://kafka:9092
       - KAFKA_ADVERTISED_LISTENERS=LISTENER_BOB://kafka:29092,LISTENER_FRED://localhost:9092
       - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=LISTENER_BOB:PLAINTEXT,LISTENER_FRED:PLAINTEXT
