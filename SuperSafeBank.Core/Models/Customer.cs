@@ -13,7 +13,7 @@ namespace SuperSafeBank.Core.Models
         public string Firstname { get; }
         public string Lastname { get; }
 
-        protected override void ApplyCore(IDomainEvent<Guid> @event)
+        protected override void Apply(IDomainEvent<Guid> @event)
         {   
         }
 
