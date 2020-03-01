@@ -5,9 +5,9 @@ VisualStudioVersion = 16.0.29709.97
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SuperSafeBank.Console", "SuperSafeBank.Console\SuperSafeBank.Console.csproj", "{CF06825B-1C30-4449-B163-28A3B73F75CF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SuperSafeBank.Core.Tests", "SuperSafeBank.Core.Tests\SuperSafeBank.Core.Tests.csproj", "{F0C8720A-9D1C-4C7E-9C02-8A1B671DAA84}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SuperSafeBank.Core.Tests", "SuperSafeBank.Core.Tests\SuperSafeBank.Core.Tests.csproj", "{F0C8720A-9D1C-4C7E-9C02-8A1B671DAA84}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SuperSafeBank.Core", "SuperSafeBank.Core\SuperSafeBank.Core.csproj", "{5C24EE52-5804-4773-A1AA-00D507DA8250}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SuperSafeBank.Core", "SuperSafeBank.Core\SuperSafeBank.Core.csproj", "{5C24EE52-5804-4773-A1AA-00D507DA8250}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
