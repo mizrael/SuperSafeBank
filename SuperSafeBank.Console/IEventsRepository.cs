@@ -4,8 +4,9 @@ using SuperSafeBank.Core.Models;
 
 namespace SuperSafeBank.Console
 {
-    public interface IEventsRepository
+    public interface IEventsRepository<in TA, in TKey>
+        where TA : IAggregateRoot<TKey>
     {
-        Task AppendAsync<TKey>(IEnumerable<IDomainEvent<TKey>> events);
+        Task AppendAsync(TA aggregateRoot);
     }
 }
