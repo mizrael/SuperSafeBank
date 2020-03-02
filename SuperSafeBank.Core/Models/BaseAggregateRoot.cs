@@ -32,14 +32,10 @@ namespace SuperSafeBank.Core.Models
             _events.Enqueue(@event);
            
             this.Apply(@event);
-        }
 
-        private void Apply(IDomainEvent<TKey> @event)
-        {
-            this.ApplyCore(@event);
             this.Version++;
         }
 
-        protected abstract void ApplyCore(IDomainEvent<TKey> @event);
+        protected abstract void Apply(IDomainEvent<TKey> @event);
     }
 }

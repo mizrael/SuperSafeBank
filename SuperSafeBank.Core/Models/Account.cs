@@ -37,7 +37,7 @@ namespace SuperSafeBank.Core.Models
             this.AddEvent(Models.Events.Deposit.Create(this, normalizedAmount));
         }
 
-        protected override void ApplyCore(IDomainEvent<Guid> @event)
+        protected override void Apply(IDomainEvent<Guid> @event)
         {
             switch (@event)
             {
