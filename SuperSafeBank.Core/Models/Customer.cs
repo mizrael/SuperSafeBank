@@ -5,6 +5,8 @@ namespace SuperSafeBank.Core.Models
 {
     public class Customer : BaseAggregateRoot<Customer, Guid>
     {
+        private Customer() { }
+        
         public Customer(Guid id, string firstname, string lastname) : base(id)
         {
             Firstname = firstname;

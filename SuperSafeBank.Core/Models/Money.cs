@@ -4,8 +4,6 @@ namespace SuperSafeBank.Core.Models
 {
     public class Money : ValueObject<Money>
     {
-        private Money() { }
-        
         public Money(Currency currency, decimal value)
         {
             Value = value;

@@ -31,6 +31,8 @@ namespace SuperSafeBank.Console
             account.Deposit(new Money(Currency.CanadianDollar, 11), currencyConverter);
             await accountEventsRepository.AppendAsync(account);
 
+            var rehydratedAccount = await accountEventsRepository.RehydrateAsync(account.Id);
+
             System.Console.WriteLine("done!");
         }
     }

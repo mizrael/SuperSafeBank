@@ -6,11 +6,13 @@ namespace SuperSafeBank.Core.Models
 {
     public class Account : BaseAggregateRoot<Account, Guid>
     {
+        private Account() { }
+
         public Account(Guid id, Customer owner, Currency currency) : base(id)
         {
             this.Owner = owner;
             this.Balance = Money.Zero(currency);
-
+            
             this.AddEvent(new AccountCreated(this));
         }
 
@@ -43,6 +45,10 @@ namespace SuperSafeBank.Core.Models
         {
             switch (@event)
             {
+                case Models.Events.AccountCreated c:
+                    this.Balance = new Money(c.Currency, 0);
+                    
+                    break;
                 case Models.Events.Withdrawal w:
                     this.Balance = this.Balance.Subtract(w.Amount.Value);
                     break;
