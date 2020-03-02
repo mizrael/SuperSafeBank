@@ -85,7 +85,10 @@ namespace SuperSafeBank.Console
                 events.AddRange(currentSlice.Events.Select(Map));
             } while (!currentSlice.IsEndOfStream);
 
-            return BaseAggregateRoot<TA, TKey>.Create(events);
+            var result = BaseAggregateRoot<TA, TKey>.Create(events.OrderBy(e => e.AggregateVersion));
+            result.ClearEvents();
+
+            return result;
         }
 
         private static IDomainEvent<TKey> Map(ResolvedEvent resolvedEvent)
