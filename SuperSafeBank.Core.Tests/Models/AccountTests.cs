@@ -1,5 +1,8 @@
+using System;
+using System.Linq;
 using FluentAssertions;
 using SuperSafeBank.Core.Models;
+using SuperSafeBank.Core.Models.Events;
 using SuperSafeBank.Core.Services;
 using Xunit;
 
@@ -16,6 +19,25 @@ namespace SuperSafeBank.Core.Tests.Models
             sut.Balance.Should().Be(Money.Zero(Currency.CanadianDollar));
             sut.Owner.Should().Be(customer);
             sut.Version.Should().Be(1);
+        }
+
+        [Fact]
+        public void ctor_should_raise_Created_event()
+        {
+            var customer = Customer.Create("lorem", "ipsum");
+
+            var accountId = Guid.NewGuid();
+            var sut = new Account(accountId, customer, Currency.CanadianDollar);
+            
+            sut.Events.Count.Should().Be(1);
+
+            var createdEvent = sut.Events.First() as AccountCreated;
+            createdEvent.Should().NotBeNull()
+                .And.BeOfType<AccountCreated>();
+            createdEvent.AggregateId.Should().Be(accountId);
+            createdEvent.AggregateVersion.Should().Be(0);
+            createdEvent.OwnerId.Should().Be(customer.Id);
+            createdEvent.Currency.Should().Be(Currency.CanadianDollar);
         }
 
         [Fact]
