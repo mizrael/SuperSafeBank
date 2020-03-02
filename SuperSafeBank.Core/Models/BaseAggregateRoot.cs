@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.Immutable;
-using SuperSafeBank.Core.Models.Events;
 
 namespace SuperSafeBank.Core.Models
 {
@@ -11,9 +9,6 @@ namespace SuperSafeBank.Core.Models
         protected BaseAggregateRoot(TKey id) : base(id)
         { 
             _events = new Queue<IDomainEvent<TKey>>();
-
-            var aggregate = this as TA;
-            this.AddEvent(new AggregateCreated<TKey>(DateTime.UtcNow, id));
         }
 
         private readonly Queue<IDomainEvent<TKey>> _events;

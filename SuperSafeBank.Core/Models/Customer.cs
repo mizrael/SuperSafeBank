@@ -1,4 +1,5 @@
 ﻿using System;
+using SuperSafeBank.Core.Models.Events;
 
 namespace SuperSafeBank.Core.Models
 {
@@ -8,13 +9,22 @@ namespace SuperSafeBank.Core.Models
         {
             Firstname = firstname;
             Lastname = lastname;
+
+            this.AddEvent(new CustomerCreated(this));
         }
 
-        public string Firstname { get; }
-        public string Lastname { get; }
+        public string Firstname { get; private set; }
+        public string Lastname { get; private set; }
 
         protected override void Apply(IDomainEvent<Guid> @event)
-        {   
+        {
+            switch (@event)
+            {
+                case Models.Events.CustomerCreated c:
+                    this.Firstname = c.Firstname;
+                    this.Lastname = c.Lastname;
+                    break;
+            }
         }
 
         public static Customer Create(string firstName, string lastName)

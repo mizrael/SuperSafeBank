@@ -6,6 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="EventStore.Client" Version="5.0.6" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\SuperSafeBank.Core\SuperSafeBank.Core.csproj" />
   </ItemGroup>
 
