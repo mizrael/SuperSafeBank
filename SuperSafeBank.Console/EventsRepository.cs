@@ -10,12 +10,12 @@ namespace SuperSafeBank.Console
     public class EventsRepository<TA, TKey> : IEventsRepository<TA, TKey>
         where TA : IAggregateRoot<TKey>
     {
-        private readonly Uri _connString;
+        private readonly IEventStoreConnectionWrapper _connectionWrapper;
         private readonly string _streamBaseName;
         
-        public EventsRepository(Uri connString)
+        public EventsRepository(IEventStoreConnectionWrapper connectionWrapper)
         {
-            _connString = connString;
+            _connectionWrapper = connectionWrapper;
 
             var aggregateType = typeof(TA);
             _streamBaseName = aggregateType.Name;
@@ -29,9 +29,7 @@ namespace SuperSafeBank.Console
             if (!aggregateRoot.Events.Any())
                 return;
 
-            using var connection = EventStoreConnection.Create(_connString);
-
-            await connection.ConnectAsync();
+            var connection = await _connectionWrapper.GetConnectionAsync();
 
             var streamName = $"{_streamBaseName}_{aggregateRoot.Id}";
             var firstEvent = aggregateRoot.Events.First();
@@ -55,6 +53,11 @@ namespace SuperSafeBank.Console
             {
                 transaction.Rollback();
             }
+        }
+
+        public async Task<TA> Rehydrate(TKey key)
+        {
+            throw new NotImplementedException();
         }
 
         private EventData Map(IDomainEvent<TKey> @event)

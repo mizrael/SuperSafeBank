@@ -1,7 +1,6 @@
 ﻿using SuperSafeBank.Core.Models;
 using System;
 using System.Threading.Tasks;
-using EventStore.ClientAPI;
 using SuperSafeBank.Core.Services;
 
 namespace SuperSafeBank.Console
@@ -11,8 +10,10 @@ namespace SuperSafeBank.Console
         static async Task Main(string[] args)
         {
             var eventStoreConnStr = new Uri("tcp://admin:changeit@localhost:1113");
-            var customerEventsRepository = new EventsRepository<Customer, Guid>(eventStoreConnStr);
-            var accountEventsRepository = new EventsRepository<Account, Guid>(eventStoreConnStr);
+            var connectionWrapper = new EventStoreConnectionWrapper(eventStoreConnStr);
+
+            var customerEventsRepository = new EventsRepository<Customer, Guid>(connectionWrapper);
+            var accountEventsRepository = new EventsRepository<Account, Guid>(connectionWrapper);
 
             var currencyConverter = new FakeCurrencyConverter();
 
