@@ -17,7 +17,7 @@ namespace SuperSafeBank.Core.Tests.Models
             var sut = Account.Create(customer, Currency.CanadianDollar);
 
             sut.Balance.Should().Be(Money.Zero(Currency.CanadianDollar));
-            sut.Owner.Should().Be(customer);
+            sut.OwnerId.Should().Be(customer.Id);
             sut.Version.Should().Be(1);
         }
 

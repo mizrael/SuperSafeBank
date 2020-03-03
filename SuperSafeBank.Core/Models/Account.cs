@@ -10,13 +10,18 @@ namespace SuperSafeBank.Core.Models
 
         public Account(Guid id, Customer owner, Currency currency) : base(id)
         {
-            this.Owner = owner;
+            if (owner == null) 
+                throw new ArgumentNullException(nameof(owner));
+            if (currency == null)
+                throw new ArgumentNullException(nameof(currency));
+
+            this.OwnerId = owner.Id;
             this.Balance = Money.Zero(currency);
             
             this.AddEvent(new AccountCreated(this));
         }
 
-        public Customer Owner { get; }
+        public Guid OwnerId { get; private set; }
         public Money Balance { get; private set; }
 
         public void Withdraw(Money amount, ICurrencyConverter currencyConverter)
@@ -46,8 +51,9 @@ namespace SuperSafeBank.Core.Models
             switch (@event)
             {
                 case Models.Events.AccountCreated c:
+                    this.Id = c.AggregateId;
                     this.Balance = new Money(c.Currency, 0);
-                    
+                    this.OwnerId = c.OwnerId;
                     break;
                 case Models.Events.Withdrawal w:
                     this.Balance = this.Balance.Subtract(w.Amount.Value);

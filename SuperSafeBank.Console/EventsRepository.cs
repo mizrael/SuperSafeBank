@@ -86,8 +86,7 @@ namespace SuperSafeBank.Console
             } while (!currentSlice.IsEndOfStream);
 
             var result = BaseAggregateRoot<TA, TKey>.Create(events.OrderBy(e => e.AggregateVersion));
-            result.ClearEvents();
-
+            
             return result;
         }
 

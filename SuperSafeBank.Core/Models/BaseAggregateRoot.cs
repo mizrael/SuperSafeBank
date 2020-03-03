@@ -61,6 +61,8 @@ namespace SuperSafeBank.Core.Models
                 foreach (var @event in events)
                     baseAggregate.AddEvent(@event);
 
+            result.ClearEvents();
+
             return result;
         }
 

@@ -9,7 +9,7 @@ namespace SuperSafeBank.Core.Models
 
         protected BaseEntity(TKey id) => Id = id;
 
-        public TKey Id { get; private set; }
+        public TKey Id { get; protected set; }
 
         public override bool Equals(object obj)
         {

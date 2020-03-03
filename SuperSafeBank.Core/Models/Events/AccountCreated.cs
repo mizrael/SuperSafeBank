@@ -12,7 +12,7 @@ namespace SuperSafeBank.Core.Models.Events
 
         public AccountCreated(Account account) : base(account)
         {
-            OwnerId = account.Owner.Id;
+            OwnerId = account.OwnerId;
             Currency = account.Balance.Currency;
         }
 

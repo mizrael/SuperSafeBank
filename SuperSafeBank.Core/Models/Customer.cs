@@ -23,6 +23,7 @@ namespace SuperSafeBank.Core.Models
             switch (@event)
             {
                 case Models.Events.CustomerCreated c:
+                    this.Id = c.AggregateId;
                     this.Firstname = c.Firstname;
                     this.Lastname = c.Lastname;
                     break;
