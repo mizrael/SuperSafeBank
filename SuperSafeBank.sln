@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SuperSafeBank.Domain", "Sup
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SuperSafeBank.Domain.Tests", "SuperSafeBank.Domain.Tests\SuperSafeBank.Domain.Tests.csproj", "{848B85D1-8026-487A-8C1D-82EE82D4A90B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SuperSafeBank.Persistence.EventStore", "SuperSafeBank.Persistence.EventStore\SuperSafeBank.Persistence.EventStore.csproj", "{DE16F629-8843-485E-A96C-344B02CFADF0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{848B85D1-8026-487A-8C1D-82EE82D4A90B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{848B85D1-8026-487A-8C1D-82EE82D4A90B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{848B85D1-8026-487A-8C1D-82EE82D4A90B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DE16F629-8843-485E-A96C-344B02CFADF0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE16F629-8843-485E-A96C-344B02CFADF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DE16F629-8843-485E-A96C-344B02CFADF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DE16F629-8843-485E-A96C-344B02CFADF0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

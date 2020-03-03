@@ -1,7 +1,7 @@
-﻿using SuperSafeBank.Core.Models;
-using System;
+﻿using System;
 using System.Threading.Tasks;
-using SuperSafeBank.Core.Services;
+using SuperSafeBank.Domain;
+using SuperSafeBank.Domain.Services;
 
 namespace SuperSafeBank.Console
 {
