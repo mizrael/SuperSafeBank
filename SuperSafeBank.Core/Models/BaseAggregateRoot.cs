@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Reflection;
 
 namespace SuperSafeBank.Core.Models
@@ -53,6 +54,9 @@ namespace SuperSafeBank.Core.Models
 
         public static TA Create(IEnumerable<IDomainEvent<TKey>> events)
         {
+            if(null == events || !events.Any())
+                throw new ArgumentNullException(nameof(events));
+
             var cTor = LazyCtor.Value;
             var result = (TA)cTor.Invoke(new object[0]);
 
