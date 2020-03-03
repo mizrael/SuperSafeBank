@@ -1,8 +1,9 @@
 ﻿using System;
-using SuperSafeBank.Core.Models.Events;
-using SuperSafeBank.Core.Services;
+using SuperSafeBank.Core.Models;
+using SuperSafeBank.Domain.Events;
+using SuperSafeBank.Domain.Services;
 
-namespace SuperSafeBank.Core.Models
+namespace SuperSafeBank.Domain
 {
     public class Account : BaseAggregateRoot<Account, Guid>
     {
@@ -43,22 +44,22 @@ namespace SuperSafeBank.Core.Models
             
             var normalizedAmount = currencyConverter.Convert(amount, this.Balance.Currency);
             
-            this.AddEvent(new Models.Events.Deposit(this, normalizedAmount));
+            this.AddEvent(new Deposit(this, normalizedAmount));
         }
 
         protected override void Apply(IDomainEvent<Guid> @event)
         {
             switch (@event)
             {
-                case Models.Events.AccountCreated c:
+                case AccountCreated c:
                     this.Id = c.AggregateId;
                     this.Balance = new Money(c.Currency, 0);
                     this.OwnerId = c.OwnerId;
                     break;
-                case Models.Events.Withdrawal w:
+                case Withdrawal w:
                     this.Balance = this.Balance.Subtract(w.Amount.Value);
                     break;
-                case Models.Events.Deposit d:
+                case Deposit d:
                     this.Balance = this.Balance.Add(d.Amount.Value);
                     break;
             }

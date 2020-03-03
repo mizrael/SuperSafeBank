@@ -1,6 +1,7 @@
 ﻿using System;
+using SuperSafeBank.Core.Models;
 
-namespace SuperSafeBank.Core.Models.Events
+namespace SuperSafeBank.Domain.Events
 {
     public class CustomerCreated : BaseDomainEvent<Customer, Guid>
     {

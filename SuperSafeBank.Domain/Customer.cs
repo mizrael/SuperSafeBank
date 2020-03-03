@@ -1,7 +1,8 @@
 ﻿using System;
-using SuperSafeBank.Core.Models.Events;
+using SuperSafeBank.Core.Models;
+using SuperSafeBank.Domain.Events;
 
-namespace SuperSafeBank.Core.Models
+namespace SuperSafeBank.Domain
 {
     public class Customer : BaseAggregateRoot<Customer, Guid>
     {
@@ -22,7 +23,7 @@ namespace SuperSafeBank.Core.Models
         {
             switch (@event)
             {
-                case Models.Events.CustomerCreated c:
+                case CustomerCreated c:
                     this.Id = c.AggregateId;
                     this.Firstname = c.Firstname;
                     this.Lastname = c.Lastname;

@@ -2,14 +2,35 @@ using System;
 using System.Linq;
 using FluentAssertions;
 using SuperSafeBank.Core.Models;
-using SuperSafeBank.Core.Models.Events;
-using SuperSafeBank.Core.Services;
+using SuperSafeBank.Domain.Events;
+using SuperSafeBank.Domain.Services;
 using Xunit;
 
-namespace SuperSafeBank.Core.Tests.Models
+namespace SuperSafeBank.Domain.Tests
 {
     public class AccountTests
     {
+
+        [Fact]
+        public void Create_should_create_valid_Account_instance()
+        {
+            var currencyConverter = new FakeCurrencyConverter();
+            var customer = new Customer(Guid.NewGuid(), "lorem", "ipsum");
+            var account = Account.Create(customer, Currency.CanadianDollar);
+            account.Deposit(new Money(Currency.CanadianDollar, 10), currencyConverter);
+            account.Deposit(new Money(Currency.CanadianDollar, 42), currencyConverter);
+            account.Withdraw(new Money(Currency.CanadianDollar, 4), currencyConverter);
+            account.Deposit(new Money(Currency.CanadianDollar, 71), currencyConverter);
+
+            var instance = BaseAggregateRoot<Account, Guid>.Create(account.Events);
+            instance.Should().NotBeNull();
+            instance.Id.Should().Be(account.Id);
+            instance.OwnerId.Should().Be(customer.Id);
+            instance.Balance.Should().NotBeNull();
+            instance.Balance.Currency.Should().Be(Currency.CanadianDollar);
+            instance.Balance.Value.Should().Be(account.Balance.Value);
+        }
+
         [Fact]
         public void ctor_should_create_valid_instance()
         {

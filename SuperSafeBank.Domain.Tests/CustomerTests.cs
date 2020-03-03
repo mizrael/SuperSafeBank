@@ -2,13 +2,25 @@ using System;
 using System.Linq;
 using FluentAssertions;
 using SuperSafeBank.Core.Models;
-using SuperSafeBank.Core.Models.Events;
+using SuperSafeBank.Domain.Events;
 using Xunit;
 
-namespace SuperSafeBank.Core.Tests.Models
+namespace SuperSafeBank.Domain.Tests
 {
     public class CustomerTests
     {
+        [Fact]
+        public void Create_should_create_valid_Customer_instance()
+        {
+            var customer = new Customer(Guid.NewGuid(), "lorem", "ipsum");
+
+            var instance = BaseAggregateRoot<Customer, Guid>.Create(customer.Events);
+            instance.Should().NotBeNull();
+            instance.Id.Should().Be(customer.Id);
+            instance.Firstname.Should().Be(customer.Firstname);
+            instance.Lastname.Should().Be(customer.Lastname);
+        }
+
         [Fact]
         public void ctor_should_create_valid_instance()
         {

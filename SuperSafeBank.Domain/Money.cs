@@ -1,6 +1,7 @@
 ﻿using System;
+using SuperSafeBank.Core.Models;
 
-namespace SuperSafeBank.Core.Models
+namespace SuperSafeBank.Domain
 {
     public class Money : ValueObject<Money>
     {

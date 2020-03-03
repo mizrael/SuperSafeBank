@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SuperSafeBank.Core.Models
+namespace SuperSafeBank.Domain
 {
     public class AccountTransactionException : Exception
     {
