@@ -3,7 +3,7 @@ using System.Text;
 using System.Text.Json;
 using Confluent.Kafka;
 
-namespace SuperSafeBank.Console.EventBus
+namespace SuperSafeBank.Persistence.Kafka
 {
     internal class KeySerializer<TKey> : ISerializer<TKey>
     {

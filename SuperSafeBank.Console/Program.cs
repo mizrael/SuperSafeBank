@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using SuperSafeBank.Console.EventBus;
 using SuperSafeBank.Core;
 using SuperSafeBank.Domain;
 using SuperSafeBank.Domain.Services;
 using SuperSafeBank.Persistence.EventStore;
+using SuperSafeBank.Persistence.Kafka;
 
 namespace SuperSafeBank.Console
 { 

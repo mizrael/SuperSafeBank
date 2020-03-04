@@ -5,7 +5,7 @@ using Confluent.Kafka;
 using SuperSafeBank.Core.EventBus;
 using SuperSafeBank.Core.Models;
 
-namespace SuperSafeBank.Console.EventBus
+namespace SuperSafeBank.Persistence.Kafka
 {
     public class EventProducer<TA, TKey> : IDisposable, IEventProducer<TA, TKey>
         where TA : IAggregateRoot<TKey>

@@ -7,19 +7,17 @@ using Confluent.Kafka;
 using SuperSafeBank.Core.EventBus;
 using SuperSafeBank.Core.Models;
 
-namespace SuperSafeBank.Console.EventBus
+namespace SuperSafeBank.Persistence.Kafka
 {
     public class EventConsumer<TA, TKey> : IDisposable, IEventConsumer where TA : IAggregateRoot<TKey>
     {
         private IConsumer<TKey, string> _consumer;
 
-        private readonly string _topicName;
-
         public EventConsumer(string topicBaseName, string kafkaConnString)
         {
             var aggregateType = typeof(TA);
 
-            _topicName = $"{topicBaseName}-{aggregateType.Name}";
+            var topicName = $"{topicBaseName}-{aggregateType.Name}";
 
             var consumerConfig = new ConsumerConfig
             {
@@ -34,7 +32,7 @@ namespace SuperSafeBank.Console.EventBus
             consumerBuilder.SetKeyDeserializer(keyDeserializerFactory.Create<TKey>());
 
             _consumer = consumerBuilder.Build();
-            _consumer.Subscribe(_topicName);
+            _consumer.Subscribe(topicName);
         }
 
         public Task ConsumeAsync(CancellationToken cancellationToken)
