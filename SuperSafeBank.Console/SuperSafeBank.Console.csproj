@@ -10,7 +10,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SuperSafeBank.Core\SuperSafeBank.Core.csproj" />
+    <ProjectReference Include="..\SuperSafeBank.Domain\SuperSafeBank.Domain.csproj" />
+    <ProjectReference Include="..\SuperSafeBank.Persistence.EventStore\SuperSafeBank.Persistence.EventStore.csproj" />
   </ItemGroup>
 
 </Project>

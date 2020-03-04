@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using SuperSafeBank.Core.Models;
 
-namespace SuperSafeBank.Core.Models
+namespace SuperSafeBank.Domain
 {
     public class Currency : ValueObject<Currency>
     {

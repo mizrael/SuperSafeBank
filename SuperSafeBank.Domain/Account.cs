@@ -1,18 +1,28 @@
 ﻿using System;
-using SuperSafeBank.Core.Models.Events;
-using SuperSafeBank.Core.Services;
+using SuperSafeBank.Core.Models;
+using SuperSafeBank.Domain.Events;
+using SuperSafeBank.Domain.Services;
 
-namespace SuperSafeBank.Core.Models
+namespace SuperSafeBank.Domain
 {
     public class Account : BaseAggregateRoot<Account, Guid>
     {
+        private Account() { }
+
         public Account(Guid id, Customer owner, Currency currency) : base(id)
         {
-            this.Owner = owner;
+            if (owner == null) 
+                throw new ArgumentNullException(nameof(owner));
+            if (currency == null)
+                throw new ArgumentNullException(nameof(currency));
+
+            this.OwnerId = owner.Id;
             this.Balance = Money.Zero(currency);
+            
+            this.AddEvent(new AccountCreated(this));
         }
 
-        public Customer Owner { get; }
+        public Guid OwnerId { get; private set; }
         public Money Balance { get; private set; }
 
         public void Withdraw(Money amount, ICurrencyConverter currencyConverter)
@@ -24,7 +34,7 @@ namespace SuperSafeBank.Core.Models
             if (normalizedAmount.Value > this.Balance.Value)
                 throw new AccountTransactionException($"unable to withdrawn {normalizedAmount} from account {this.Id}", this);
 
-            this.AddEvent(Withdrawal.Create(this, amount));
+            this.AddEvent(new Withdrawal(this, amount));
         }
 
         public void Deposit(Money amount, ICurrencyConverter currencyConverter)
@@ -34,17 +44,22 @@ namespace SuperSafeBank.Core.Models
             
             var normalizedAmount = currencyConverter.Convert(amount, this.Balance.Currency);
             
-            this.AddEvent(Models.Events.Deposit.Create(this, normalizedAmount));
+            this.AddEvent(new Deposit(this, normalizedAmount));
         }
 
         protected override void Apply(IDomainEvent<Guid> @event)
         {
             switch (@event)
             {
-                case Models.Events.Withdrawal w:
+                case AccountCreated c:
+                    this.Id = c.AggregateId;
+                    this.Balance = new Money(c.Currency, 0);
+                    this.OwnerId = c.OwnerId;
+                    break;
+                case Withdrawal w:
                     this.Balance = this.Balance.Subtract(w.Amount.Value);
                     break;
-                case Models.Events.Deposit d:
+                case Deposit d:
                     this.Balance = this.Balance.Add(d.Amount.Value);
                     break;
             }

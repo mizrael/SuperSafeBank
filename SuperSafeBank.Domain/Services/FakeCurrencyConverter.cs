@@ -1,6 +1,4 @@
-﻿using SuperSafeBank.Core.Models;
-
-namespace SuperSafeBank.Core.Services
+﻿namespace SuperSafeBank.Domain.Services
 {
     public class FakeCurrencyConverter : ICurrencyConverter 
     {

@@ -1,11 +1,10 @@
 ﻿using System;
+using SuperSafeBank.Core.Models;
 
-namespace SuperSafeBank.Core.Models
+namespace SuperSafeBank.Domain
 {
     public class Money : ValueObject<Money>
     {
-        private Money() { }
-        
         public Money(Currency currency, decimal value)
         {
             Value = value;

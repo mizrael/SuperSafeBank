@@ -1,13 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using SuperSafeBank.Core.Models;
 using System.Threading.Tasks;
-using Confluent.Kafka;
-using SuperSafeBank.Console.EventBus;
-using SuperSafeBank.Core.Services;
+using SuperSafeBank.Domain;
+using SuperSafeBank.Domain.Services;
+using SuperSafeBank.Persistence.EventStore;
 
 namespace SuperSafeBank.Console
 { 
@@ -15,40 +10,31 @@ namespace SuperSafeBank.Console
     {
         static async Task Main(string[] args)
         {
-            var kafkaConnString = "localhost:9092";
-            var eventsTopic = "events";
+            var eventStoreConnStr = new Uri("tcp://admin:changeit@localhost:1113");
+            var connectionWrapper = new EventStoreConnectionWrapper(eventStoreConnStr);
 
-            var accounts = await Produce(eventsTopic, kafkaConnString);
-            
-            System.Console.WriteLine("done!");
-        }
-
-        private static async Task<IEnumerable<Account>> Produce(string eventsTopic, string kafkaConnString)
-        {
-            var customerEventsRepo = new EventProducer<Customer, Guid>(eventsTopic, kafkaConnString);
-            var accountEventsRepo = new EventProducer<Account, Guid>(eventsTopic, kafkaConnString);
+            var customerEventsRepository = new EventsRepository<Customer, Guid>(connectionWrapper);
+            var accountEventsRepository = new EventsRepository<Account, Guid>(connectionWrapper);
 
             var currencyConverter = new FakeCurrencyConverter();
 
-            var accounts = new List<Account>();
+            var customer = Customer.Create("lorem", "ipsum");
+            await customerEventsRepository.AppendAsync(customer);
 
-            for (var i = 0; i != 10; ++i)
-            {
-                var customer = Customer.Create(Guid.NewGuid().ToString(), Guid.NewGuid().ToString());
-                await customerEventsRepo.DispatchAsync(customer);
+            var account = Account.Create(customer, Currency.CanadianDollar);
+            account.Deposit(new Money(Currency.CanadianDollar, 10), currencyConverter);
+            account.Deposit(new Money(Currency.CanadianDollar, 42), currencyConverter);
+            account.Withdraw(new Money(Currency.CanadianDollar, 4), currencyConverter);
+            account.Deposit(new Money(Currency.CanadianDollar, 71), currencyConverter);
+            await accountEventsRepository.AppendAsync(account);
 
-                var account = Account.Create(customer, Currency.CanadianDollar);
-                account.Deposit(new Money(Currency.CanadianDollar, 10), currencyConverter);
-                account.Deposit(new Money(Currency.CanadianDollar, 42), currencyConverter);
-                account.Withdraw(new Money(Currency.CanadianDollar, 4), currencyConverter);
-                account.Deposit(new Money(Currency.CanadianDollar, 71), currencyConverter);
+            account.Withdraw(new Money(Currency.CanadianDollar, 10), currencyConverter);
+            account.Deposit(new Money(Currency.CanadianDollar, 11), currencyConverter);
+            await accountEventsRepository.AppendAsync(account);
 
-                await accountEventsRepo.DispatchAsync(account);
+            var rehydratedAccount = await accountEventsRepository.RehydrateAsync(account.Id);
 
-                accounts.Add(account);
-            }
-
-            return accounts;
+            System.Console.WriteLine("done!");
         }
     }
 }
