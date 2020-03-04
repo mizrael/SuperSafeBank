@@ -1,7 +1,10 @@
-﻿namespace SuperSafeBank.Core.EventBus
+﻿using System.Threading;
+using System.Threading.Tasks;
+
+namespace SuperSafeBank.Core.EventBus
 {
     public interface IEventConsumer
     {
-        void Consume();
+        Task ConsumeAsync(CancellationToken cancellationToken);
     }
 }

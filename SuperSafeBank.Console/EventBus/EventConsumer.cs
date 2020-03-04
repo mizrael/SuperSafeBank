@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Confluent.Kafka;
 using SuperSafeBank.Core.EventBus;
 using SuperSafeBank.Core.Models;
@@ -32,30 +34,37 @@ namespace SuperSafeBank.Console.EventBus
             consumerBuilder.SetKeyDeserializer(keyDeserializerFactory.Create<TKey>());
 
             _consumer = consumerBuilder.Build();
+            _consumer.Subscribe(_topicName);
         }
 
-        public void Consume()
+        public Task ConsumeAsync(CancellationToken cancellationToken)
         {
-            _consumer.Subscribe(_topicName);
-
-            while (true)
+            return Task.Run(() =>
             {
-                try
+                while (!cancellationToken.IsCancellationRequested)
                 {
-                    var cr = _consumer.Consume();
-                    if (cr.IsPartitionEOF)
-                        continue;
+                    try
+                    {
+                        var cr = _consumer.Consume(cancellationToken);
+                        if (cr.IsPartitionEOF)
+                            continue;
+                        
+                        var messageTypeHeader = cr.Headers.First(h => h.Key == "type");
+                        var messageType = Encoding.UTF8.GetString(messageTypeHeader.GetValueBytes());
 
-                    var messageTypeHeader = cr.Headers.First(h => h.Key == "type");
-                    var messageType = Encoding.UTF8.GetString(messageTypeHeader.GetValueBytes());
-
-                    System.Console.WriteLine($"Consumed '{messageType}' message: '{cr.Key}' -> '{cr.Value}' at: '{cr.TopicPartitionOffset}'.");
+                        System.Console.WriteLine(
+                            $"Consumed '{messageType}' message: '{cr.Key}' -> '{cr.Value}' at: '{cr.TopicPartitionOffset}'.");
+                    }
+                    catch (OperationCanceledException ce)
+                    {
+                        System.Console.WriteLine("shutting down consumer...");
+                    }
+                    catch (Exception e)
+                    {
+                        System.Console.WriteLine($"Error occured: {e}");
+                    }
                 }
-                catch (ConsumeException e)
-                {
-                    System.Console.WriteLine($"Error occured: {e.Error.Reason}");
-                }
-            }
+            }, cancellationToken);
         }
 
         public void Dispose()
