@@ -1,7 +1,7 @@
 ﻿using System;
 using Confluent.Kafka;
 
-namespace SuperSafeBank.Console
+namespace SuperSafeBank.Console.EventBus
 {
     internal class GuidDeserializer : IDeserializer<Guid>
     {

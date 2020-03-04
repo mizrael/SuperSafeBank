@@ -1,32 +1,31 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using Confluent.Kafka;
 using SuperSafeBank.Core.Models;
 
-namespace SuperSafeBank.Console
+namespace SuperSafeBank.Console.EventBus
 {
-    public class EventsRepository<TA, TKey> : IDisposable, IEventsRepository<TA, TKey>
+    public class EventProducer<TA, TKey> : IDisposable, IEventProducer<TA, TKey>
         where TA : IAggregateRoot<TKey>
     {
         private IProducer<TKey, string> _producer;
 
         private readonly string _topicName;
         
-        public EventsRepository(string topicBaseName, ProducerConfig producerConfig)
+        public EventProducer(string topicBaseName, string kafkaConnString)
         {
             var aggregateType = typeof(TA);
 
             _topicName = $"{topicBaseName}-{aggregateType.Name}";
-         
-            var builder = new ProducerBuilder<TKey, string>(producerConfig);
-            builder.SetKeySerializer(new KeySerializer<TKey>());
 
-            _producer = builder.Build();
+            var producerConfig = new ProducerConfig { BootstrapServers = kafkaConnString };
+            var producerBuilder = new ProducerBuilder<TKey, string>(producerConfig);
+            producerBuilder.SetKeySerializer(new KeySerializer<TKey>());
+            _producer = producerBuilder.Build();
         }
 
-        public async Task AppendAsync(TA aggregateRoot)
+        public async Task DispatchAsync(TA aggregateRoot)
         {
             if(null == aggregateRoot)
                 throw new ArgumentNullException(nameof(aggregateRoot));

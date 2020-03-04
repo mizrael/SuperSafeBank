@@ -6,6 +6,7 @@ using System.Threading;
 using SuperSafeBank.Core.Models;
 using System.Threading.Tasks;
 using Confluent.Kafka;
+using SuperSafeBank.Console.EventBus;
 using SuperSafeBank.Core.Services;
 
 namespace SuperSafeBank.Console
@@ -17,76 +18,15 @@ namespace SuperSafeBank.Console
             var kafkaConnString = "localhost:9092";
             var eventsTopic = "events";
 
-            var accounts = await Produce(kafkaConnString, eventsTopic);
-
-            Consume<Account, Guid>(kafkaConnString, eventsTopic);
-
+            var accounts = await Produce(eventsTopic, kafkaConnString);
+            
             System.Console.WriteLine("done!");
         }
 
-        private static void Consume<TA, TKey>(string kafkaConnString, string topicBaseName)
-            where TA : IAggregateRoot<TKey>
+        private static async Task<IEnumerable<Account>> Produce(string eventsTopic, string kafkaConnString)
         {
-            var keyDeserializerFactory = new KeyDeserializerFactory();
-
-            var conf = new ConsumerConfig
-            {
-                GroupId = "test-consumer-group",
-                BootstrapServers = kafkaConnString,
-                AutoOffsetReset = AutoOffsetReset.Earliest,
-                EnablePartitionEof = true
-            };
-
-            var builder = new ConsumerBuilder<Guid, string>(conf);
-            builder.SetKeyDeserializer(keyDeserializerFactory.Create<Guid>());
-
-            using var c = builder.Build();
-
-            var aggregateType = typeof(TA);
-            var topicName = $"{topicBaseName}-{aggregateType.Name}";
-            c.Subscribe(topicName);
-
-            var cts = new CancellationTokenSource();
-            System.Console.CancelKeyPress += (_, e) =>
-            {
-                e.Cancel = true;
-                cts.Cancel();
-            };
-
-            try
-            {
-                while (true)
-                {
-                    try
-                    {
-                        var cr = c.Consume(cts.Token);
-                        if (cr.IsPartitionEOF)
-                            continue;
-
-                        var messageTypeHeader = cr.Headers.First(h => h.Key == "type");
-                        var messageType = Encoding.UTF8.GetString(messageTypeHeader.GetValueBytes());
-
-                        System.Console.WriteLine($"Consumed '{messageType}' message: '{cr.Key}' -> '{cr.Value}' at: '{cr.TopicPartitionOffset}'.");
-                    }
-                    catch (ConsumeException e)
-                    {
-                        System.Console.WriteLine($"Error occured: {e.Error.Reason}");
-                    }
-                }
-            }
-            catch (OperationCanceledException)
-            {
-                // Ensure the consumer leaves the group cleanly and final offsets are committed.
-                c.Close();
-            }
-        }
-
-        private static async Task<IEnumerable<Account>> Produce(string kafkaConnString, string eventsTopic)
-        {
-            var config = new ProducerConfig {BootstrapServers = kafkaConnString};
-
-            var customerEventsRepo = new EventsRepository<Customer, Guid>(eventsTopic, config);
-            var accountEventsRepo = new EventsRepository<Account, Guid>(eventsTopic, config);
+            var customerEventsRepo = new EventProducer<Customer, Guid>(eventsTopic, kafkaConnString);
+            var accountEventsRepo = new EventProducer<Account, Guid>(eventsTopic, kafkaConnString);
 
             var currencyConverter = new FakeCurrencyConverter();
 
@@ -95,15 +35,15 @@ namespace SuperSafeBank.Console
             for (var i = 0; i != 10; ++i)
             {
                 var customer = Customer.Create(Guid.NewGuid().ToString(), Guid.NewGuid().ToString());
-                await customerEventsRepo.AppendAsync(customer);
+                await customerEventsRepo.DispatchAsync(customer);
 
                 var account = Account.Create(customer, Currency.CanadianDollar);
                 account.Deposit(new Money(Currency.CanadianDollar, 10), currencyConverter);
                 account.Deposit(new Money(Currency.CanadianDollar, 42), currencyConverter);
                 account.Withdraw(new Money(Currency.CanadianDollar, 4), currencyConverter);
                 account.Deposit(new Money(Currency.CanadianDollar, 71), currencyConverter);
-    
-                await accountEventsRepo.AppendAsync(account);
+
+                await accountEventsRepo.DispatchAsync(account);
 
                 accounts.Add(account);
             }
@@ -111,6 +51,4 @@ namespace SuperSafeBank.Console
             return accounts;
         }
     }
-
-
 }
