@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace SuperSafeBank.Console
+namespace SuperSafeBank.Persistence.EventStore
 {
     public interface IEventsRepository<in TA, TKey>
     {

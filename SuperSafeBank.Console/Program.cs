@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using SuperSafeBank.Domain;
 using SuperSafeBank.Domain.Services;
+using SuperSafeBank.Persistence.EventStore;
 
 namespace SuperSafeBank.Console
 {

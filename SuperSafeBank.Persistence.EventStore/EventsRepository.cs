@@ -9,7 +9,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using SuperSafeBank.Core.Models;
 
-namespace SuperSafeBank.Console
+namespace SuperSafeBank.Persistence.EventStore
 {
     public class EventsRepository<TA, TKey> : IEventsRepository<TA, TKey>
         where TA : class, IAggregateRoot<TKey>
@@ -134,17 +134,18 @@ namespace SuperSafeBank.Console
     /// <summary>
     /// https://www.mking.net/blog/working-with-private-setters-in-json-net
     /// </summary>
-    public class PrivateSetterContractResolver : DefaultContractResolver
+    internal class PrivateSetterContractResolver : DefaultContractResolver
     {
         protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization memberSerialization)
         {
             var jsonProperty = base.CreateProperty(member, memberSerialization);
-            if (!jsonProperty.Writable)
+            if (jsonProperty.Writable) 
+                return jsonProperty;
+            
+            if (member is PropertyInfo propertyInfo)
             {
-                if (member is PropertyInfo propertyInfo)
-                {
-                    jsonProperty.Writable = propertyInfo.GetSetMethod(true) != null;
-                }
+                var setter = propertyInfo.GetSetMethod(true);
+                jsonProperty.Writable = setter != null;
             }
 
             return jsonProperty;

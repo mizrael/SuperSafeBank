@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using EventStore.ClientAPI;
 
-namespace SuperSafeBank.Console
+namespace SuperSafeBank.Persistence.EventStore
 {
     public interface IEventStoreConnectionWrapper
     {
