@@ -2,6 +2,7 @@
 using System.Text;
 using System.Threading.Tasks;
 using Confluent.Kafka;
+using SuperSafeBank.Core.EventBus;
 using SuperSafeBank.Core.Models;
 
 namespace SuperSafeBank.Console.EventBus

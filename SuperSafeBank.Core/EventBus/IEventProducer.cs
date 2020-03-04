@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using SuperSafeBank.Core.Models;
 
-namespace SuperSafeBank.Console.EventBus
+namespace SuperSafeBank.Core.EventBus
 {
     public interface IEventProducer<in TA, in TKey>
         where TA : IAggregateRoot<TKey>

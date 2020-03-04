@@ -14,6 +14,7 @@ services:
       - "1113:1113"
       - "2112:2112"
       - "2113:2113"
+      
   zookeeper:
     image: 'bitnami/zookeeper:3'
     ports:

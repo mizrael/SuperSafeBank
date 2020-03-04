@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using EventStore.ClientAPI;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using SuperSafeBank.Core;
 using SuperSafeBank.Core.Models;
 
 namespace SuperSafeBank.Persistence.EventStore
@@ -16,6 +17,7 @@ namespace SuperSafeBank.Persistence.EventStore
     {
         private readonly IEventStoreConnectionWrapper _connectionWrapper;
         private readonly string _streamBaseName;
+
         
         public EventsRepository(IEventStoreConnectionWrapper connectionWrapper)
         {
@@ -51,12 +53,11 @@ namespace SuperSafeBank.Persistence.EventStore
                 }
 
                 await transaction.CommitAsync();
-
-                aggregateRoot.ClearEvents();
             }
-            catch (Exception ex)
+            catch
             {
                 transaction.Rollback();
+                throw;
             }
         }
 

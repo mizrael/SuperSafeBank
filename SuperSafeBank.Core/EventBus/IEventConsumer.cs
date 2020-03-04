@@ -1,4 +1,4 @@
-﻿namespace SuperSafeBank.Console.EventBus
+﻿namespace SuperSafeBank.Core.EventBus
 {
     public interface IEventConsumer
     {
