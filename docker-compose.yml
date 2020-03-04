@@ -1,7 +1,7 @@
 version: '3.4'
 
 services:
-  eventstore.db:
+  eventstore_db:
     image: eventstore/eventstore
     environment:
       - EVENTSTORE_CLUSTER_SIZE=1
@@ -40,8 +40,20 @@ services:
     depends_on:
       - zookeeper
 
+  mongodb:
+    image: mongo:latest
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password
+    ports:
+      - 27017:27017
+    volumes:
+      - mongodb_data:/data/db
+
 volumes:
   zookeeper_data:
     driver: local
   kafka_data:
+    driver: local
+  mongodb_data:
     driver: local
