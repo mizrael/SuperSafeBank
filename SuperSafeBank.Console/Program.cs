@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using MediatR;
+using Microsoft.Extensions.DependencyInjection;
 using SuperSafeBank.Core;
 using SuperSafeBank.Domain;
 using SuperSafeBank.Domain.Events;
@@ -17,23 +19,21 @@ namespace SuperSafeBank.Console
             var kafkaConnString = "localhost:9092";
             var eventsTopic = "events";
 
-            var cts = new CancellationTokenSource();
-
-            System.Console.CancelKeyPress += (s, e) =>
-            {
-                System.Console.WriteLine("shutting down...");
-                e.Cancel = true;
-                cts.Cancel();
-            };
-
-            var jsonEventDeserializer = new JsonEventDeserializer(new []
+            var jsonEventDeserializer = new JsonEventDeserializer(new[]
             {
                 typeof(AccountCreated).Assembly
             });
 
-            var consumer = new EventConsumer<Account, Guid>(eventsTopic, kafkaConnString, jsonEventDeserializer);
-            consumer.EventReceived += Consumer_EventReceived;
-            var tc = consumer.ConsumeAsync(cts.Token);
+            var serviceProvider = new ServiceCollection()
+                .AddMediatR(new[]
+                {
+                    typeof(AccountEventsHandler).Assembly
+                })
+                .BuildServiceProvider();
+
+            var mediator = serviceProvider.GetRequiredService<IMediator>();
+
+            var tc = Read(eventsTopic, kafkaConnString, jsonEventDeserializer, mediator);
 
             var tp = Write(eventsTopic, kafkaConnString, jsonEventDeserializer);
 
@@ -43,9 +43,29 @@ namespace SuperSafeBank.Console
             System.Console.ReadLine();
         }
 
-        private static void Consumer_EventReceived(object sender, Core.Models.IDomainEvent<Guid> e)
+        private static Task Read(string eventsTopic, 
+            string kafkaConnString,
+            JsonEventDeserializer jsonEventDeserializer,
+            IMediator mediator)
         {
-            System.Console.WriteLine($"processing event {e.GetType()} ...");
+            var cts = new CancellationTokenSource();
+
+            System.Console.CancelKeyPress += (s, e) =>
+            {
+                System.Console.WriteLine("shutting down...");
+                e.Cancel = true;
+                cts.Cancel();
+            };
+
+            var consumer = new EventConsumer<Account, Guid>(eventsTopic, kafkaConnString, jsonEventDeserializer);
+            consumer.EventReceived += async (s, e) =>
+            {
+                var @event = EventReceivedFactory.Create((dynamic)e);
+                await mediator.Publish(@event, cts.Token);
+            };
+
+            var tc = consumer.ConsumeAsync(cts.Token);
+            return tc;
         }
 
         private static async Task Write(string eventsTopic, 
