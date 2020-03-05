@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Confluent.Kafka;
+using SuperSafeBank.Core;
 using SuperSafeBank.Core.EventBus;
 using SuperSafeBank.Core.Models;
 
@@ -12,12 +15,12 @@ namespace SuperSafeBank.Persistence.Kafka
     public class EventConsumer<TA, TKey> : IDisposable, IEventConsumer where TA : IAggregateRoot<TKey>
     {
         private IConsumer<TKey, string> _consumer;
+        private readonly IEventDeserializer _eventDeserializer;
 
-        public EventConsumer(string topicBaseName, string kafkaConnString)
+        public EventConsumer(string topicBaseName, string kafkaConnString, IEventDeserializer eventDeserializer)
         {
+            _eventDeserializer = eventDeserializer;
             var aggregateType = typeof(TA);
-
-            var topicName = $"{topicBaseName}-{aggregateType.Name}";
 
             var consumerConfig = new ConsumerConfig
             {
@@ -32,6 +35,8 @@ namespace SuperSafeBank.Persistence.Kafka
             consumerBuilder.SetKeyDeserializer(keyDeserializerFactory.Create<TKey>());
 
             _consumer = consumerBuilder.Build();
+            
+            var topicName = $"{topicBaseName}-{aggregateType.Name}";
             _consumer.Subscribe(topicName);
         }
 
@@ -48,18 +53,21 @@ namespace SuperSafeBank.Persistence.Kafka
                             continue;
                         
                         var messageTypeHeader = cr.Headers.First(h => h.Key == "type");
-                        var messageType = Encoding.UTF8.GetString(messageTypeHeader.GetValueBytes());
+                        var eventType = Encoding.UTF8.GetString(messageTypeHeader.GetValueBytes());
 
-                        System.Console.WriteLine(
-                            $"Consumed '{messageType}' message: '{cr.Key}' -> '{cr.Value}' at: '{cr.TopicPartitionOffset}'.");
+                        Console.WriteLine($"received '{eventType}' message: '{cr.Key}' -> '{cr.Value}' at: '{cr.TopicPartitionOffset}'.");
+                        var @event = _eventDeserializer.Deserialize<TKey>(eventType, cr.Value);
+                        if(null == @event)
+                            throw new SerializationException($"unable to deserialize event {eventType} : {cr.Value}");
+
                     }
-                    catch (OperationCanceledException ce)
+                    catch (OperationCanceledException)
                     {
-                        System.Console.WriteLine("shutting down consumer...");
+                        Console.WriteLine("shutting down consumer...");
                     }
                     catch (Exception e)
                     {
-                        System.Console.WriteLine($"Error occured: {e}");
+                        Console.WriteLine($"Error occured: {e}");
                     }
                 }
             }, cancellationToken);

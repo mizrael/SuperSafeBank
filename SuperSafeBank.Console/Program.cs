@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using SuperSafeBank.Core;
 using SuperSafeBank.Domain;
+using SuperSafeBank.Domain.Events;
 using SuperSafeBank.Domain.Services;
 using SuperSafeBank.Persistence.EventStore;
 using SuperSafeBank.Persistence.Kafka;
@@ -25,10 +26,15 @@ namespace SuperSafeBank.Console
                 cts.Cancel();
             };
 
-            var consumer = new EventConsumer<Account, Guid>(eventsTopic, kafkaConnString);
+            var jsonEventDeserializer = new JsonEventDeserializer(new []
+            {
+                typeof(AccountCreated).Assembly
+            });
+
+            var consumer = new EventConsumer<Account, Guid>(eventsTopic, kafkaConnString, jsonEventDeserializer);
             var tc = consumer.ConsumeAsync(cts.Token);
 
-            var tp = Write(eventsTopic, kafkaConnString);
+            var tp = Write(eventsTopic, kafkaConnString, jsonEventDeserializer);
 
             await Task.WhenAll(tp, tc);
 
@@ -36,15 +42,17 @@ namespace SuperSafeBank.Console
             System.Console.ReadLine();
         }
 
-        private static async Task Write(string eventsTopic, string kafkaConnString)
+        private static async Task Write(string eventsTopic, 
+            string kafkaConnString,
+            JsonEventDeserializer jsonEventDeserializer)
         {
             var eventStoreConnStr = new Uri("tcp://admin:changeit@localhost:1113");
             var connectionWrapper = new EventStoreConnectionWrapper(eventStoreConnStr);
 
-            var customerEventsRepository = new EventsRepository<Customer, Guid>(connectionWrapper);
+            var customerEventsRepository = new EventsRepository<Customer, Guid>(connectionWrapper, jsonEventDeserializer);
             var customerEventsProducer = new EventProducer<Customer, Guid>(eventsTopic, kafkaConnString);
 
-            var accountEventsRepository = new EventsRepository<Account, Guid>(connectionWrapper);
+            var accountEventsRepository = new EventsRepository<Account, Guid>(connectionWrapper, jsonEventDeserializer);
             var accountEventsProducer = new EventProducer<Account, Guid>(eventsTopic, kafkaConnString);
 
             var customerEventsService = new EventsService<Customer, Guid>(customerEventsRepository, customerEventsProducer);

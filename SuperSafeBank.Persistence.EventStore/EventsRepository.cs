@@ -17,11 +17,12 @@ namespace SuperSafeBank.Persistence.EventStore
     {
         private readonly IEventStoreConnectionWrapper _connectionWrapper;
         private readonly string _streamBaseName;
+        private readonly IEventDeserializer _eventDeserializer;
 
-        
-        public EventsRepository(IEventStoreConnectionWrapper connectionWrapper)
+        public EventsRepository(IEventStoreConnectionWrapper connectionWrapper, IEventDeserializer eventDeserializer)
         {
             _connectionWrapper = connectionWrapper;
+            _eventDeserializer = eventDeserializer;
 
             var aggregateType = typeof(TA);
             _streamBaseName = aggregateType.Name;
@@ -91,22 +92,10 @@ namespace SuperSafeBank.Persistence.EventStore
             return result;
         }
 
-        private static IDomainEvent<TKey> Map(ResolvedEvent resolvedEvent)
+        private IDomainEvent<TKey> Map(ResolvedEvent resolvedEvent)
         {
             var meta = System.Text.Json.JsonSerializer.Deserialize<EventMeta>(resolvedEvent.Event.Metadata);
-            var eventType = Type.GetType(meta.EventType, true);
-
-            // as of 01/10/2020, "Deserialization to reference types without a parameterless constructor isn't supported."
-            // https://docs.microsoft.com/en-us/dotnet/standard/serialization/system-text-json-how-to
-            // apparently it's being worked on: https://github.com/dotnet/runtime/issues/29895
-            var eventJson = System.Text.Encoding.UTF8.GetString(resolvedEvent.Event.Data);
-            var result = Newtonsoft.Json.JsonConvert.DeserializeObject(eventJson, eventType, new Newtonsoft.Json.JsonSerializerSettings()
-            {
-                ConstructorHandling = Newtonsoft.Json.ConstructorHandling.AllowNonPublicDefaultConstructor,
-                ContractResolver = new PrivateSetterContractResolver()
-            });
-
-            return (IDomainEvent<TKey>)result;
+            return _eventDeserializer.Deserialize<TKey>(meta.EventType, resolvedEvent.Event.Data);
         }
 
         private static EventData Map(IDomainEvent<TKey> @event)
@@ -132,24 +121,4 @@ namespace SuperSafeBank.Persistence.EventStore
         }
     }
 
-    /// <summary>
-    /// https://www.mking.net/blog/working-with-private-setters-in-json-net
-    /// </summary>
-    internal class PrivateSetterContractResolver : DefaultContractResolver
-    {
-        protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization memberSerialization)
-        {
-            var jsonProperty = base.CreateProperty(member, memberSerialization);
-            if (jsonProperty.Writable) 
-                return jsonProperty;
-            
-            if (member is PropertyInfo propertyInfo)
-            {
-                var setter = propertyInfo.GetSetMethod(true);
-                jsonProperty.Writable = setter != null;
-            }
-
-            return jsonProperty;
-        }
-    }
 }

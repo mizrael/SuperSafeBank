@@ -40,7 +40,7 @@ namespace SuperSafeBank.Persistence.Kafka
                 var headers = new Headers
                 {
                     {"aggregate", Encoding.UTF8.GetBytes(@event.AggregateId.ToString())},
-                    {"type", Encoding.UTF8.GetBytes(eventType.Name)}
+                    {"type", Encoding.UTF8.GetBytes(eventType.AssemblyQualifiedName)}
                 };
 
                 var message = new Message<TKey, string>()
