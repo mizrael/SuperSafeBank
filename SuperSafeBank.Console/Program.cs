@@ -32,6 +32,7 @@ namespace SuperSafeBank.Console
             });
 
             var consumer = new EventConsumer<Account, Guid>(eventsTopic, kafkaConnString, jsonEventDeserializer);
+            consumer.EventReceived += Consumer_EventReceived;
             var tc = consumer.ConsumeAsync(cts.Token);
 
             var tp = Write(eventsTopic, kafkaConnString, jsonEventDeserializer);
@@ -40,6 +41,11 @@ namespace SuperSafeBank.Console
 
             System.Console.WriteLine("done!");
             System.Console.ReadLine();
+        }
+
+        private static void Consumer_EventReceived(object sender, Core.Models.IDomainEvent<Guid> e)
+        {
+            System.Console.WriteLine($"processing event {e.GetType()} ...");
         }
 
         private static async Task Write(string eventsTopic, 

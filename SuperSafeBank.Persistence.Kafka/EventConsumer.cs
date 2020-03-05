@@ -54,12 +54,11 @@ namespace SuperSafeBank.Persistence.Kafka
                         
                         var messageTypeHeader = cr.Headers.First(h => h.Key == "type");
                         var eventType = Encoding.UTF8.GetString(messageTypeHeader.GetValueBytes());
-
-                        Console.WriteLine($"received '{eventType}' message: '{cr.Key}' -> '{cr.Value}' at: '{cr.TopicPartitionOffset}'.");
+                        
                         var @event = _eventDeserializer.Deserialize<TKey>(eventType, cr.Value);
                         if(null == @event)
                             throw new SerializationException($"unable to deserialize event {eventType} : {cr.Value}");
-
+                        OnEventReceived(@event);
                     }
                     catch (OperationCanceledException)
                     {
@@ -71,6 +70,14 @@ namespace SuperSafeBank.Persistence.Kafka
                     }
                 }
             }, cancellationToken);
+        }
+
+        public delegate void EventReceivedHandler(object sender, IDomainEvent<TKey> e);
+        public event EventReceivedHandler EventReceived;
+        protected virtual void OnEventReceived(IDomainEvent<TKey> e)
+        {
+            var handler = EventReceived;
+            handler?.Invoke(this, e);
         }
 
         public void Dispose()
