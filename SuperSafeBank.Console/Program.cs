@@ -3,6 +3,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
+using MongoDB.Bson.Serialization.Serializers;
+using MongoDB.Driver;
 using SuperSafeBank.Core;
 using SuperSafeBank.Domain;
 using SuperSafeBank.Domain.Events;
@@ -18,13 +23,27 @@ namespace SuperSafeBank.Console
         {
             var kafkaConnString = "localhost:9092";
             var eventsTopic = "events";
+            var mongoConnString = "mongodb://root:password@localhost:27017";
 
             var jsonEventDeserializer = new JsonEventDeserializer(new[]
             {
                 typeof(AccountCreated).Assembly
             });
 
+            BsonSerializer.RegisterSerializer(typeof(decimal), new DecimalSerializer(BsonType.Decimal128));
+
             var serviceProvider = new ServiceCollection()
+                .AddSingleton(new MongoClient(connectionString: mongoConnString))
+                .AddSingleton(ctx =>
+                {
+                    var client = ctx.GetRequiredService<MongoClient>();
+                    return client.GetDatabase("bankAccounts");
+                })
+                .AddLogging(cfg =>
+                {
+                    cfg.ClearProviders()
+                        .AddConsole();
+                })
                 .AddMediatR(new[]
                 {
                     typeof(AccountEventsHandler).Assembly
