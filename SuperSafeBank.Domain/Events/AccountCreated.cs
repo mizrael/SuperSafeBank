@@ -8,7 +8,6 @@ namespace SuperSafeBank.Domain.Events
         /// <summary>
         /// for deserialization
         /// </summary>
-       // [Newtonsoft.Json.JsonConstructor] 
         private AccountCreated() { }
 
         public AccountCreated(Account account) : base(account)
