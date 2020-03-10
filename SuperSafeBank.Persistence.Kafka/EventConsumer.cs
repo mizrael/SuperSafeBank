@@ -42,7 +42,7 @@ namespace SuperSafeBank.Persistence.Kafka
 
         public Task ConsumeAsync(CancellationToken cancellationToken)
         {
-            return Task.Run(() =>
+            return Task.Run(async () =>
             {
                 while (!cancellationToken.IsCancellationRequested)
                 {
@@ -58,7 +58,7 @@ namespace SuperSafeBank.Persistence.Kafka
                         var @event = _eventDeserializer.Deserialize<TKey>(eventType, cr.Value);
                         if(null == @event)
                             throw new SerializationException($"unable to deserialize event {eventType} : {cr.Value}");
-                        OnEventReceived(@event);
+                        await OnEventReceived(@event);
                     }
                     catch (OperationCanceledException)
                     {
@@ -72,12 +72,12 @@ namespace SuperSafeBank.Persistence.Kafka
             }, cancellationToken);
         }
 
-        public delegate void EventReceivedHandler(object sender, IDomainEvent<TKey> e);
+        public delegate Task EventReceivedHandler(object sender, IDomainEvent<TKey> e);
         public event EventReceivedHandler EventReceived;
-        protected virtual void OnEventReceived(IDomainEvent<TKey> e)
+        protected virtual Task OnEventReceived(IDomainEvent<TKey> e)
         {
             var handler = EventReceived;
-            handler?.Invoke(this, e);
+            return handler?.Invoke(this, e);
         }
 
         public void Dispose()
