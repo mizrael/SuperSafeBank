@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
@@ -76,17 +77,24 @@ namespace SuperSafeBank.Console
                 cts.Cancel();
             };
 
-            var consumer = new EventConsumer<Account, Guid>(eventsTopic, kafkaConnString, jsonEventDeserializer);
-            consumer.EventReceived += async (s, e) =>
-            {
-                var @event = EventReceivedFactory.Create((dynamic)e);
-                
-                System.Console.WriteLine($"received event {@event.GetType()} for aggregate {e.AggregateId} , version {e.AggregateVersion}");
+            var consumers = Enumerable.Range(1, 10)
+                .Select(i =>
+                {
+                    var consumer =
+                        new EventConsumer<Account, Guid>(eventsTopic, kafkaConnString, jsonEventDeserializer);
+                    consumer.EventReceived += async (s, e) =>
+                    {
+                        var @event = EventReceivedFactory.Create((dynamic) e);
 
-                await mediator.Publish(@event, cts.Token);
-            };
+                        System.Console.WriteLine(
+                            $"consumer {i} received event {@event.GetType()} for aggregate {e.AggregateId} , version {e.AggregateVersion}");
 
-            var tc = consumer.ConsumeAsync(cts.Token);
+                        await mediator.Publish(@event, cts.Token);
+                    };
+                    return consumer;
+                }).ToArray();
+
+            var tc = Task.WhenAll(consumers.Select(c => c.ConsumeAsync(cts.Token)));
             return tc;
         }
 
@@ -111,16 +119,17 @@ namespace SuperSafeBank.Console
             var customer = Customer.Create("lorem", "ipsum");
             await customerEventsService.PersistAsync(customer);
 
-            var account = Account.Create(customer, Currency.CanadianDollar);
-            account.Deposit(new Money(Currency.CanadianDollar, 10), currencyConverter);
-            account.Deposit(new Money(Currency.CanadianDollar, 42), currencyConverter);
-            account.Withdraw(new Money(Currency.CanadianDollar, 4), currencyConverter);
-            account.Deposit(new Money(Currency.CanadianDollar, 71), currencyConverter);
-            await accountEventsService.PersistAsync(account);
-
-            account.Withdraw(new Money(Currency.CanadianDollar, 10), currencyConverter);
-            account.Deposit(new Money(Currency.CanadianDollar, 11), currencyConverter);
-            await accountEventsService.PersistAsync(account);
+            var accounts = Enumerable.Range(1, 100)
+                .Select(i =>
+                {
+                    var account = Account.Create(customer, Currency.CanadianDollar);
+                    account.Deposit(new Money(Currency.CanadianDollar, 10), currencyConverter);
+                    account.Deposit(new Money(Currency.CanadianDollar, 42), currencyConverter);
+                    account.Withdraw(new Money(Currency.CanadianDollar, 4), currencyConverter);
+                    account.Deposit(new Money(Currency.CanadianDollar, 71), currencyConverter);
+                    return account;
+                });
+            await Task.WhenAll(accounts.Select(a => accountEventsService.PersistAsync(a)));
         }
     }
 }
