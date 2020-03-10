@@ -80,6 +80,9 @@ namespace SuperSafeBank.Console
             consumer.EventReceived += async (s, e) =>
             {
                 var @event = EventReceivedFactory.Create((dynamic)e);
+                
+                System.Console.WriteLine($"received event {@event.GetType()} for aggregate {e.AggregateId} , version {e.AggregateVersion}");
+
                 await mediator.Publish(@event, cts.Token);
             };
 
