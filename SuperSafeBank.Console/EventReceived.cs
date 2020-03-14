@@ -10,8 +10,6 @@ namespace SuperSafeBank.Console
         }
 
         public TE Event { get; }
-
-        
     }
 
     public static class EventReceivedFactory

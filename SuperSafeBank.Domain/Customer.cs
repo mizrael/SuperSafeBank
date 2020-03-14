@@ -10,6 +10,11 @@ namespace SuperSafeBank.Domain
         
         public Customer(Guid id, string firstname, string lastname) : base(id)
         {
+            if(string.IsNullOrWhiteSpace(firstname))
+                throw new ArgumentOutOfRangeException(nameof(firstname));
+            if (string.IsNullOrWhiteSpace(lastname))
+                throw new ArgumentOutOfRangeException(nameof(lastname));
+
             Firstname = firstname;
             Lastname = lastname;
 

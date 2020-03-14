@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using EventStore.ClientAPI;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 using SuperSafeBank.Core;
 using SuperSafeBank.Core.Models;
 

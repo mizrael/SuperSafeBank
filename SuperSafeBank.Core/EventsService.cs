@@ -26,10 +26,7 @@ namespace SuperSafeBank.Core
                 return;
 
             await _eventsRepository.AppendAsync(aggregateRoot);
-
             await _eventProducer.DispatchAsync(aggregateRoot);
-
-            aggregateRoot.ClearEvents();
         }
     }
 }

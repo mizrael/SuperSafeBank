@@ -15,6 +15,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SuperSafeBank.Persistence.E
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SuperSafeBank.Persistence.Kafka", "SuperSafeBank.Persistence.Kafka\SuperSafeBank.Persistence.Kafka.csproj", "{6BAD29CD-0B16-4715-9AEC-BB1CADADC55F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SuperSafeBank.Web.API", "SuperSafeBank.Web.API\SuperSafeBank.Web.API.csproj", "{26C3CE1A-76FC-47F7-9636-D757846359F4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +47,10 @@ Global
 		{6BAD29CD-0B16-4715-9AEC-BB1CADADC55F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6BAD29CD-0B16-4715-9AEC-BB1CADADC55F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6BAD29CD-0B16-4715-9AEC-BB1CADADC55F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{26C3CE1A-76FC-47F7-9636-D757846359F4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{26C3CE1A-76FC-47F7-9636-D757846359F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{26C3CE1A-76FC-47F7-9636-D757846359F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{26C3CE1A-76FC-47F7-9636-D757846359F4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

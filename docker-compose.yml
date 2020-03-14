@@ -23,6 +23,7 @@ services:
       - 'zookeeper_data:/bitnami'
     environment:
       - ALLOW_ANONYMOUS_LOGIN=yes
+    tmpfs: "/datalog"
 
   kafka:
     image: 'bitnami/kafka:2'

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,6 +11,7 @@ using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
 using SuperSafeBank.Core;
+using SuperSafeBank.Core.Models;
 using SuperSafeBank.Domain;
 using SuperSafeBank.Domain.Events;
 using SuperSafeBank.Domain.Services;
@@ -53,11 +55,13 @@ namespace SuperSafeBank.Console
 
             var mediator = serviceProvider.GetRequiredService<IMediator>();
 
-            var tc = Read(eventsTopic, kafkaConnString, jsonEventDeserializer, mediator);
+            //var tc = Read(eventsTopic, kafkaConnString, jsonEventDeserializer, mediator);
 
-            var tp = Write(eventsTopic, kafkaConnString, jsonEventDeserializer);
+            //var tp = Write(eventsTopic, kafkaConnString, jsonEventDeserializer);
 
-            await Task.WhenAll(tp, tc);
+            //await Task.WhenAll(tp, tc);
+
+            await Read(eventsTopic, kafkaConnString, jsonEventDeserializer, mediator);
 
             System.Console.WriteLine("done!");
             System.Console.ReadLine();
@@ -77,25 +81,35 @@ namespace SuperSafeBank.Console
                 cts.Cancel();
             };
 
-            var consumers = Enumerable.Range(1, 10)
-                .Select(i =>
-                {
-                    var consumer =
-                        new EventConsumer<Account, Guid>(eventsTopic, kafkaConnString, jsonEventDeserializer);
-                    consumer.EventReceived += async (s, e) =>
-                    {
-                        var @event = EventReceivedFactory.Create((dynamic) e);
-
-                        System.Console.WriteLine(
-                            $"consumer {i} received event {@event.GetType()} for aggregate {e.AggregateId} , version {e.AggregateVersion}");
-
-                        await mediator.Publish(@event, cts.Token);
-                    };
-                    return consumer;
-                }).ToArray();
-
-            var tc = Task.WhenAll(consumers.Select(c => c.ConsumeAsync(cts.Token)));
+            var consumers = new List<Task>();
+            consumers.AddRange(Enumerable.Range(1, 10)
+                .Select(i => InitEventConsumer<Account, Guid>(eventsTopic, kafkaConnString, jsonEventDeserializer,
+                    mediator, i, cts.Token)));
+            consumers.AddRange(Enumerable.Range(1, 10)
+                .Select(i => InitEventConsumer<Customer, Guid>(eventsTopic, kafkaConnString, jsonEventDeserializer, mediator, i, cts.Token)));
+            
+            var tc = Task.WhenAll(consumers);
             return tc;
+        }
+
+        private static Task InitEventConsumer<TA, TK>(string eventsTopic, string kafkaConnString,
+            JsonEventDeserializer jsonEventDeserializer, IMediator mediator, int consumerId, CancellationToken cancellationToken)
+            where TA : IAggregateRoot<TK>
+        {
+            var consumer = new EventConsumer<TA, TK>(eventsTopic, kafkaConnString, jsonEventDeserializer);
+
+            async Task OnConsumerOnEventReceived(object s, IDomainEvent<TK> e)
+            {
+                var @event = EventReceivedFactory.Create((dynamic) e);
+
+                System.Console.WriteLine($"consumer {consumerId} received event {@event.GetType()} for aggregate {e.AggregateId} , version {e.AggregateVersion}");
+
+                await mediator.Publish(@event, cancellationToken);
+            }
+
+            consumer.EventReceived += OnConsumerOnEventReceived;
+
+            return consumer.ConsumeAsync(cancellationToken);
         }
 
         private static async Task Write(string eventsTopic, 
