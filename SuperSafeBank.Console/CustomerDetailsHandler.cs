@@ -8,7 +8,9 @@ using SuperSafeBank.Domain.Queries.Models;
 
 namespace SuperSafeBank.Console
 {
-    public class CustomerDetailsHandler : INotificationHandler<EventReceived<CustomerCreated>>
+    public class CustomerDetailsHandler : 
+        INotificationHandler<EventReceived<CustomerCreated>>,
+        INotificationHandler<EventReceived<AccountCreated>>
     {
         private readonly IMongoDatabase _db;
         private readonly IMongoCollection<CustomerDetails> _coll;
@@ -38,6 +40,22 @@ namespace SuperSafeBank.Console
                 options: new UpdateOptions() { IsUpsert = true });
 
             _logger.LogInformation($"created customer details {@event.Event.AggregateId}");
+        }
+
+        public async Task Handle(EventReceived<AccountCreated> @event, CancellationToken cancellationToken)
+        {
+            var filter = Builders<CustomerDetails>.Filter
+                .Eq(a => a.Id, @event.Event.OwnerId);
+
+            var update = Builders<CustomerDetails>.Update
+                .AddToSet(a => a.Accounts, @event.Event.AggregateId);
+
+            await _coll.UpdateOneAsync(filter,
+                cancellationToken: cancellationToken,
+                update: update,
+                options: new UpdateOptions() { IsUpsert = true });
+
+            _logger.LogInformation($"updated customer details accounts {@event.Event.AggregateId}");
         }
     }
 }
