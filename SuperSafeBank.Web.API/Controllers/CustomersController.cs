@@ -3,12 +3,25 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using SuperSafeBank.Domain;
 using SuperSafeBank.Web.API.Commands;
 using SuperSafeBank.Web.API.DTOs;
 using SuperSafeBank.Web.API.Queries;
 
 namespace SuperSafeBank.Web.API.Controllers
 {
+    [ApiController]
+    [Route("[controller]")]
+    public class AccountsController : ControllerBase
+    {
+        private readonly IMediator _mediator;
+
+        public AccountsController(IMediator mediator)
+        {
+            _mediator = mediator;
+        }
+    }
+
     [ApiController]
     [Route("[controller]")]
     public class CustomersController : ControllerBase
@@ -28,6 +41,18 @@ namespace SuperSafeBank.Web.API.Controllers
             var command = new CreateCustomer(Guid.NewGuid(), dto.FirstName, dto.LastName);
             await _mediator.Publish(command, cancellationToken);
             return CreatedAtAction("GetCustomer", new { id = command.Id }, command);
+        }
+
+        [HttpPost, Route("{id:guid}/accounts")]
+        public async Task<IActionResult> CreateAccount([FromRoute]Guid id, [FromBody]CreateAccountDto dto, CancellationToken cancellationToken = default)
+        {
+            if (null == dto)
+                return BadRequest();
+
+            var currency = Currency.FromCode(dto.CurrencyCode);
+            var command = new CreateAccount(id, Guid.NewGuid(), currency);
+            await _mediator.Publish(command, cancellationToken);
+            return Created($"/accounts/{command.AccountId}", command);
         }
 
         [HttpGet, Route("{id:guid}", Name = "GetCustomer")]

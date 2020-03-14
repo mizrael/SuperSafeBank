@@ -28,5 +28,10 @@ namespace SuperSafeBank.Core
             await _eventsRepository.AppendAsync(aggregateRoot);
             await _eventProducer.DispatchAsync(aggregateRoot);
         }
+
+        public Task<TA> RehydrateAsync(TKey key)
+        {
+            return _eventsRepository.RehydrateAsync(key);
+        }
     }
 }

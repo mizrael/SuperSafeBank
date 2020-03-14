@@ -3,9 +3,10 @@ using SuperSafeBank.Core.Models;
 
 namespace SuperSafeBank.Core
 {
-    public interface IEventsService<in TA, TKey> 
+    public interface IEventsService<TA, TKey> 
         where TA : class, IAggregateRoot<TKey>
     {
         Task PersistAsync(TA aggregateRoot);
+        Task<TA> RehydrateAsync(TKey key);
     }
 }

@@ -50,9 +50,10 @@ namespace SuperSafeBank.Domain
         {
             if(string.IsNullOrWhiteSpace(code))
                 throw new ArgumentNullException(nameof(code));
-            if(!Currencies.ContainsKey(code))
-                throw new ArgumentException($"Invalid code: {code}", nameof(code));
-            return Currencies[code];
+            var normalizedCode = code.Trim().ToUpper();
+            if(!Currencies.ContainsKey(normalizedCode))
+                throw new ArgumentException($"Invalid code: '{code}'", nameof(code));
+            return Currencies[normalizedCode];
         }
         
         public static Currency Euro => new Currency("EUR", "€");
