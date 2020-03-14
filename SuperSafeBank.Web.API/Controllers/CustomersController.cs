@@ -39,5 +39,15 @@ namespace SuperSafeBank.Web.API.Controllers
                 return NotFound();
             return Ok(result);
         }
+
+        [HttpGet]
+        public async Task<IActionResult> Get(CancellationToken cancellationToken = default)
+        {
+            var query = new CustomersArchive();
+            var results = await _mediator.Send(query, cancellationToken);
+            if (null == results)
+                return NotFound();
+            return Ok(results);
+        }
     }
 }

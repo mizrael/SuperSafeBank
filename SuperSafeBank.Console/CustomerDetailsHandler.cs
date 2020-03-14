@@ -8,13 +8,13 @@ using SuperSafeBank.Domain.Queries.Models;
 
 namespace SuperSafeBank.Console
 {
-    public class CustomerEventsHandler : INotificationHandler<EventReceived<CustomerCreated>>
+    public class CustomerDetailsHandler : INotificationHandler<EventReceived<CustomerCreated>>
     {
         private readonly IMongoDatabase _db;
         private readonly IMongoCollection<CustomerDetails> _coll;
-        private readonly ILogger<CustomerEventsHandler> _logger;
+        private readonly ILogger<CustomerDetailsHandler> _logger;
 
-        public CustomerEventsHandler(IMongoDatabase db, ILogger<CustomerEventsHandler> logger)
+        public CustomerDetailsHandler(IMongoDatabase db, ILogger<CustomerDetailsHandler> logger)
         {
             _db = db;
             _logger = logger;
@@ -37,7 +37,7 @@ namespace SuperSafeBank.Console
                 update: update,
                 options: new UpdateOptions() { IsUpsert = true });
 
-            _logger.LogInformation($"created customer {@event.Event.AggregateId}");
+            _logger.LogInformation($"created customer details {@event.Event.AggregateId}");
         }
     }
 }
