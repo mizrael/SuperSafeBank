@@ -4,10 +4,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using MediatR;
+using Microsoft.Extensions.Logging;
 using SuperSafeBank.Core;
 using SuperSafeBank.Domain.Events;
 using SuperSafeBank.Domain.Services;
 using SuperSafeBank.Web.API.Commands;
+using SuperSafeBank.Web.API.Workers;
 
 namespace SuperSafeBank.Web.API
 {
@@ -36,6 +38,16 @@ namespace SuperSafeBank.Web.API
             services.AddMediatR(new[]
             {
                 typeof(CreateCustomer).Assembly
+            });
+
+            services.AddHostedService(ctx =>
+            {
+                var mediator = ctx.GetRequiredService<IMediator>();
+                var logger = ctx.GetRequiredService<ILogger<EventsConsumerWorker>>();
+                var eventsDeserializer = ctx.GetRequiredService<IEventDeserializer>();
+                var kafkaConnStr = this.Configuration.GetConnectionString("kafka");
+
+                return new EventsConsumerWorker(mediator, logger, "events", kafkaConnStr, eventsDeserializer);
             });
         }
 

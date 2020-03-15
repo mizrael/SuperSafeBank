@@ -9,7 +9,6 @@ using SuperSafeBank.Core;
 using SuperSafeBank.Core.EventBus;
 using SuperSafeBank.Core.Models;
 using SuperSafeBank.Domain;
-using SuperSafeBank.Domain.Queries.Models;
 using SuperSafeBank.Persistence.EventStore;
 using SuperSafeBank.Persistence.Kafka;
 

@@ -5,6 +5,6 @@ namespace SuperSafeBank.Core.EventBus
 {
     public interface IEventConsumer
     {
-        Task ConsumeAsync(CancellationToken cancellationToken);
+        Task ConsumeAsync(CancellationToken stoppingToken);
     }
 }

@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29709.97
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SuperSafeBank.Console", "SuperSafeBank.Console\SuperSafeBank.Console.csproj", "{CF06825B-1C30-4449-B163-28A3B73F75CF}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SuperSafeBank.Core", "SuperSafeBank.Core\SuperSafeBank.Core.csproj", "{5C24EE52-5804-4773-A1AA-00D507DA8250}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SuperSafeBank.Domain", "SuperSafeBank.Domain\SuperSafeBank.Domain.csproj", "{EE530189-2328-40EF-896F-73B7A3F56C0E}"
@@ -15,7 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SuperSafeBank.Persistence.E
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SuperSafeBank.Persistence.Kafka", "SuperSafeBank.Persistence.Kafka\SuperSafeBank.Persistence.Kafka.csproj", "{6BAD29CD-0B16-4715-9AEC-BB1CADADC55F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SuperSafeBank.Web.API", "SuperSafeBank.Web.API\SuperSafeBank.Web.API.csproj", "{26C3CE1A-76FC-47F7-9636-D757846359F4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SuperSafeBank.Web.API", "SuperSafeBank.Web.API\SuperSafeBank.Web.API.csproj", "{26C3CE1A-76FC-47F7-9636-D757846359F4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +21,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{CF06825B-1C30-4449-B163-28A3B73F75CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CF06825B-1C30-4449-B163-28A3B73F75CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CF06825B-1C30-4449-B163-28A3B73F75CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CF06825B-1C30-4449-B163-28A3B73F75CF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5C24EE52-5804-4773-A1AA-00D507DA8250}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5C24EE52-5804-4773-A1AA-00D507DA8250}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5C24EE52-5804-4773-A1AA-00D507DA8250}.Release|Any CPU.ActiveCfg = Release|Any CPU

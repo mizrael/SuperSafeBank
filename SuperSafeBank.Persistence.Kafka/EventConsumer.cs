@@ -19,6 +19,7 @@ namespace SuperSafeBank.Persistence.Kafka
         public EventConsumer(string topicBaseName, string kafkaConnString, IEventDeserializer eventDeserializer)
         {
             _eventDeserializer = eventDeserializer;
+
             var aggregateType = typeof(TA);
 
             var consumerConfig = new ConsumerConfig
@@ -39,15 +40,15 @@ namespace SuperSafeBank.Persistence.Kafka
             _consumer.Subscribe(topicName);
         }
 
-        public Task ConsumeAsync(CancellationToken cancellationToken)
+        public Task ConsumeAsync(CancellationToken stoppingToken)
         {
             return Task.Run(async () =>
             {
-                while (!cancellationToken.IsCancellationRequested)
+                while (!stoppingToken.IsCancellationRequested)
                 {
                     try
                     {
-                        var cr = _consumer.Consume(cancellationToken);
+                        var cr = _consumer.Consume(stoppingToken);
                         if (cr.IsPartitionEOF)
                             continue;
                         
@@ -57,18 +58,19 @@ namespace SuperSafeBank.Persistence.Kafka
                         var @event = _eventDeserializer.Deserialize<TKey>(eventType, cr.Value);
                         if(null == @event)
                             throw new SerializationException($"unable to deserialize event {eventType} : {cr.Value}");
+
                         await OnEventReceived(@event);
                     }
                     catch (OperationCanceledException)
                     {
-                        Console.WriteLine("shutting down consumer...");
+                        OnConsumerStopped();
                     }
                     catch (Exception e)
                     {
-                        Console.WriteLine($"Error occured: {e}");
+                        OnExceptionThrown(e);
                     }
                 }
-            }, cancellationToken);
+            }, stoppingToken);
         }
 
         public delegate Task EventReceivedHandler(object sender, IDomainEvent<TKey> e);
@@ -77,6 +79,22 @@ namespace SuperSafeBank.Persistence.Kafka
         {
             var handler = EventReceived;
             return handler?.Invoke(this, e);
+        }
+
+        public delegate void ExceptionThrownHandler(object sender, Exception e);
+        public event ExceptionThrownHandler ExceptionThrown;
+        protected virtual void OnExceptionThrown(Exception e)
+        {
+            var handler = ExceptionThrown;
+            handler?.Invoke(this, e);
+        }
+
+        public delegate void ConsumerStoppedHandler(object sender);
+        public event ConsumerStoppedHandler ConsumerStopped;
+        protected virtual void OnConsumerStopped()
+        {
+            var handler = ConsumerStopped;
+            handler?.Invoke(this);
         }
 
         public void Dispose()
