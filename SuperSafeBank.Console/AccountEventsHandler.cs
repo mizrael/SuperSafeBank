@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using SuperSafeBank.Domain;
 using SuperSafeBank.Domain.Events;
+using SuperSafeBank.Domain.Queries.Models;
 
 namespace SuperSafeBank.Console
 {
@@ -14,28 +15,43 @@ namespace SuperSafeBank.Console
         INotificationHandler<EventReceived<Withdrawal>>
     {
         private readonly IMongoDatabase _db;
-        private readonly IMongoCollection<AccountView> _coll;
+        private readonly IMongoCollection<AccountDetails> _accountsColl;
+        private readonly IMongoCollection<CustomerDetails> _customerDetailsColl;
         private readonly ILogger<AccountEventsHandler> _logger;
 
         public AccountEventsHandler(IMongoDatabase db, ILogger<AccountEventsHandler> logger)
         {
             _db = db;
             _logger = logger;
-            _coll = _db.GetCollection<AccountView>("accounts");
+            _accountsColl = _db.GetCollection<AccountDetails>("accounts");
+            _customerDetailsColl = _db.GetCollection<CustomerDetails>("customers");
         }
 
         public async Task Handle(EventReceived<AccountCreated> @event, CancellationToken cancellationToken)
         {
-            var filter = Builders<AccountView>.Filter
+            var customerFilter = Builders<CustomerDetails>.Filter
+                .Eq(a => a.Id, @event.Event.OwnerId);
+
+            var customer = await (await _customerDetailsColl.FindAsync(customerFilter, null, cancellationToken))
+                .FirstOrDefaultAsync(cancellationToken);
+            if (null == customer)
+            {
+                _logger.LogWarning($"unable to find customer by id {@event.Event.OwnerId}");
+                return;
+            }
+
+            var filter = Builders<AccountDetails>.Filter
                 .Eq(a => a.Id, @event.Event.AggregateId);
 
-            var update = Builders<AccountView>.Update
+            var update = Builders<AccountDetails>.Update
                 .Set(a => a.Id, @event.Event.AggregateId)
                 .Set(a => a.Version, @event.Event.AggregateVersion)
+                .Set(a => a.OwnerFirstName, customer.Firstname)
+                .Set(a => a.OwnerLastName, customer.Lastname)
                 .Set(a => a.OwnerId, @event.Event.OwnerId)
                 .Set(a => a.Balance, new Money(@event.Event.Currency, 0));
 
-            await _coll.UpdateOneAsync(filter,
+            await _accountsColl.UpdateOneAsync(filter,
                 cancellationToken: cancellationToken,
                 update: update, 
                 options: new UpdateOptions() { IsUpsert = true});
@@ -47,18 +63,18 @@ namespace SuperSafeBank.Console
         {
             _logger.LogInformation($"processing deposit of {@event.Event.Amount} on account {@event.Event.AggregateId} ...");
 
-            var filter = Builders<AccountView>.Filter
-                .And(Builders<AccountView>.Filter.Eq(a => a.Id, @event.Event.AggregateId),
-                       Builders<AccountView>.Filter.Eq(a => a.Version, @event.Event.AggregateVersion-1));
+            var filter = Builders<AccountDetails>.Filter
+                .And(Builders<AccountDetails>.Filter.Eq(a => a.Id, @event.Event.AggregateId),
+                       Builders<AccountDetails>.Filter.Eq(a => a.Version, @event.Event.AggregateVersion-1));
 
-            var update = Builders<AccountView>.Update
+            var update = Builders<AccountDetails>.Update
                 .Set(a => a.Version, @event.Event.AggregateVersion)
                 .Inc(a => a.Balance.Value, @event.Event.Amount.Value);
-            var res = await _coll.FindOneAndUpdateAsync(
+            var res = await _accountsColl.FindOneAndUpdateAsync(
                 filter: filter,
                 cancellationToken: cancellationToken,
                 update: update,
-                options: new FindOneAndUpdateOptions<AccountView, AccountView>() { IsUpsert = false });
+                options: new FindOneAndUpdateOptions<AccountDetails, AccountDetails>() { IsUpsert = false });
 
             if(res != null) 
                 _logger.LogInformation($"deposited {@event.Event.Amount} on account {@event.Event.AggregateId}");
@@ -70,18 +86,18 @@ namespace SuperSafeBank.Console
         {
             _logger.LogInformation($"processing withdrawal of {@event.Event.Amount} on account {@event.Event.AggregateId} ...");
 
-            var filter = Builders<AccountView>.Filter
-                .And(Builders<AccountView>.Filter.Eq(a => a.Id, @event.Event.AggregateId),
-                    Builders<AccountView>.Filter.Eq(a => a.Version, @event.Event.AggregateVersion-1));
+            var filter = Builders<AccountDetails>.Filter
+                .And(Builders<AccountDetails>.Filter.Eq(a => a.Id, @event.Event.AggregateId),
+                    Builders<AccountDetails>.Filter.Eq(a => a.Version, @event.Event.AggregateVersion-1));
 
-            var update = Builders<AccountView>.Update
+            var update = Builders<AccountDetails>.Update
                 .Set(a => a.Version, @event.Event.AggregateVersion)
                 .Inc(a => a.Balance.Value, -@event.Event.Amount.Value);
-            var res = await _coll.FindOneAndUpdateAsync(
+            var res = await _accountsColl.FindOneAndUpdateAsync(
                 filter: filter,
                 cancellationToken: cancellationToken,
                 update: update,
-                options: new FindOneAndUpdateOptions<AccountView, AccountView>() { IsUpsert = false });
+                options: new FindOneAndUpdateOptions<AccountDetails, AccountDetails>() { IsUpsert = false });
 
             if (res != null)
                 _logger.LogInformation($"withdrawn {@event.Event.Amount} from account {@event.Event.AggregateId}");

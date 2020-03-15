@@ -12,18 +12,6 @@ namespace SuperSafeBank.Web.API.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class AccountsController : ControllerBase
-    {
-        private readonly IMediator _mediator;
-
-        public AccountsController(IMediator mediator)
-        {
-            _mediator = mediator;
-        }
-    }
-
-    [ApiController]
-    [Route("[controller]")]
     public class CustomersController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -52,7 +40,7 @@ namespace SuperSafeBank.Web.API.Controllers
             var currency = Currency.FromCode(dto.CurrencyCode);
             var command = new CreateAccount(id, Guid.NewGuid(), currency);
             await _mediator.Publish(command, cancellationToken);
-            return Created($"/accounts/{command.AccountId}", command);
+            return CreatedAtAction("GetAccount", "Accounts", new {id = command.AccountId}, command);
         }
 
         [HttpGet, Route("{id:guid}", Name = "GetCustomer")]
