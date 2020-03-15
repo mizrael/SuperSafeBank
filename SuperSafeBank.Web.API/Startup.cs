@@ -6,6 +6,7 @@ using Microsoft.Extensions.Hosting;
 using MediatR;
 using SuperSafeBank.Core;
 using SuperSafeBank.Domain.Events;
+using SuperSafeBank.Domain.Services;
 using SuperSafeBank.Web.API.Commands;
 
 namespace SuperSafeBank.Web.API
@@ -23,6 +24,8 @@ namespace SuperSafeBank.Web.API
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+
+            services.AddSingleton<ICurrencyConverter, FakeCurrencyConverter>();
 
             services.AddSingleton<IEventDeserializer>(new JsonEventDeserializer(new[]
                 {

@@ -3,6 +3,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using SuperSafeBank.Domain;
+using SuperSafeBank.Web.API.Commands;
+using SuperSafeBank.Web.API.DTOs;
 using SuperSafeBank.Web.API.Queries;
 
 namespace SuperSafeBank.Web.API.Controllers
@@ -26,6 +29,32 @@ namespace SuperSafeBank.Web.API.Controllers
             if (null == result)
                 return NotFound();
             return Ok(result);
+        }
+
+        [HttpPut, Route("{id:guid}/deposit")]
+        public async Task<IActionResult> Deposit([FromRoute]Guid id, [FromBody]DepositDto dto, CancellationToken cancellationToken = default)
+        {
+            if (null == dto)
+                return BadRequest();
+
+            var currency = Currency.FromCode(dto.CurrencyCode);
+            var amount = new Money(currency, dto.Amount);
+            var command = new Deposit(id, amount);
+            await _mediator.Publish(command, cancellationToken);
+            return Ok();
+        }
+
+        [HttpPut, Route("{id:guid}/withdraw")]
+        public async Task<IActionResult> Withdraw([FromRoute]Guid id, [FromBody]WithdrawDto dto, CancellationToken cancellationToken = default)
+        {
+            if (null == dto)
+                return BadRequest();
+
+            var currency = Currency.FromCode(dto.CurrencyCode);
+            var amount = new Money(currency, dto.Amount);
+            var command = new Withdraw(id, amount);
+            await _mediator.Publish(command, cancellationToken);
+            return Ok();
         }
     }
 }
