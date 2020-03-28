@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <PackageReference Include="EventStore.Client" Version="5.0.6" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.2" />
   </ItemGroup>
 
   <ItemGroup>

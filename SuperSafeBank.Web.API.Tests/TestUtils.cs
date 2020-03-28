@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -20,8 +21,9 @@ namespace SuperSafeBank.Web.API.Tests
                         break;
                     }
                 }
-                catch
+                catch(Exception ex)
                 {
+                    Debug.WriteLine(ex);
                 }
 
                 await Task.Delay((int) Math.Pow(2, curr) * 250);

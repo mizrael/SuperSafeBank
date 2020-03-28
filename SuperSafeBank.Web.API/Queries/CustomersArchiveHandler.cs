@@ -4,24 +4,23 @@ using System.Threading.Tasks;
 using MediatR;
 using MongoDB.Driver;
 using SuperSafeBank.Domain.Queries.Models;
+using SuperSafeBank.Web.API.Infrastructure;
 
 namespace SuperSafeBank.Web.API.Queries
 {
     public class CustomersArchiveHandler : IRequestHandler<CustomersArchive, IEnumerable<CustomerArchiveItem>>
     {
-        private readonly IMongoDatabase _db;
-        private readonly IMongoCollection<CustomerArchiveItem> _coll;
+        private readonly IQueryDbContext _db;
 
-        public CustomersArchiveHandler(IMongoDatabase db)
+        public CustomersArchiveHandler(IQueryDbContext db)
         {
             _db = db;
-            _coll = _db.GetCollection<CustomerArchiveItem>("customers");
         }
 
         public async Task<IEnumerable<CustomerArchiveItem>> Handle(CustomersArchive request, CancellationToken cancellationToken)
         {
             var filter = Builders<CustomerArchiveItem>.Filter.Empty;
-            var cursor = await _coll.FindAsync(filter, null, cancellationToken);
+            var cursor = await _db.Customers.FindAsync(filter, null, cancellationToken);
             IEnumerable<CustomerArchiveItem> results = await cursor.ToListAsync(cancellationToken);
             return results;
         }

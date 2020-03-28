@@ -1,6 +1,7 @@
 using System;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Serializers;
@@ -11,6 +12,7 @@ using SuperSafeBank.Core.Models;
 using SuperSafeBank.Domain;
 using SuperSafeBank.Persistence.EventStore;
 using SuperSafeBank.Persistence.Kafka;
+using SuperSafeBank.Web.API.Infrastructure;
 
 namespace SuperSafeBank.Web.API
 {
@@ -30,7 +32,7 @@ namespace SuperSafeBank.Web.API
                     var client = ctx.GetRequiredService<MongoClient>();
                     var database = client.GetDatabase("bankAccounts");
                     return database;
-                });
+                }).AddSingleton<IQueryDbContext, QueryDbContext>();
         }
 
         public static IServiceCollection AddEventStore(this IServiceCollection services, IConfiguration configuration)
@@ -38,7 +40,8 @@ namespace SuperSafeBank.Web.API
             return services.AddSingleton<IEventStoreConnectionWrapper>(ctx =>
                 {
                     var connStr = configuration.GetConnectionString("eventstore");
-                    return new EventStoreConnectionWrapper(new Uri(connStr));
+                    var logger = ctx.GetRequiredService<ILogger<EventStoreConnectionWrapper>>();
+                    return new EventStoreConnectionWrapper(new Uri(connStr), logger);
                 }).AddEventsRepository<Customer, Guid>()
                 .AddEventProducer<Customer, Guid>(configuration)
                 .AddEventsService<Customer, Guid>()

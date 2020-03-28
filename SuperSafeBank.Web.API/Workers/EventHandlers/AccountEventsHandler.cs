@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -6,38 +7,36 @@ using MongoDB.Driver;
 using SuperSafeBank.Domain;
 using SuperSafeBank.Domain.Events;
 using SuperSafeBank.Domain.Queries.Models;
+using SuperSafeBank.Web.API.Infrastructure;
 
-namespace SuperSafeBank.Web.API.Workers
+namespace SuperSafeBank.Web.API.Workers.EventHandlers
 {
     public class AccountEventsHandler : 
         INotificationHandler<EventReceived<AccountCreated>>,
         INotificationHandler<EventReceived<Deposit>>,
         INotificationHandler<EventReceived<Withdrawal>>
     {
-        private readonly IMongoDatabase _db;
-        private readonly IMongoCollection<AccountDetails> _accountsColl;
-        private readonly IMongoCollection<CustomerDetails> _customerDetailsColl;
+        private readonly IQueryDbContext _db;
         private readonly ILogger<AccountEventsHandler> _logger;
 
-        public AccountEventsHandler(IMongoDatabase db, ILogger<AccountEventsHandler> logger)
+        public AccountEventsHandler(IQueryDbContext db, ILogger<AccountEventsHandler> logger)
         {
             _db = db;
             _logger = logger;
-            _accountsColl = _db.GetCollection<AccountDetails>("accounts");
-            _customerDetailsColl = _db.GetCollection<CustomerDetails>("customers");
         }
 
         public async Task Handle(EventReceived<AccountCreated> @event, CancellationToken cancellationToken)
         {
-            var customerFilter = Builders<CustomerDetails>.Filter
+            var customerFilter = Builders<CustomerArchiveItem>.Filter
                 .Eq(a => a.Id, @event.Event.OwnerId);
 
-            var customer = await (await _customerDetailsColl.FindAsync(customerFilter, null, cancellationToken))
+            var customer = await (await _db.Customers.FindAsync(customerFilter, null, cancellationToken))
                 .FirstOrDefaultAsync(cancellationToken);
-            if (null == customer)
+            if (null == customer) //TODO add retry mechanism
             {
-                _logger.LogWarning($"unable to find customer by id {@event.Event.OwnerId}");
-                return;
+                var msg = $"unable to find customer by id {@event.Event.OwnerId}";
+                _logger.LogWarning(msg);
+                throw new ArgumentOutOfRangeException(nameof(@event.Event.OwnerId), msg);
             }
 
             var filter = Builders<AccountDetails>.Filter
@@ -51,7 +50,7 @@ namespace SuperSafeBank.Web.API.Workers
                 .Set(a => a.OwnerId, @event.Event.OwnerId)
                 .Set(a => a.Balance, new Money(@event.Event.Currency, 0));
 
-            await _accountsColl.UpdateOneAsync(filter,
+            await _db.AccountsDetails.UpdateOneAsync(filter,
                 cancellationToken: cancellationToken,
                 update: update, 
                 options: new UpdateOptions() { IsUpsert = true});
@@ -70,7 +69,7 @@ namespace SuperSafeBank.Web.API.Workers
             var update = Builders<AccountDetails>.Update
                 .Set(a => a.Version, @event.Event.AggregateVersion)
                 .Inc(a => a.Balance.Value, @event.Event.Amount.Value);
-            var res = await _accountsColl.FindOneAndUpdateAsync(
+            var res = await _db.AccountsDetails.FindOneAndUpdateAsync(
                 filter: filter,
                 cancellationToken: cancellationToken,
                 update: update,
@@ -93,7 +92,7 @@ namespace SuperSafeBank.Web.API.Workers
             var update = Builders<AccountDetails>.Update
                 .Set(a => a.Version, @event.Event.AggregateVersion)
                 .Inc(a => a.Balance.Value, -@event.Event.Amount.Value);
-            var res = await _accountsColl.FindOneAndUpdateAsync(
+            var res = await _db.AccountsDetails.FindOneAndUpdateAsync(
                 filter: filter,
                 cancellationToken: cancellationToken,
                 update: update,

@@ -44,7 +44,7 @@ namespace SuperSafeBank.Web.API.Workers
         {
             var consumer = new EventConsumer<TA, TK>(_eventsTopicName, _kafkaConnString, _eventDeserializer);
 
-            async Task OnConsumerOnEventReceived(object s, IDomainEvent<TK> e)
+            async Task onEventReceived(object s, IDomainEvent<TK> e)
             {
                 var @event = EventReceivedFactory.Create((dynamic)e);
 
@@ -52,7 +52,7 @@ namespace SuperSafeBank.Web.API.Workers
 
                 await _mediator.Publish(@event, cancellationToken);
             }
-            consumer.EventReceived += OnConsumerOnEventReceived;
+            consumer.EventReceived += onEventReceived;
 
             consumer.ExceptionThrown += (sender, exception) =>
             {

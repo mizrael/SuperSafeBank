@@ -3,23 +3,22 @@ using System.Threading.Tasks;
 using MediatR;
 using MongoDB.Driver;
 using SuperSafeBank.Domain.Queries.Models;
+using SuperSafeBank.Web.API.Infrastructure;
 
 namespace SuperSafeBank.Web.API.Queries
 {
     public class CustomerByIdHandler : IRequestHandler<CustomerById, CustomerDetails>
     {
-        private readonly IMongoDatabase _db;
-        private readonly IMongoCollection<CustomerDetails> _coll;
-
-        public CustomerByIdHandler(IMongoDatabase db)
+        private readonly IQueryDbContext _db;
+       
+        public CustomerByIdHandler(IQueryDbContext db)
         {
             _db = db;
-            _coll = _db.GetCollection<CustomerDetails>("customerdetails");
         }
 
         public async Task<CustomerDetails> Handle(CustomerById request, CancellationToken cancellationToken)
         {
-            var cursor = await _coll.FindAsync(c => c.Id == request.Id,
+            var cursor = await _db.CustomersDetails.FindAsync(c => c.Id == request.Id,
                 null, cancellationToken);
             return await cursor.FirstOrDefaultAsync(cancellationToken);
         }

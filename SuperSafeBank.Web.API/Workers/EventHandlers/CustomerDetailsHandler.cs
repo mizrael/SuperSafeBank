@@ -5,22 +5,22 @@ using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using SuperSafeBank.Domain.Events;
 using SuperSafeBank.Domain.Queries.Models;
+using SuperSafeBank.Web.API.Infrastructure;
 
-namespace SuperSafeBank.Web.API.Workers
+namespace SuperSafeBank.Web.API.Workers.EventHandlers
 {
     public class CustomerDetailsHandler : 
         INotificationHandler<EventReceived<CustomerCreated>>,
         INotificationHandler<EventReceived<AccountCreated>>
     {
-        private readonly IMongoDatabase _db;
-        private readonly IMongoCollection<CustomerDetails> _coll;
+        private readonly IQueryDbContext _db;
+        
         private readonly ILogger<CustomerDetailsHandler> _logger;
 
-        public CustomerDetailsHandler(IMongoDatabase db, ILogger<CustomerDetailsHandler> logger)
+        public CustomerDetailsHandler(IQueryDbContext db, ILogger<CustomerDetailsHandler> logger)
         {
             _db = db;
             _logger = logger;
-            _coll = _db.GetCollection<CustomerDetails>("customerdetails");
         }
 
         public async Task Handle(EventReceived<CustomerCreated> @event, CancellationToken cancellationToken)
@@ -34,7 +34,7 @@ namespace SuperSafeBank.Web.API.Workers
                 .Set(a => a.Firstname, @event.Event.Firstname)
                 .Set(a => a.Lastname, @event.Event.Lastname);
 
-            await _coll.UpdateOneAsync(filter,
+            await _db.CustomersDetails.UpdateOneAsync(filter,
                 cancellationToken: cancellationToken,
                 update: update,
                 options: new UpdateOptions() { IsUpsert = true });
@@ -50,7 +50,7 @@ namespace SuperSafeBank.Web.API.Workers
             var update = Builders<CustomerDetails>.Update
                 .AddToSet(a => a.Accounts, @event.Event.AggregateId);
 
-            await _coll.UpdateOneAsync(filter,
+            await _db.CustomersDetails.UpdateOneAsync(filter,
                 cancellationToken: cancellationToken,
                 update: update,
                 options: new UpdateOptions() { IsUpsert = true });
