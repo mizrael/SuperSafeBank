@@ -28,7 +28,8 @@ namespace SuperSafeBank.Web.API
                 .AddSingleton(ctx =>
                 {
                     var client = ctx.GetRequiredService<MongoClient>();
-                    return client.GetDatabase("bankAccounts");
+                    var database = client.GetDatabase("bankAccounts");
+                    return database;
                 });
         }
 
