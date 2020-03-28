@@ -56,7 +56,7 @@ namespace SuperSafeBank.Web.API.Tests.Contract
                 detailsResponse.IsSuccessStatusCode.Should().BeTrue();
 
                 var details = await detailsResponse.Content.ReadAsAsync<dynamic>();
-                Guid accountCustomerId = details.CustomerId;
+                Guid accountCustomerId = details.ownerId;
                 customerId.Should().Be(accountCustomerId);
 
                 return true;
