@@ -7,7 +7,7 @@ namespace SuperSafeBank.Web.API.Tests
 {
     public static class TestUtils
     {
-        public static async Task RetryPolicy(Func<Task<bool>> predicate, string because, int maxRetries = 10)
+        public static async Task Retry(Func<Task<bool>> predicate, string because, int maxRetries = 10)
         {
             int curr = 0;
             bool found = false;

@@ -14,7 +14,7 @@ using SuperSafeBank.Persistence.EventStore;
 using SuperSafeBank.Persistence.Kafka;
 using SuperSafeBank.Web.API.Infrastructure;
 
-namespace SuperSafeBank.Web.API
+namespace SuperSafeBank.Web.API.Registries
 {
     public static class InfrastructureRegistry
     {

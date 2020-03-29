@@ -25,6 +25,8 @@ namespace SuperSafeBank.Web.API.Workers.EventHandlers
 
         public async Task Handle(EventReceived<CustomerCreated> @event, CancellationToken cancellationToken)
         {
+            _logger.LogInformation($"creating customer details for aggregate {@event.Event.AggregateId} ...");
+
             var filter = Builders<CustomerDetails>.Filter
                 .Eq(a => a.Id, @event.Event.AggregateId);
 

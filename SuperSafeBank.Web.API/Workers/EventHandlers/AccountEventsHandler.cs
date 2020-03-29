@@ -27,12 +27,14 @@ namespace SuperSafeBank.Web.API.Workers.EventHandlers
 
         public async Task Handle(EventReceived<AccountCreated> @event, CancellationToken cancellationToken)
         {
+            _logger.LogInformation($"creating account details for aggregate {@event.Event.AggregateId} ...");
+
             var customerFilter = Builders<CustomerArchiveItem>.Filter
                 .Eq(a => a.Id, @event.Event.OwnerId);
 
             var customer = await (await _db.Customers.FindAsync(customerFilter, null, cancellationToken))
                 .FirstOrDefaultAsync(cancellationToken);
-            if (null == customer) //TODO add retry mechanism
+            if (null == customer) 
             {
                 var msg = $"unable to find customer by id {@event.Event.OwnerId}";
                 _logger.LogWarning(msg);

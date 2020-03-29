@@ -4,12 +4,14 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using MediatR;
-using Microsoft.Extensions.Logging;
 using SuperSafeBank.Core;
 using SuperSafeBank.Domain.Events;
+using SuperSafeBank.Domain.Queries.Models;
 using SuperSafeBank.Domain.Services;
 using SuperSafeBank.Web.API.Commands;
-using SuperSafeBank.Web.API.Workers;
+using SuperSafeBank.Web.API.Queries;
+using SuperSafeBank.Web.API.Registries;
+using SuperSafeBank.Web.API.Workers.EventHandlers;
 
 namespace SuperSafeBank.Web.API
 {
@@ -35,20 +37,20 @@ namespace SuperSafeBank.Web.API
                 })).AddEventStore(this.Configuration)
                 .AddMongoDb(this.Configuration);
 
-            services.AddMediatR(new[]
+            services.AddScoped<ServiceFactory>(ctx => ctx.GetRequiredService);
+            services.AddScoped<IMediator, Mediator>();
+
+            services.Scan(scan =>
             {
-                typeof(CreateCustomer).Assembly
+                scan.FromAssembliesOf(typeof(CustomerDetailsHandler))
+                    .RegisterHandlers(typeof(IRequestHandler<>))
+                    .RegisterHandlers(typeof(IRequestHandler<,>))
+                    .RegisterHandlers(typeof(INotificationHandler<>));
             });
 
-            services.AddHostedService(ctx =>
-            {
-                var mediator = ctx.GetRequiredService<IMediator>();
-                var logger = ctx.GetRequiredService<ILogger<EventsConsumerWorker>>();
-                var eventsDeserializer = ctx.GetRequiredService<IEventDeserializer>();
-                var kafkaConnStr = this.Configuration.GetConnectionString("kafka");
+            services.Decorate(typeof(INotificationHandler<>), typeof(RetryDecorator<>));
 
-                return new EventsConsumerWorker(mediator, logger, "events", kafkaConnStr, eventsDeserializer);
-            });
+            services.RegisterWorker();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -65,10 +67,8 @@ namespace SuperSafeBank.Web.API
 
             app.UseAuthorization();
 
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
+            app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
         }
+
     }
 }

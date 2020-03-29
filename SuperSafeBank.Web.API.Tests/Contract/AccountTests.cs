@@ -50,7 +50,7 @@ namespace SuperSafeBank.Web.API.Tests.Contract
             response.IsSuccessStatusCode.Should().BeTrue();
             response.StatusCode.Should().Be(HttpStatusCode.Created);
 
-            await TestUtils.RetryPolicy(async () =>
+            await TestUtils.Retry(async () =>
             {
                 var detailsResponse = await _fixture.HttpClient.GetAsync(response.Headers.Location);
                 detailsResponse.IsSuccessStatusCode.Should().BeTrue();
