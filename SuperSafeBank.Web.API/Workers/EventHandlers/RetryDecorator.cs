@@ -14,7 +14,7 @@ namespace SuperSafeBank.Web.API.Workers.EventHandlers
 
         public RetryDecorator(MediatR.INotificationHandler<TNotification> inner)
         {
-            _inner = inner;
+            _inner = inner; //TODO: check RetryDecorator doesn't get injected twice
             _retryPolicy = Polly.Policy.Handle<ArgumentOutOfRangeException>()
                 .WaitAndRetryAsync(3,
                     i => TimeSpan.FromSeconds(i));
