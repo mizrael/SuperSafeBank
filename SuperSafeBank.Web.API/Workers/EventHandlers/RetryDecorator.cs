@@ -10,7 +10,7 @@ namespace SuperSafeBank.Web.API.Workers.EventHandlers
         where TNotification : MediatR.INotification
     {
         private readonly INotificationHandler<TNotification> _inner;
-        private readonly Polly.AsyncPolicy _retryPolicy;
+        private readonly Polly.IAsyncPolicy _retryPolicy;
 
         public RetryDecorator(MediatR.INotificationHandler<TNotification> inner)
         {
