@@ -1,6 +1,7 @@
 ﻿using System;
+using SuperSafeBank.Domain;
 
-namespace SuperSafeBank.Domain.Queries.Models
+namespace SuperSafeBank.Web.API.Queries.Models
 {
     public class AccountDetails
     {

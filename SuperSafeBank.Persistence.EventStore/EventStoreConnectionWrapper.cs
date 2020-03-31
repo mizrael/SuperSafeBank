@@ -32,8 +32,8 @@ namespace SuperSafeBank.Persistence.EventStore
         private IEventStoreConnection SetupConnection()
         {
             var settings = ConnectionSettings.Create()
-                .EnableVerboseLogging()
-                .UseConsoleLogger()
+                // .EnableVerboseLogging()
+                // .UseConsoleLogger()
                 .Build();
             var connection = EventStoreConnection.Create(settings, _connString);
 

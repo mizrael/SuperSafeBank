@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using SuperSafeBank.Domain;
 
-namespace SuperSafeBank.Domain.Queries.Models
+namespace SuperSafeBank.Web.API.Queries.Models
 {
     public class CustomerDetails
     {
@@ -10,6 +11,7 @@ namespace SuperSafeBank.Domain.Queries.Models
         public string Firstname { get; private set; }
         public string Lastname { get; private set; }
         public IEnumerable<Guid> Accounts { get; private set; }
+        public Money TotalBalance {get;private set; }
         public long Version { get; private set; }
     }
 }
