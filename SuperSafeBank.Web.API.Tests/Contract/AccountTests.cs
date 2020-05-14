@@ -32,8 +32,8 @@ namespace SuperSafeBank.Web.API.Tests.Contract
         {
             var createCustomerPayload = new
             {
-                firstname = Guid.NewGuid(),
-                lastname = Guid.NewGuid()
+                firstname = "Customer",
+                lastname = "WithAccount"
             };
             var response = await _fixture.HttpClient.PostAsJsonAsync("customers", createCustomerPayload);
             response.IsSuccessStatusCode.Should().BeTrue();

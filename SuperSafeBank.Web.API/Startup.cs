@@ -7,8 +7,8 @@ using MediatR;
 using SuperSafeBank.Core;
 using SuperSafeBank.Domain.Events;
 using SuperSafeBank.Domain.Services;
+using SuperSafeBank.Web.API.EventHandlers;
 using SuperSafeBank.Web.API.Registries;
-using SuperSafeBank.Web.API.Workers.EventHandlers;
 
 namespace SuperSafeBank.Web.API
 {

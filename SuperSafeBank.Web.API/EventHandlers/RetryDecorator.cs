@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using MediatR;
 using Polly;
 
-namespace SuperSafeBank.Web.API.Workers.EventHandlers
+namespace SuperSafeBank.Web.API.EventHandlers
 {
     public class RetryDecorator<TNotification> : MediatR.INotificationHandler<TNotification>
         where TNotification : MediatR.INotification

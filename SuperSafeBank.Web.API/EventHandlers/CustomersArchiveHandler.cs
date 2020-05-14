@@ -6,8 +6,9 @@ using MongoDB.Driver;
 using SuperSafeBank.Domain.Events;
 using SuperSafeBank.Web.API.Infrastructure;
 using SuperSafeBank.Web.API.Queries.Models;
+using SuperSafeBank.Web.API.Workers;
 
-namespace SuperSafeBank.Web.API.Workers.EventHandlers
+namespace SuperSafeBank.Web.API.EventHandlers
 {
     public class CustomersArchiveHandler : 
         INotificationHandler<EventReceived<CustomerCreated>>,

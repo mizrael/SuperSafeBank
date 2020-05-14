@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Scrutor;
-using SuperSafeBank.Web.API.Workers.EventHandlers;
+using SuperSafeBank.Web.API.EventHandlers;
 
 namespace SuperSafeBank.Web.API
 {
