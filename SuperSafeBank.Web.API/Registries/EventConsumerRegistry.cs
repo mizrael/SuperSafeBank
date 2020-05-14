@@ -26,7 +26,7 @@ namespace SuperSafeBank.Web.API.Registries
 
                 var config = ctx.GetRequiredService<IConfiguration>();
                 var kafkaConnStr = config.GetConnectionString("kafka");
-                var eventsTopicName = "events";
+                var eventsTopicName = config["eventsTopicName"];
 
                 var consumers = new[]
                 {

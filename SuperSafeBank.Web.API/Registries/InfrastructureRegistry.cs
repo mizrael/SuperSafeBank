@@ -20,7 +20,9 @@ namespace SuperSafeBank.Web.API.Registries
     {
         public static IServiceCollection AddMongoDb(this IServiceCollection services, IConfiguration configuration)
         {
-            if(null == BsonSerializer.SerializerRegistry.GetSerializer<decimal>())
+            BsonDefaults.GuidRepresentation = GuidRepresentation.Standard;
+
+            if (null == BsonSerializer.SerializerRegistry.GetSerializer<decimal>())
                 BsonSerializer.RegisterSerializer(typeof(decimal), new DecimalSerializer(BsonType.Decimal128));
 
             return services.AddSingleton(ctx =>
@@ -30,8 +32,9 @@ namespace SuperSafeBank.Web.API.Registries
                 })
                 .AddSingleton(ctx =>
                 {
+                    var dbName = configuration["queryDbName"];
                     var client = ctx.GetRequiredService<MongoClient>();
-                    var database = client.GetDatabase("bankAccounts");
+                    var database = client.GetDatabase(dbName);
                     return database;
                 }).AddSingleton<IQueryDbContext, QueryDbContext>();
         }
@@ -68,8 +71,8 @@ namespace SuperSafeBank.Web.API.Registries
             return services.AddSingleton<IEventProducer<TA, TK>>(ctx =>
             {
                 var connStr = configuration.GetConnectionString("kafka");
-
-                return new EventProducer<TA, TK>("events", connStr);
+                var eventsTopicName = configuration["eventsTopicName"];
+                return new EventProducer<TA, TK>(eventsTopicName, connStr);
             });
         }
 
