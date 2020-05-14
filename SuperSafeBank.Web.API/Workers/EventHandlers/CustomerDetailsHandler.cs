@@ -6,8 +6,8 @@ using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using SuperSafeBank.Domain;
 using SuperSafeBank.Domain.Events;
-using SuperSafeBank.Domain.Queries.Models;
 using SuperSafeBank.Web.API.Infrastructure;
+using SuperSafeBank.Web.API.Queries.Models;
 
 namespace SuperSafeBank.Web.API.Workers.EventHandlers
 {

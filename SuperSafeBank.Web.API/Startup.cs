@@ -6,10 +6,7 @@ using Microsoft.Extensions.Hosting;
 using MediatR;
 using SuperSafeBank.Core;
 using SuperSafeBank.Domain.Events;
-using SuperSafeBank.Domain.Queries.Models;
 using SuperSafeBank.Domain.Services;
-using SuperSafeBank.Web.API.Commands;
-using SuperSafeBank.Web.API.Queries;
 using SuperSafeBank.Web.API.Registries;
 using SuperSafeBank.Web.API.Workers.EventHandlers;
 

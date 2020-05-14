@@ -2,8 +2,8 @@
 using System.Threading.Tasks;
 using MediatR;
 using MongoDB.Driver;
-using SuperSafeBank.Domain.Queries.Models;
 using SuperSafeBank.Web.API.Infrastructure;
+using SuperSafeBank.Web.API.Queries.Models;
 
 namespace SuperSafeBank.Web.API.Queries
 {

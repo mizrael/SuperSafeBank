@@ -1,16 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using SuperSafeBank.Core;
 using SuperSafeBank.Core.EventBus;
-using SuperSafeBank.Core.Models;
-using SuperSafeBank.Domain;
-using SuperSafeBank.Persistence.Kafka;
 
 namespace SuperSafeBank.Web.API.Workers
 {
