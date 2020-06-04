@@ -4,7 +4,6 @@ using System.Net.Http;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Configuration.Memory;
 using MongoDB.Driver;
 
 namespace SuperSafeBank.Web.API.Tests.Fixtures
