@@ -23,6 +23,7 @@ namespace SuperSafeBank.Core
 
         public IDomainEvent<TKey> Deserialize<TKey>(string type, string data)
         {
+            //TODO: cache types
             var eventType = _assemblies.Select(a => a.GetType(type, false))
                                 .FirstOrDefault(t => t != null) ?? Type.GetType(type);
             if (null == eventType)
