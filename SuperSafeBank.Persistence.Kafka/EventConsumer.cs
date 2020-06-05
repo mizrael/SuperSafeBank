@@ -16,7 +16,7 @@ namespace SuperSafeBank.Persistence.Kafka
         private IConsumer<TKey, string> _consumer;
         private readonly IEventDeserializer _eventDeserializer;
 
-        public EventConsumer(string topicBaseName, string kafkaConnString, IEventDeserializer eventDeserializer)
+        public EventConsumer(IEventDeserializer eventDeserializer, EventConsumerConfig config)
         {
             _eventDeserializer = eventDeserializer;
 
@@ -24,8 +24,8 @@ namespace SuperSafeBank.Persistence.Kafka
 
             var consumerConfig = new ConsumerConfig
             {
-                GroupId = "events-consumer-group",
-                BootstrapServers = kafkaConnString,
+                GroupId = config.ConsumerGroup,
+                BootstrapServers = config.KafkaConnectionString,
                 AutoOffsetReset = AutoOffsetReset.Earliest,
                 EnablePartitionEof = true
             };
@@ -36,7 +36,7 @@ namespace SuperSafeBank.Persistence.Kafka
 
             _consumer = consumerBuilder.Build();
             
-            var topicName = $"{topicBaseName}-{aggregateType.Name}";
+            var topicName = $"{config.TopicBaseName}-{aggregateType.Name}";
             _consumer.Subscribe(topicName);
         }
 

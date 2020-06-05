@@ -11,12 +11,4 @@ namespace SuperSafeBank.Web.API.Workers
 
         public TE Event { get; }
     }
-
-    public static class EventReceivedFactory
-    {
-        public static EventReceived<TE> Create<TE>(TE @event)
-        {
-            return new EventReceived<TE>(@event);
-        }
-    }
 }

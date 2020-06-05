@@ -49,7 +49,8 @@ namespace SuperSafeBank.Web.API.Registries
             ILogger<IEventConsumer> logger)
             where TA : IAggregateRoot<TK>
         {
-            var consumer = new EventConsumer<TA, TK>(eventsTopicName, kafkaConnString, eventDeserializer);
+            var config = new EventConsumerConfig(kafkaConnString, eventsTopicName, "web-api-events-consumer-group");
+            var consumer = new EventConsumer<TA, TK>(eventDeserializer, config);
 
             async Task onEventReceived(object s, IDomainEvent<TK> e)
             {
