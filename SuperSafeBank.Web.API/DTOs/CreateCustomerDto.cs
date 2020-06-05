@@ -10,6 +10,7 @@ namespace SuperSafeBank.Web.API.DTOs
         [Required]
         public string LastName { get; set; }
 
+        [Required]
         public string Email { get; set; }
     }
 }

@@ -10,6 +10,7 @@ namespace SuperSafeBank.Web.API.Queries.Models
         public Guid Id { get; private set; }
         public string Firstname { get; private set; }
         public string Lastname { get; private set; }
+        public string Email { get; private set; }
         public IEnumerable<Guid> Accounts { get; private set; }
         public Money TotalBalance {get;private set; }
         public long Version { get; private set; }

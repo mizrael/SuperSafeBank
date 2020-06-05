@@ -40,6 +40,7 @@ namespace SuperSafeBank.Web.API.EventHandlers
                 .Set(a => a.Version, @event.Event.AggregateVersion)
                 .Set(a => a.Firstname, @event.Event.Firstname)
                 .Set(a => a.Lastname, @event.Event.Lastname)
+                .Set(a => a.Email, @event.Event.Email)
                 .Set(a => a.TotalBalance, new Money(Currency.CanadianDollar, 0));
 
             await _db.CustomersDetails.UpdateOneAsync(filter,
