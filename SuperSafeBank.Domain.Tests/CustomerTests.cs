@@ -12,7 +12,7 @@ namespace SuperSafeBank.Domain.Tests
         [Fact]
         public void Create_should_create_valid_Customer_instance()
         {
-            var customer = new Customer(Guid.NewGuid(), "lorem", "ipsum");
+            var customer = new Customer(Guid.NewGuid(), "lorem", "ipsum", "test@test.com");
 
             var instance = BaseAggregateRoot<Customer, Guid>.Create(customer.Events);
             instance.Should().NotBeNull();
@@ -24,7 +24,7 @@ namespace SuperSafeBank.Domain.Tests
         [Fact]
         public void ctor_should_create_valid_instance()
         {
-            var sut = Customer.Create("lorem", "ipsum");
+            var sut = Customer.Create("lorem", "ipsum", "test@test.com");
             
             sut.Firstname.Should().Be("lorem");
             sut.Lastname.Should().Be("ipsum");
@@ -35,7 +35,7 @@ namespace SuperSafeBank.Domain.Tests
         public void ctor_should_raise_Created_event()
         {
             var customerId = Guid.NewGuid();
-            var sut = new Customer(customerId, "lorem", "ipsum");
+            var sut = new Customer(customerId, "lorem", "ipsum", "test@test.com");
 
             sut.Events.Count.Should().Be(1);
 
@@ -46,6 +46,7 @@ namespace SuperSafeBank.Domain.Tests
             createdEvent.AggregateVersion.Should().Be(0);
             createdEvent.Firstname.Should().Be("lorem");
             createdEvent.Lastname.Should().Be("ipsum");
+            createdEvent.Email.Should().Be("test@test.com");
         }
     }
 }

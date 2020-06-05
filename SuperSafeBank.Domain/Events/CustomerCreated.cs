@@ -14,9 +14,11 @@ namespace SuperSafeBank.Domain.Events
         {
             Firstname = customer.Firstname;
             Lastname = customer.Lastname;
+            Email = customer.Email;
         }
 
         public string Firstname { get; private set; }
         public string Lastname { get; private set; }
+        public string Email { get; private set; }
     }
 }

@@ -15,7 +15,7 @@ namespace SuperSafeBank.Domain.Tests
         public void Create_should_create_valid_Account_instance()
         {
             var currencyConverter = new FakeCurrencyConverter();
-            var customer = new Customer(Guid.NewGuid(), "lorem", "ipsum");
+            var customer = new Customer(Guid.NewGuid(), "lorem", "ipsum", "test@test.com");
             var account = Account.Create(customer, Currency.CanadianDollar);
             account.Deposit(new Money(Currency.CanadianDollar, 10), currencyConverter);
             account.Deposit(new Money(Currency.CanadianDollar, 42), currencyConverter);
@@ -34,7 +34,7 @@ namespace SuperSafeBank.Domain.Tests
         [Fact]
         public void ctor_should_create_valid_instance()
         {
-            var customer = Customer.Create("lorem", "ipsum");
+            var customer = Customer.Create("lorem", "ipsum", "test@test.com");
             var sut = Account.Create(customer, Currency.CanadianDollar);
 
             sut.Balance.Should().Be(Money.Zero(Currency.CanadianDollar));
@@ -45,7 +45,7 @@ namespace SuperSafeBank.Domain.Tests
         [Fact]
         public void ctor_should_raise_Created_event()
         {
-            var customer = Customer.Create("lorem", "ipsum");
+            var customer = Customer.Create("lorem", "ipsum", "test@test.com");
 
             var accountId = Guid.NewGuid();
             var sut = new Account(accountId, customer, Currency.CanadianDollar);
@@ -64,7 +64,7 @@ namespace SuperSafeBank.Domain.Tests
         [Fact]
         public void Deposit_should_add_value()
         {
-            var customer = Customer.Create("lorem", "ipsum");
+            var customer = Customer.Create("lorem", "ipsum", "test@test.com");
             var sut = Account.Create(customer, Currency.CanadianDollar);
             var currencyConverter = new FakeCurrencyConverter();
 
@@ -82,7 +82,7 @@ namespace SuperSafeBank.Domain.Tests
         [Fact]
         public void Withdraw_should_throw_if_current_balance_is_below_amount()
         {
-            var customer = Customer.Create("lorem", "ipsum");
+            var customer = Customer.Create("lorem", "ipsum", "test@test.com");
             var sut = Account.Create(customer, Currency.CanadianDollar);
             var currencyConverter = new FakeCurrencyConverter();
 
@@ -94,7 +94,7 @@ namespace SuperSafeBank.Domain.Tests
         [Fact]
         public void Withdraw_should_remove_value()
         {
-            var customer = Customer.Create("lorem", "ipsum");
+            var customer = Customer.Create("lorem", "ipsum", "test@test.com");
             var sut = Account.Create(customer, Currency.CanadianDollar);
             var currencyConverter = new FakeCurrencyConverter();
 
