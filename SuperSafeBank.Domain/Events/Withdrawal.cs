@@ -12,9 +12,11 @@ namespace SuperSafeBank.Domain.Events
 
         public Withdrawal(Account account, Money amount) : base(account)
         {
-            Amount = amount;
+            Amount = amount; 
+            OwnerId = account.OwnerId;
         }
 
         public Money Amount { get; private set; }
+        public Guid OwnerId { get; private set; }
     }
 }
