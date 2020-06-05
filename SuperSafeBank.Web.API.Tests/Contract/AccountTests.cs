@@ -33,10 +33,10 @@ namespace SuperSafeBank.Web.API.Tests.Contract
             var createCustomerPayload = new
             {
                 firstname = "Customer",
-                lastname = "WithAccount"
+                lastname = "WithAccount",
+                email = "test@test.com"
             };
             var response = await _fixture.HttpClient.PostAsJsonAsync("customers", createCustomerPayload);
-            response.IsSuccessStatusCode.Should().BeTrue();
             response.StatusCode.Should().Be(HttpStatusCode.Created);
             var result = await response.Content.ReadAsAsync<dynamic>();
 
@@ -47,7 +47,6 @@ namespace SuperSafeBank.Web.API.Tests.Contract
                 currencyCode = "cad"
             };
             response = await _fixture.HttpClient.PostAsJsonAsync($"customers/{customerId}/accounts", createAccountPayload);
-            response.IsSuccessStatusCode.Should().BeTrue();
             response.StatusCode.Should().Be(HttpStatusCode.Created);
 
             await TestUtils.Retry(async () =>

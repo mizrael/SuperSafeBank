@@ -33,7 +33,8 @@ namespace SuperSafeBank.Web.API.Tests.Contract
             var payload = new
             {
                 firstname = "test customer",
-                lastname = "creation"
+                lastname = "creation",
+                email = "test@test.com"
             };
             var response = await _fixture.HttpClient.PostAsJsonAsync("customers", payload);
             response.IsSuccessStatusCode.Should().BeTrue();
@@ -52,6 +53,9 @@ namespace SuperSafeBank.Web.API.Tests.Contract
 
                 string lastName = details.lastname;
                 payload.lastname.Should().Be(lastName);
+
+                string email = details.email;
+                payload.email.Should().Be(email);
 
                 return true;
             }, "failed to fetch customer by id");

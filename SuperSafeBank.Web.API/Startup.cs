@@ -12,7 +12,7 @@ using SuperSafeBank.Web.API.Registries;
 
 namespace SuperSafeBank.Web.API
 {
-    public class Startup
+    public class Startup //TODO: add global error handler
     {
         public Startup(IConfiguration configuration)
         {

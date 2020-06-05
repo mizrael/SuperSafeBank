@@ -9,16 +9,18 @@ namespace SuperSafeBank.Web.API.Commands
 {
     public class CreateCustomer : INotification
     {
-        public CreateCustomer(Guid id, string firstName, string lastName)
+        public CreateCustomer(Guid id, string firstName, string lastName, string email)
         {
             this.Id = id;
             this.FirstName = firstName;
             this.LastName = lastName;
+            this.Email = email;
         }
 
         public Guid Id { get; }
         public string FirstName { get; }
         public string LastName { get; }
+        public string Email { get; }
     }
 
     public class CreateCustomerHandler : INotificationHandler<CreateCustomer>
@@ -32,7 +34,7 @@ namespace SuperSafeBank.Web.API.Commands
 
         public async Task Handle(CreateCustomer command, CancellationToken cancellationToken)
         {
-            var customer = new Customer(command.Id, command.FirstName, command.LastName);
+            var customer = new Customer(command.Id, command.FirstName, command.LastName, command.Email);
             await _eventsService.PersistAsync(customer);
         }
     }
