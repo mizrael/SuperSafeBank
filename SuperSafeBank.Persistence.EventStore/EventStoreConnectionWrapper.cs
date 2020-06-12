@@ -36,7 +36,7 @@ namespace SuperSafeBank.Persistence.EventStore
                  .EnableVerboseLogging()
                  .UseConsoleLogger()
                 .Build();
-            var connection = EventStoreConnection.Create("ConnectTo=tcp://admin:changeit@127.0.0.1:2113;"); //settings, _connString);
+            var connection = EventStoreConnection.Create(settings, _connString);
 
             connection.ErrorOccurred += async (s, e) =>
             {
