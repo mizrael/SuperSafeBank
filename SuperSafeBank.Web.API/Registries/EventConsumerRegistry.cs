@@ -20,7 +20,6 @@ namespace SuperSafeBank.Web.API.Registries
         {
             services.AddHostedService(ctx =>
             {
-                var logger = ctx.GetRequiredService<ILogger<IEventConsumer>>();
                 var eventsDeserializer = ctx.GetRequiredService<IEventDeserializer>();
                 var scopeFactory = ctx.GetRequiredService<IServiceScopeFactory>();
 
@@ -31,10 +30,13 @@ namespace SuperSafeBank.Web.API.Registries
                 var groupName = config["eventsTopicGroupName"];
                 var consumerConfig = new EventConsumerConfig(kafkaConnStr, eventsTopicName, groupName);
 
+                var accountLogger = ctx.GetRequiredService<ILogger<EventConsumer<Account, Guid>>>();
+                var customerLogger = ctx.GetRequiredService<ILogger<EventConsumer<Customer, Guid>>>();
+
                 var consumers = new[]
                 {
-                    BuildEventConsumer<Account, Guid>(consumerConfig, eventsDeserializer, scopeFactory, logger),
-                    BuildEventConsumer<Customer, Guid>(consumerConfig, eventsDeserializer, scopeFactory, logger)
+                    BuildEventConsumer<Account, Guid>(consumerConfig, eventsDeserializer, scopeFactory, accountLogger),
+                    BuildEventConsumer<Customer, Guid>(consumerConfig, eventsDeserializer, scopeFactory, customerLogger)
                 };
 
                 return new EventsConsumerWorker(consumers);
@@ -46,10 +48,10 @@ namespace SuperSafeBank.Web.API.Registries
         private static IEventConsumer BuildEventConsumer<TA, TK>(EventConsumerConfig consumerConfig, 
             IEventDeserializer eventDeserializer,
             IServiceScopeFactory scopeFactory,
-            ILogger<IEventConsumer> logger)
+            ILogger<EventConsumer<TA, TK>> logger)
             where TA : IAggregateRoot<TK>
         {
-            var consumer = new EventConsumer<TA, TK>(eventDeserializer, consumerConfig);
+            var consumer = new EventConsumer<TA, TK>(eventDeserializer, consumerConfig, logger);
 
             async Task onEventReceived(object s, IDomainEvent<TK> e)
             {

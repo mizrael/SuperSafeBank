@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Confluent.Kafka;
+using Microsoft.Extensions.Logging;
 using SuperSafeBank.Core;
 using SuperSafeBank.Core.EventBus;
 using SuperSafeBank.Core.Models;
@@ -15,10 +16,12 @@ namespace SuperSafeBank.Persistence.Kafka
     {
         private IConsumer<TKey, string> _consumer;
         private readonly IEventDeserializer _eventDeserializer;
+        private readonly ILogger<EventConsumer<TA, TKey>> _logger;
 
-        public EventConsumer(IEventDeserializer eventDeserializer, EventConsumerConfig config)
+        public EventConsumer(IEventDeserializer eventDeserializer, EventConsumerConfig config, ILogger<EventConsumer<TA, TKey>> logger)
         {
             _eventDeserializer = eventDeserializer;
+            _logger = logger;
 
             var aggregateType = typeof(TA);
 
@@ -44,6 +47,10 @@ namespace SuperSafeBank.Persistence.Kafka
         {
             return Task.Run(async () =>
             {
+                _logger.LogInformation("started Kafka consumer {ConsumerName} on {ConsumerTopics}", 
+                    _consumer.Name, 
+                    string.Join(",", _consumer.Subscription));
+
                 while (!stoppingToken.IsCancellationRequested)
                 {
                     try

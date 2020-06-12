@@ -15,8 +15,9 @@ namespace SuperSafeBank.Worker.Notifications
 
         public Task DispatchAsync(Notification notification)
         {
-            if (notification == null) throw new ArgumentNullException(nameof(notification));
-            _logger.LogInformation($"sending notification to {notification.Recipient} : {notification.Message}");
+            if (notification == null) 
+                throw new ArgumentNullException(nameof(notification));
+            _logger.LogInformation("sending notification to {Recipient}", notification.Recipient);
             return Task.CompletedTask;
         }
     }

@@ -76,12 +76,12 @@ namespace SuperSafeBank.Worker.Notifications
 
                     services.AddHostedService(ctx =>
                     {
-                        var logger = ctx.GetRequiredService<ILogger<IEventConsumer>>();
+                        var logger = ctx.GetRequiredService<ILogger<EventConsumer<Account, Guid>>>();
                         var eventsDeserializer = ctx.GetRequiredService<IEventDeserializer>();
                         var consumerConfig = ctx.GetRequiredService<EventConsumerConfig>();
                         var notificationsFactory = ctx.GetRequiredService<INotificationsFactory>();
                         var notificationsService = ctx.GetRequiredService<INotificationsService>();
-                        var consumer = new EventConsumer<Account, Guid>(eventsDeserializer, consumerConfig);
+                        var consumer = new EventConsumer<Account, Guid>(eventsDeserializer, consumerConfig, logger);
 
                         return new AccountEventsWorker(notificationsFactory, notificationsService, consumer, logger);
                     });
