@@ -37,16 +37,13 @@ namespace SuperSafeBank.Worker.Notifications
                 .UseSerilog((ctx, cfg) =>
                 {
                     var credentials = new NoAuthCredentials(ctx.Configuration.GetConnectionString("loki"));
-                    var labels = new Dictionary<string, string>()
-                    {
-                        {"app", ctx.HostingEnvironment.ApplicationName},
-                        {"envName", ctx.HostingEnvironment.EnvironmentName}
-                    };
-
+                    
                     cfg.MinimumLevel.Verbose()
                         .Enrich.FromLogContext()
+                        .Enrich.WithProperty("Application", ctx.HostingEnvironment.ApplicationName)
+                        .Enrich.WithProperty("Environment", ctx.HostingEnvironment.EnvironmentName)
                         .WriteTo.Console(new RenderedCompactJsonFormatter())
-                        .WriteTo.LokiHttp(credentials, new LogLabelProvider(labels));
+                        .WriteTo.LokiHttp(credentials);
                 })
                 .ConfigureServices((hostContext, services) =>
                 {
