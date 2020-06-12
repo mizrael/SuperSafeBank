@@ -3,6 +3,7 @@ version: '3.4'
 services:
   eventstore_db:
     image: eventstore/eventstore
+    command: --dev --enable-external-tcp --ext-ip=0.0.0.0 --int-ip=0.0.0.0
     environment:
       - EVENTSTORE_CLUSTER_SIZE=1
       - EVENTSTORE_INT_TCP_PORT=1112
@@ -10,11 +11,10 @@ services:
       - EVENTSTORE_INT_HTTP_PORT=2112
       - EVENTSTORE_EXT_HTTP_PORT=2113
     ports:
-      - "1112:1112"
-      - "1113:1113"
-      - "2112:2112"
-      - "2113:2113"
-      
+      - 1113:1113
+      - 2113:2113
+    restart: always
+
   zookeeper:
     image: 'bitnami/zookeeper:3'
     ports:
@@ -51,6 +51,21 @@ services:
     volumes:
       - mongodb_data:/data/db
 
+  loki:
+    image: grafana/loki:master
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - loki
+
+  grafana:
+    image: grafana/grafana:master
+    ports:
+      - "3000:3000"
+    networks:
+      - loki
+
 volumes:
   zookeeper_data:
     driver: local
@@ -58,3 +73,6 @@ volumes:
     driver: local
   mongodb_data:
     driver: local
+
+networks:
+  loki:
