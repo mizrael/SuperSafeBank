@@ -29,13 +29,14 @@ namespace SuperSafeBank.Persistence.EventStore
             });
         }
 
+        // TODO: I'm not sure this is really the right approach.
         private IEventStoreConnection SetupConnection()
         {
             var settings = ConnectionSettings.Create()
-                // .EnableVerboseLogging()
-                // .UseConsoleLogger()
+                 .EnableVerboseLogging()
+                 .UseConsoleLogger()
                 .Build();
-            var connection = EventStoreConnection.Create(settings, _connString);
+            var connection = EventStoreConnection.Create("ConnectTo=tcp://admin:changeit@127.0.0.1:2113;"); //settings, _connString);
 
             connection.ErrorOccurred += async (s, e) =>
             {

@@ -40,8 +40,8 @@ namespace SuperSafeBank.Persistence.EventStore
             var firstEvent = aggregateRoot.Events.First();
             var version = firstEvent.AggregateVersion - 1;
 
-            using var transaction =  await connection.StartTransactionAsync(streamName, version);
-           
+            using var transaction = await connection.StartTransactionAsync(streamName, version);
+
             try
             {
                 foreach (var @event in aggregateRoot.Events)
