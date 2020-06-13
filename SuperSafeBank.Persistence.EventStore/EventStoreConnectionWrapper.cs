@@ -48,13 +48,13 @@ namespace SuperSafeBank.Persistence.EventStore
             };
             connection.Disconnected += async (s, e) =>
             {
-                _logger.LogWarning($"The Evenstore connection has dropped. Trying to reconnect...");
+                _logger.LogWarning($"The Eventstore connection has dropped. Trying to reconnect...");
                 connection = SetupConnection();
                 await connection.ConnectAsync();
             };
             connection.Closed += async (s, e) =>
             {
-                _logger.LogWarning($"The Evenstore connection was closed: {e.Reason}. Opening new connection...");
+                _logger.LogWarning($"The Eventstore connection was closed: {e.Reason}. Opening new connection...");
                 connection = SetupConnection();
                 await connection.ConnectAsync();
             };
