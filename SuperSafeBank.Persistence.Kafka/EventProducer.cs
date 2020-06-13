@@ -14,7 +14,7 @@ namespace SuperSafeBank.Persistence.Kafka
     {
         private IProducer<TKey, string> _producer;
         private readonly string _topicName;
-        private ILogger<EventProducer<TA, TKey>> _logger;
+        private readonly ILogger<EventProducer<TA, TKey>> _logger;
 
         public EventProducer(string topicBaseName, string kafkaConnString, ILogger<EventProducer<TA, TKey>> logger)
         {
