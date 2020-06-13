@@ -47,9 +47,8 @@ namespace SuperSafeBank.Persistence.Kafka
         {
             return Task.Run(async () =>
             {
-                _logger.LogInformation("started Kafka consumer {ConsumerName} on {ConsumerTopics}", 
-                    _consumer.Name, 
-                    string.Join(",", _consumer.Subscription));
+                var topics = string.Join(",", _consumer.Subscription);
+                _logger.LogInformation("started Kafka consumer {ConsumerName} on {ConsumerTopic}", _consumer.Name, topics);
 
                 while (!stoppingToken.IsCancellationRequested)
                 {
@@ -68,13 +67,15 @@ namespace SuperSafeBank.Persistence.Kafka
 
                         await OnEventReceived(@event);
                     }
-                    catch (OperationCanceledException)
+                    catch (OperationCanceledException ex)
                     {
+                        _logger.LogWarning(ex, "consumer {ConsumerName} on {ConsumerTopic} was stopped: {StopReason}", _consumer.Name, topics, ex.Message);
                         OnConsumerStopped();
                     }
-                    catch (Exception e)
+                    catch (Exception ex)
                     {
-                        OnExceptionThrown(e);
+                        _logger.LogError(ex, $"an exception has occurred while consuming a message: {ex.Message}");
+                        OnExceptionThrown(ex);
                     }
                 }
             }, stoppingToken);
