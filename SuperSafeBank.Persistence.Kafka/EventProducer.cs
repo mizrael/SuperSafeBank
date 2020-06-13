@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Confluent.Kafka;
+using Microsoft.Extensions.Logging;
 using SuperSafeBank.Core.EventBus;
 using SuperSafeBank.Core.Models;
 
@@ -11,11 +13,13 @@ namespace SuperSafeBank.Persistence.Kafka
         where TA : IAggregateRoot<TKey>
     {
         private IProducer<TKey, string> _producer;
-
         private readonly string _topicName;
-        
-        public EventProducer(string topicBaseName, string kafkaConnString)
+        private ILogger<EventProducer<TA, TKey>> _logger;
+
+        public EventProducer(string topicBaseName, string kafkaConnString, ILogger<EventProducer<TA, TKey>> logger)
         {
+            _logger = logger;
+
             var aggregateType = typeof(TA);
 
             _topicName = $"{topicBaseName}-{aggregateType.Name}";
@@ -30,6 +34,11 @@ namespace SuperSafeBank.Persistence.Kafka
         {
             if(null == aggregateRoot)
                 throw new ArgumentNullException(nameof(aggregateRoot));
+
+            if (!aggregateRoot.Events.Any())
+                return;
+
+            _logger.LogInformation("publishing {0} events for {AggregateId} ...", aggregateRoot.Events.Count, aggregateRoot.Id); //TODO: confirm this gets logged correctly
 
             foreach (var @event in aggregateRoot.Events)
             {

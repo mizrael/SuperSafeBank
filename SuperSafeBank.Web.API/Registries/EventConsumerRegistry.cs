@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
@@ -20,29 +21,35 @@ namespace SuperSafeBank.Web.API.Registries
         {
             services.AddHostedService(ctx =>
             {
-                var eventsDeserializer = ctx.GetRequiredService<IEventDeserializer>();
-                var scopeFactory = ctx.GetRequiredService<IServiceScopeFactory>();
-
-                var config = ctx.GetRequiredService<IConfiguration>();
-
-                var kafkaConnStr = config.GetConnectionString("kafka");
-                var eventsTopicName = config["eventsTopicName"];
-                var groupName = config["eventsTopicGroupName"];
-                var consumerConfig = new EventConsumerConfig(kafkaConnStr, eventsTopicName, groupName);
-
-                var accountLogger = ctx.GetRequiredService<ILogger<EventConsumer<Account, Guid>>>();
-                var customerLogger = ctx.GetRequiredService<ILogger<EventConsumer<Customer, Guid>>>();
-
-                var consumers = new[]
-                {
-                    BuildEventConsumer<Account, Guid>(consumerConfig, eventsDeserializer, scopeFactory, accountLogger),
-                    BuildEventConsumer<Customer, Guid>(consumerConfig, eventsDeserializer, scopeFactory, customerLogger)
-                };
-
+                var consumers = BuildConsumers(ctx);
                 return new EventsConsumerWorker(consumers);
             });
 
             return services;
+        }
+
+        private static IEnumerable<IEventConsumer> BuildConsumers(IServiceProvider ctx)
+        {
+            var eventsDeserializer = ctx.GetRequiredService<IEventDeserializer>();
+            var scopeFactory = ctx.GetRequiredService<IServiceScopeFactory>();
+
+            var config = ctx.GetRequiredService<IConfiguration>();
+
+            var kafkaConnStr = config.GetConnectionString("kafka");
+            var eventsTopicName = config["eventsTopicName"];
+            var groupName = config["eventsTopicGroupName"];
+            var consumerConfig = new EventConsumerConfig(kafkaConnStr, eventsTopicName, groupName);
+
+            var accountLogger = ctx.GetRequiredService<ILogger<EventConsumer<Account, Guid>>>();
+            var customerLogger = ctx.GetRequiredService<ILogger<EventConsumer<Customer, Guid>>>();
+
+            var consumers = new[]
+            {
+                BuildEventConsumer(consumerConfig, eventsDeserializer, scopeFactory, accountLogger),
+                BuildEventConsumer(consumerConfig, eventsDeserializer, scopeFactory, customerLogger)
+            };
+
+            return consumers;
         }
 
         private static IEventConsumer BuildEventConsumer<TA, TK>(EventConsumerConfig consumerConfig, 
@@ -57,7 +64,7 @@ namespace SuperSafeBank.Web.API.Registries
             {
                 var @event = EventReceivedFactory.Create((dynamic)e);
 
-                logger.LogInformation($"Received event {@event.GetType()} for aggregate {e.AggregateId} , version {e.AggregateVersion}");
+                logger.LogInformation("Received event {EventType} for aggregate {AggregateId} , version {AggregateVersion}", @event.GetType(), e.AggregateId, e.AggregateVersion);
                
                 using var scope = scopeFactory.CreateScope();
                 var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();

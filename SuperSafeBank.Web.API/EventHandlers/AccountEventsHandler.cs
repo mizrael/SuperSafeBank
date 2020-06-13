@@ -28,7 +28,7 @@ namespace SuperSafeBank.Web.API.EventHandlers
 
         public async Task Handle(EventReceived<AccountCreated> @event, CancellationToken cancellationToken)
         {
-            _logger.LogInformation($"creating account details for aggregate {@event.Event.AggregateId} ...");
+            _logger.LogInformation("creating account details for aggregate {AggregateId} ...", @event.Event.AggregateId);
 
             var customerFilter = Builders<CustomerArchiveItem>.Filter
                 .Eq(a => a.Id, @event.Event.OwnerId);
@@ -58,12 +58,12 @@ namespace SuperSafeBank.Web.API.EventHandlers
                 update: update, 
                 options: new UpdateOptions() { IsUpsert = true});
 
-            _logger.LogInformation($"created account {@event.Event.AggregateId}");
+            _logger.LogInformation("created account {AggregateId}", @event.Event.AggregateId);
         }
 
         public async Task Handle(EventReceived<Deposit> @event, CancellationToken cancellationToken)
         {
-            _logger.LogInformation($"processing deposit of {@event.Event.Amount} on account {@event.Event.AggregateId} ...");
+            _logger.LogInformation("processing deposit of {@event.Event.Amount} on account {AggregateId} ...", @event.Event.AggregateId);
 
             var filter = Builders<AccountDetails>.Filter
                 .And(Builders<AccountDetails>.Filter.Eq(a => a.Id, @event.Event.AggregateId),
@@ -79,14 +79,14 @@ namespace SuperSafeBank.Web.API.EventHandlers
                 options: new FindOneAndUpdateOptions<AccountDetails, AccountDetails>() { IsUpsert = false });
 
             if(res != null) 
-                _logger.LogInformation($"deposited {@event.Event.Amount} on account {@event.Event.AggregateId}");
+                _logger.LogInformation("deposited {@event.Event.Amount} on account {AggregateId} ...", @event.Event.AggregateId);
             else 
-                _logger.LogWarning($"deposit {@event.Event.Amount} on account {@event.Event.AggregateId} failed!");
+                _logger.LogWarning("deposit {@event.Event.Amount} on account {AggregateId} failed!", @event.Event.AggregateId);
         }
 
         public async Task Handle(EventReceived<Withdrawal> @event, CancellationToken cancellationToken)
         {
-            _logger.LogInformation($"processing withdrawal of {@event.Event.Amount} on account {@event.Event.AggregateId} ...");
+            _logger.LogInformation("processing withdrawal of {@event.Event.Amount} on account {AggregateId} ...", @event.Event.AggregateId);
 
             var filter = Builders<AccountDetails>.Filter
                 .And(Builders<AccountDetails>.Filter.Eq(a => a.Id, @event.Event.AggregateId),
@@ -102,9 +102,9 @@ namespace SuperSafeBank.Web.API.EventHandlers
                 options: new FindOneAndUpdateOptions<AccountDetails, AccountDetails>() { IsUpsert = false });
 
             if (res != null)
-                _logger.LogInformation($"withdrawn {@event.Event.Amount} from account {@event.Event.AggregateId}");
+                _logger.LogInformation("withdrawn {@event.Event.Amount} from account {AggregateId} ...", @event.Event.AggregateId);
             else 
-                _logger.LogWarning($"withdrawal of {@event.Event.Amount} from account {@event.Event.AggregateId} failed!");
+                _logger.LogWarning("withdrawal of {@event.Event.Amount} from account {AggregateId} failed!", @event.Event.AggregateId);
         }
     }
 }

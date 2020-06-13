@@ -25,7 +25,7 @@ namespace SuperSafeBank.Web.API.EventHandlers
 
         public async Task Handle(EventReceived<CustomerCreated> @event, CancellationToken cancellationToken)
         {
-            _logger.LogInformation($"creating customer archive item for aggregate {@event.Event.AggregateId} ...");
+            _logger.LogInformation("creating customer archive item for aggregate {AggregateId} ...", @event.Event.AggregateId);
 
             var filter = Builders<CustomerArchiveItem>.Filter
                 .Eq(a => a.Id, @event.Event.AggregateId);

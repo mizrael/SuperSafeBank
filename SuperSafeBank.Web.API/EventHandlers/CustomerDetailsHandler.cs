@@ -30,7 +30,7 @@ namespace SuperSafeBank.Web.API.EventHandlers
 
         public async Task Handle(EventReceived<CustomerCreated> @event, CancellationToken cancellationToken)
         {
-            _logger.LogInformation($"creating customer details for aggregate {@event.Event.AggregateId} ...");
+            _logger.LogInformation("creating customer details for {AggregateId} ...", @event.Event.AggregateId);
 
             var filter = Builders<CustomerDetails>.Filter
                 .Eq(a => a.Id, @event.Event.AggregateId);
@@ -48,7 +48,7 @@ namespace SuperSafeBank.Web.API.EventHandlers
                 update: update,
                 options: new UpdateOptions() { IsUpsert = true });
 
-            _logger.LogInformation($"created customer details {@event.Event.AggregateId}");
+            _logger.LogInformation("created customer details {AggregateId}", @event.Event.AggregateId);
         }
 
         public async Task Handle(EventReceived<AccountCreated> @event, CancellationToken cancellationToken)
@@ -73,9 +73,8 @@ namespace SuperSafeBank.Web.API.EventHandlers
             var account = await (await _db.AccountsDetails.FindAsync(filter, null, cancellationToken)).FirstOrDefaultAsync(cancellationToken);
             if (null == account)
             {
-                var msg = $"unable to find account by id {@event.Event.AggregateId}";
-                _logger.LogWarning(msg);
-                throw new ArgumentOutOfRangeException(nameof(@event.Event.AggregateId), msg);
+                _logger.LogWarning("unable to find account by id {AggregateId}", @event.Event.AggregateId);
+                throw new ArgumentOutOfRangeException(nameof(@event.Event.AggregateId), $"unable to find account by id {@event.Event.AggregateId}" );
             }
 
             var customerFilter = Builders<CustomerDetails>.Filter.Eq(a => a.Id, account.OwnerId);
@@ -97,9 +96,8 @@ namespace SuperSafeBank.Web.API.EventHandlers
             var account = await (await _db.AccountsDetails.FindAsync(filter, null, cancellationToken)).FirstOrDefaultAsync(cancellationToken);
             if (null == account)
             {
-                var msg = $"unable to find account by id {@event.Event.AggregateId}";
-                _logger.LogWarning(msg);
-                throw new ArgumentOutOfRangeException(nameof(@event.Event.AggregateId), msg);
+                _logger.LogWarning("unable to find account by id {AggregateId}", @event.Event.AggregateId);
+                throw new ArgumentOutOfRangeException(nameof(@event.Event.AggregateId), $"unable to find account by id {@event.Event.AggregateId}");
             }
 
             var customerFilter = Builders<CustomerDetails>.Filter.Eq(a => a.Id, account.OwnerId);
