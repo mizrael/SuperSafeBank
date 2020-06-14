@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -8,7 +7,6 @@ using Serilog;
 using Serilog.Formatting.Compact;
 using Serilog.Sinks.Loki;
 using SuperSafeBank.Core;
-using SuperSafeBank.Core.EventBus;
 using SuperSafeBank.Domain;
 using SuperSafeBank.Domain.Events;
 using SuperSafeBank.Persistence.Kafka;

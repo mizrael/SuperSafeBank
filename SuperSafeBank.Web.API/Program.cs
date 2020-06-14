@@ -1,5 +1,9 @@
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
+using Serilog;
+using Serilog.Formatting.Compact;
+using Serilog.Sinks.Loki;
 
 namespace SuperSafeBank.Web.API
 {
@@ -15,6 +19,16 @@ namespace SuperSafeBank.Web.API
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
+                }).UseSerilog((ctx, cfg) =>
+                {
+                    var credentials = new NoAuthCredentials(ctx.Configuration.GetConnectionString("loki"));
+
+                    cfg.MinimumLevel.Verbose()
+                        .Enrich.FromLogContext()
+                        .Enrich.WithProperty("Application", ctx.HostingEnvironment.ApplicationName)
+                        .Enrich.WithProperty("Environment", ctx.HostingEnvironment.EnvironmentName)
+                        .WriteTo.Console(new RenderedCompactJsonFormatter())
+                        .WriteTo.LokiHttp(credentials);
                 });
     }
 }
