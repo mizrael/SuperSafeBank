@@ -72,7 +72,8 @@ namespace SuperSafeBank.Web.API.Registries
             {
                 var connStr = configuration.GetConnectionString("kafka");
                 var eventsTopicName = configuration["eventsTopicName"];
-                return new EventProducer<TA, TK>(eventsTopicName, connStr);
+                var logger = ctx.GetRequiredService<ILogger<EventProducer<TA, TK>>>();
+                return new EventProducer<TA, TK>(eventsTopicName, connStr, logger);
             });
         }
 

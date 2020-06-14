@@ -20,15 +20,14 @@ namespace SuperSafeBank.Web.API.Workers
         public IEventConsumer Build<TA, TKey>() where TA : IAggregateRoot<TKey>
         {
             using var scope = scopeFactory.CreateScope();
-
             var consumer = scope.ServiceProvider.GetRequiredService<EventConsumer<TA, TKey>>();
 
             async Task onEventReceived(object s, IDomainEvent<TKey> e)
             {
                 var @event = EventReceivedFactory.Create((dynamic)e);
 
-                using var scope = scopeFactory.CreateScope();
-                var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+                using var innerScope = scopeFactory.CreateScope();
+                var mediator = innerScope.ServiceProvider.GetRequiredService<IMediator>();
                 await mediator.Publish(@event, CancellationToken.None);
             }
             consumer.EventReceived += onEventReceived;

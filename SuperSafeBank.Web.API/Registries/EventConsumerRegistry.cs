@@ -1,15 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using SuperSafeBank.Core;
-using SuperSafeBank.Core.EventBus;
-using SuperSafeBank.Core.Models;
-using SuperSafeBank.Domain;
 using SuperSafeBank.Persistence.Kafka;
 using SuperSafeBank.Web.API.Workers;
 
@@ -24,6 +14,8 @@ namespace SuperSafeBank.Web.API.Registries
             var groupName = config["eventsTopicGroupName"];
             var consumerConfig = new EventConsumerConfig(kafkaConnStr, eventsTopicName, groupName);
             services.AddSingleton(consumerConfig);
+
+            services.AddSingleton(typeof(EventConsumer<,>));
 
             services.AddSingleton<IEventConsumerFactory, EventConsumerFactory>();
 
