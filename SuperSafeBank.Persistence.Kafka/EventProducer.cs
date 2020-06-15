@@ -38,7 +38,7 @@ namespace SuperSafeBank.Persistence.Kafka
             if (!aggregateRoot.Events.Any())
                 return;
 
-            _logger.LogInformation("publishing {0} events for {AggregateId} ...", aggregateRoot.Events.Count, aggregateRoot.Id); //TODO: confirm this gets logged correctly
+            _logger.LogInformation("publishing " + aggregateRoot.Events.Count + " events for {AggregateId} ...", aggregateRoot.Id); 
 
             foreach (var @event in aggregateRoot.Events)
             {
