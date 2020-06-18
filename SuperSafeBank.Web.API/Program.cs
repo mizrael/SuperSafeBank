@@ -24,8 +24,7 @@ namespace SuperSafeBank.Web.API
                 {
                     var credentials = new NoAuthCredentials(ctx.Configuration.GetConnectionString("loki"));
 
-                    cfg.MinimumLevel.Override("Microsoft", LogEventLevel.Information)
-                        .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
+                    cfg.MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
                         .Enrich.FromLogContext()
                         .Enrich.WithProperty("Application", ctx.HostingEnvironment.ApplicationName)
                         .Enrich.WithProperty("Environment", ctx.HostingEnvironment.EnvironmentName)
