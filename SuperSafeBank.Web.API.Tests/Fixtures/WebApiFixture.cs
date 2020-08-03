@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
+using Serilog;
 
 namespace SuperSafeBank.Web.API.Tests.Fixtures
 {
@@ -36,6 +37,7 @@ namespace SuperSafeBank.Web.API.Tests.Fixtures
                     _queryDbName = cfg["queryDbName"];
                     _queryDbConnectionString = cfg.GetConnectionString("mongo");
                 })
+                .UseSerilog()
                 .UseStartup<TStartup>();
             
             var server = new TestServer(builder);
