@@ -58,12 +58,12 @@ namespace SuperSafeBank.Persistence.Kafka
                         if (cr.IsPartitionEOF)
                             continue;
                         
-                        var messageTypeHeader = cr.Headers.First(h => h.Key == "type");
+                        var messageTypeHeader = cr.Message.Headers.First(h => h.Key == "type");
                         var eventType = Encoding.UTF8.GetString(messageTypeHeader.GetValueBytes());
                         
-                        var @event = _eventDeserializer.Deserialize<TKey>(eventType, cr.Value);
+                        var @event = _eventDeserializer.Deserialize<TKey>(eventType, cr.Message.Value);
                         if(null == @event)
-                            throw new SerializationException($"unable to deserialize event {eventType} : {cr.Value}");
+                            throw new SerializationException($"unable to deserialize event {eventType} : {cr.Message.Value}");
 
                         await OnEventReceived(@event);
                     }
