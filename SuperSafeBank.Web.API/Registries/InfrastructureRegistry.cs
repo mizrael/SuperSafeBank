@@ -21,9 +21,9 @@ namespace SuperSafeBank.Web.API.Registries
         public static IServiceCollection AddMongoDb(this IServiceCollection services, IConfiguration configuration)
         {
             BsonDefaults.GuidRepresentation = GuidRepresentation.Standard;
-
-            if (null == BsonSerializer.SerializerRegistry.GetSerializer<decimal>())
-                BsonSerializer.RegisterSerializer(typeof(decimal), new DecimalSerializer(BsonType.Decimal128));
+            
+            BsonSerializer.RegisterSerializer(typeof(decimal), new DecimalSerializer(BsonType.Decimal128));
+            BsonSerializer.RegisterSerializer(typeof(decimal?), new NullableSerializer<decimal>(new DecimalSerializer(BsonType.Decimal128)));
 
             return services.AddSingleton(ctx =>
                 {
