@@ -63,7 +63,7 @@ namespace SuperSafeBank.Web.API.EventHandlers
 
         public async Task Handle(EventReceived<Deposit> @event, CancellationToken cancellationToken)
         {
-            _logger.LogInformation("processing deposit of {@event.Event.Amount} on account {AggregateId} ...", @event.Event.AggregateId);
+            _logger.LogInformation("processing deposit of {Amount} on account {AggregateId} ...", @event.Event.Amount, @event.Event.AggregateId);
 
             var filter = Builders<AccountDetails>.Filter
                 .And(Builders<AccountDetails>.Filter.Eq(a => a.Id, @event.Event.AggregateId),
@@ -79,14 +79,14 @@ namespace SuperSafeBank.Web.API.EventHandlers
                 options: new FindOneAndUpdateOptions<AccountDetails, AccountDetails>() { IsUpsert = false });
 
             if(res != null) 
-                _logger.LogInformation("deposited {@event.Event.Amount} on account {AggregateId} ...", @event.Event.AggregateId);
+                _logger.LogInformation("deposited {Amount} on account {AggregateId} ...", @event.Event.Amount, @event.Event.AggregateId);
             else 
-                _logger.LogWarning("deposit {@event.Event.Amount} on account {AggregateId} failed!", @event.Event.AggregateId);
+                _logger.LogWarning("deposit {Amount} on account {AggregateId} failed!", @event.Event.Amount, @event.Event.AggregateId);
         }
 
         public async Task Handle(EventReceived<Withdrawal> @event, CancellationToken cancellationToken)
         {
-            _logger.LogInformation("processing withdrawal of {@event.Event.Amount} on account {AggregateId} ...", @event.Event.AggregateId);
+            _logger.LogInformation("processing withdrawal of {Amount} on account {AggregateId} ...", @event.Event.Amount, @event.Event.AggregateId);
 
             var filter = Builders<AccountDetails>.Filter
                 .And(Builders<AccountDetails>.Filter.Eq(a => a.Id, @event.Event.AggregateId),
@@ -102,9 +102,9 @@ namespace SuperSafeBank.Web.API.EventHandlers
                 options: new FindOneAndUpdateOptions<AccountDetails, AccountDetails>() { IsUpsert = false });
 
             if (res != null)
-                _logger.LogInformation("withdrawn {@event.Event.Amount} from account {AggregateId} ...", @event.Event.AggregateId);
+                _logger.LogInformation("withdrawn {Amount} from account {AggregateId} ...", @event.Event.Amount, @event.Event.AggregateId);
             else 
-                _logger.LogWarning("withdrawal of {@event.Event.Amount} from account {AggregateId} failed!", @event.Event.AggregateId);
+                _logger.LogWarning("withdrawal of {Amount} from account {AggregateId} failed!", @event.Event.Amount, @event.Event.AggregateId);
         }
     }
 }
