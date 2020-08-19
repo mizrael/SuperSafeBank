@@ -1,7 +1,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SuperSafeBank.Core.EventBus;
-using SuperSafeBank.Persistence.Kafka;
 using SuperSafeBank.Web.API.Workers;
 
 namespace SuperSafeBank.Web.API.Registries

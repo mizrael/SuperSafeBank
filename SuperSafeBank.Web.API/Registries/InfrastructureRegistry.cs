@@ -2,25 +2,37 @@ using System;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization;
-using MongoDB.Bson.Serialization.Serializers;
-using MongoDB.Driver;
 using SuperSafeBank.Core;
 using SuperSafeBank.Core.EventBus;
 using SuperSafeBank.Core.Models;
 using SuperSafeBank.Domain;
+
+#if OnPremise
 using SuperSafeBank.Persistence.EventStore;
 using SuperSafeBank.Persistence.Kafka;
 using SuperSafeBank.Web.Persistence.Mongo;
 using SuperSafeBank.Web.Persistence.Mongo.EventHandlers;
+#endif
 
 namespace SuperSafeBank.Web.API.Registries
 {
     public static class InfrastructureRegistry
     {
-        public static IServiceCollection AddEventStore(this IServiceCollection services, IConfiguration config)
+        public static IServiceCollection AddInfrastructure(this IServiceCollection services,
+            IConfiguration config)
+        {
+
+#if OnPremise
+            services.AddOnPremiseInfrastructure(config);
+#endif
+            return services
+                .AddEventsService<Customer, Guid>()
+                .AddEventsService<Account, Guid>();
+        }
+
+#if OnPremise
+
+        private static IServiceCollection AddOnPremiseInfrastructure(this IServiceCollection services, IConfiguration config)
         {
             services.Scan(scan =>
             {
@@ -38,10 +50,10 @@ namespace SuperSafeBank.Web.API.Registries
             var eventstoreConnStr = config.GetConnectionString("eventstore");
 
             return services.AddKafka(consumerConfig)
-                .AddEventStore(eventstoreConnStr)
-                .AddEventsService<Customer, Guid>()
-                .AddEventsService<Account, Guid>();
+                .AddEventStore(eventstoreConnStr);
         }
+
+#endif
 
         private static IServiceCollection AddEventsService<TA, TK>(this IServiceCollection services)
             where TA : class, IAggregateRoot<TK>

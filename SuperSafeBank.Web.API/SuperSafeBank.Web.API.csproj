@@ -2,6 +2,11 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <Configurations>Debug;Release;DebugOnPremise</Configurations>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugOnPremise|AnyCPU'">
+    <DefineConstants>TRACE;OnPremise</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,9 +19,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\SuperSafeBank.Core\SuperSafeBank.Core.csproj" />
+    <ProjectReference Include="..\SuperSafeBank.Domain\SuperSafeBank.Domain.csproj" />
+    <ProjectReference Include="..\SuperSafeBank.Web.Core\SuperSafeBank.Web.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="$(DefineConstants.Contains('OnPremise'))">
     <ProjectReference Include="..\SuperSafeBank.Persistence.EventStore\SuperSafeBank.Persistence.EventStore.csproj" />
     <ProjectReference Include="..\SuperSafeBank.Persistence.Kafka\SuperSafeBank.Persistence.Kafka.csproj" />
-    <ProjectReference Include="..\SuperSafeBank.Web.Core\SuperSafeBank.Web.Core.csproj" />
     <ProjectReference Include="..\SuperSafeBank.Web.Persistence.Mongo\SuperSafeBank.Web.Persistence.Mongo.csproj" />
   </ItemGroup>
 

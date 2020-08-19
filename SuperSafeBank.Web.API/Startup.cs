@@ -33,7 +33,7 @@ namespace SuperSafeBank.Web.API
             services.AddSingleton<IEventDeserializer>(new JsonEventDeserializer(new[]
             {
                 typeof(CustomerCreated).Assembly
-            })).AddEventStore(this.Configuration);
+            })).AddInfrastructure(this.Configuration);
 
             services.AddScoped<ServiceFactory>(ctx => ctx.GetRequiredService);
             services.AddScoped<IMediator, Mediator>();

@@ -8,14 +8,20 @@ using Xunit;
 
 namespace SuperSafeBank.Web.API.Tests.Contract
 {
-    public class CustomerTests : IClassFixture<WebApiFixture<Startup>>
-    {
-        private readonly WebApiFixture<Startup> _fixture;
+    public class CustomerTests 
+#if OnPremise 
+    : IClassFixture<OnPremiseWebApiFixture<Startup>>
+#endif
 
-        public CustomerTests(WebApiFixture<Startup> fixture)
+    {
+        private readonly BaseWebApiFixture<Startup> _fixture;
+
+#if OnPremise
+        public CustomerTests(OnPremiseWebApiFixture<Startup> fixture)
         {
             _fixture = fixture;
         }
+#endif
 
         [Fact]
         public async Task GetDetails_should_return_404_if_id_invalid()

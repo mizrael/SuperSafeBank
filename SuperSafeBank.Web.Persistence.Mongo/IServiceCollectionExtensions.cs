@@ -1,12 +1,10 @@
 ﻿using System;
-using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
-using SuperSafeBank.Web.Persistence.Mongo.EventHandlers;
 
 namespace SuperSafeBank.Web.Persistence.Mongo
 {
