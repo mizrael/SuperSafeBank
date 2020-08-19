@@ -3,9 +3,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using SuperSafeBank.Core;
-using SuperSafeBank.Domain;
 
-namespace SuperSafeBank.Web.API.Commands
+namespace SuperSafeBank.Domain.Commands
 {
     public class CreateAccount : INotification
     {

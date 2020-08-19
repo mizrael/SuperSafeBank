@@ -3,10 +3,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using MongoDB.Driver;
-using SuperSafeBank.Web.API.Infrastructure;
-using SuperSafeBank.Web.API.Queries.Models;
+using SuperSafeBank.Web.Core.Queries;
+using SuperSafeBank.Web.Core.Queries.Models;
 
-namespace SuperSafeBank.Web.API.Queries
+namespace SuperSafeBank.Web.Persistence.Mongo.QueryHandlers
 {
     public class CustomersArchiveHandler : IRequestHandler<CustomersArchive, IEnumerable<CustomerArchiveItem>>
     {

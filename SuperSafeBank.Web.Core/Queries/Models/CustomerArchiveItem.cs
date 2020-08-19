@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SuperSafeBank.Web.API.Queries.Models
+namespace SuperSafeBank.Web.Core.Queries.Models
 {
     public class CustomerArchiveItem
     {

@@ -5,21 +5,19 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MediatR" Version="8.1.0" />
     <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="8.1.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.7" />
-    <PackageReference Include="MongoDB.Driver" Version="2.11.0" />
     <PackageReference Include="Polly" Version="7.2.1" />
-    <PackageReference Include="scrutor" Version="3.2.1" />
     <PackageReference Include="Serilog.AspNetCore" Version="3.4.0" />
     <PackageReference Include="Serilog.Sinks.Loki" Version="2.1.0" />
+    <PackageReference Include="scrutor" Version="3.2.1" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SuperSafeBank.Core\SuperSafeBank.Core.csproj" />
-    <ProjectReference Include="..\SuperSafeBank.Domain\SuperSafeBank.Domain.csproj" />
     <ProjectReference Include="..\SuperSafeBank.Persistence.EventStore\SuperSafeBank.Persistence.EventStore.csproj" />
     <ProjectReference Include="..\SuperSafeBank.Persistence.Kafka\SuperSafeBank.Persistence.Kafka.csproj" />
+    <ProjectReference Include="..\SuperSafeBank.Web.Core\SuperSafeBank.Web.Core.csproj" />
+    <ProjectReference Include="..\SuperSafeBank.Web.Persistence.Mongo\SuperSafeBank.Web.Persistence.Mongo.csproj" />
   </ItemGroup>
 
 

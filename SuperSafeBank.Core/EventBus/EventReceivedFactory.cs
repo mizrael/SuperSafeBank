@@ -1,4 +1,4 @@
-﻿namespace SuperSafeBank.Web.API.Workers
+﻿namespace SuperSafeBank.Core.EventBus
 {
     public static class EventReceivedFactory
     {

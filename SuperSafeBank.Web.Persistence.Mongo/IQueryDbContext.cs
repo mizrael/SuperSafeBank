@@ -1,7 +1,7 @@
 ﻿using MongoDB.Driver;
-using SuperSafeBank.Web.API.Queries.Models;
+using SuperSafeBank.Web.Core.Queries.Models;
 
-namespace SuperSafeBank.Web.API.Infrastructure
+namespace SuperSafeBank.Web.Persistence.Mongo
 {
     public interface IQueryDbContext
     {

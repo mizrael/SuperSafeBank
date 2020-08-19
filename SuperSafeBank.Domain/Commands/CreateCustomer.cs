@@ -3,9 +3,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using SuperSafeBank.Core;
-using SuperSafeBank.Domain;
 
-namespace SuperSafeBank.Web.API.Commands
+namespace SuperSafeBank.Domain.Commands
 {
     public class CreateCustomer : INotification
     {
@@ -34,6 +33,7 @@ namespace SuperSafeBank.Web.API.Commands
 
         public async Task Handle(CreateCustomer command, CancellationToken cancellationToken)
         {
+            //TODO email validation
             var customer = new Customer(command.Id, command.FirstName, command.LastName, command.Email);
             await _eventsService.PersistAsync(customer);
         }

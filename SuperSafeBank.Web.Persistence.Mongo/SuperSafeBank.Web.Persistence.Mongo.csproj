@@ -1,17 +1,17 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Confluent.Kafka" Version="1.5.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="3.1.7" />
+    <PackageReference Include="MongoDB.Driver" Version="2.11.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.7" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SuperSafeBank.Core\SuperSafeBank.Core.csproj" />
+    <ProjectReference Include="..\SuperSafeBank.Web.Core\SuperSafeBank.Web.Core.csproj" />
   </ItemGroup>
 
 </Project>

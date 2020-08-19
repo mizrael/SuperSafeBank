@@ -6,10 +6,12 @@ using Microsoft.Extensions.Hosting;
 using MediatR;
 using Serilog;
 using SuperSafeBank.Core;
+using SuperSafeBank.Domain.Commands;
 using SuperSafeBank.Domain.Events;
 using SuperSafeBank.Domain.Services;
 using SuperSafeBank.Web.API.EventHandlers;
 using SuperSafeBank.Web.API.Registries;
+//using SuperSafeBank.Web.Persistence.Mongo.EventHandlers;
 
 namespace SuperSafeBank.Web.API
 {
@@ -30,17 +32,16 @@ namespace SuperSafeBank.Web.API
             services.AddSingleton<ICurrencyConverter, FakeCurrencyConverter>();
 
             services.AddSingleton<IEventDeserializer>(new JsonEventDeserializer(new[]
-                {
-                    typeof(CustomerCreated).Assembly
-                })).AddEventStore(this.Configuration)
-                .AddMongoDb(this.Configuration);
+            {
+                typeof(CustomerCreated).Assembly
+            })).AddEventStore(this.Configuration);
 
             services.AddScoped<ServiceFactory>(ctx => ctx.GetRequiredService);
             services.AddScoped<IMediator, Mediator>();
 
             services.Scan(scan =>
             {
-                scan.FromAssembliesOf(typeof(CustomerDetailsHandler))
+                scan.FromAssembliesOf(typeof(CreateCustomer))
                     .RegisterHandlers(typeof(IRequestHandler<>))
                     .RegisterHandlers(typeof(IRequestHandler<,>))
                     .RegisterHandlers(typeof(INotificationHandler<>));

@@ -1,7 +1,6 @@
-﻿using SuperSafeBank.Core.EventBus;
-using SuperSafeBank.Core.Models;
+﻿using SuperSafeBank.Core.Models;
 
-namespace SuperSafeBank.Web.API.Workers
+namespace SuperSafeBank.Core.EventBus
 {
     public interface IEventConsumerFactory
     {

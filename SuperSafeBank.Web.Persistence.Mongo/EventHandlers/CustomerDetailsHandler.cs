@@ -4,13 +4,12 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
+using SuperSafeBank.Core.EventBus;
 using SuperSafeBank.Domain;
 using SuperSafeBank.Domain.Events;
-using SuperSafeBank.Web.API.Infrastructure;
-using SuperSafeBank.Web.API.Queries.Models;
-using SuperSafeBank.Web.API.Workers;
+using SuperSafeBank.Web.Core.Queries.Models;
 
-namespace SuperSafeBank.Web.API.EventHandlers
+namespace SuperSafeBank.Web.Persistence.Mongo.EventHandlers
 {
     public class CustomerDetailsHandler :
         INotificationHandler<EventReceived<CustomerCreated>>,

@@ -2,11 +2,9 @@
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
-using SuperSafeBank.Core.EventBus;
 using SuperSafeBank.Core.Models;
-using SuperSafeBank.Persistence.Kafka;
 
-namespace SuperSafeBank.Web.API.Workers
+namespace SuperSafeBank.Core.EventBus
 {
     public class EventConsumerFactory : IEventConsumerFactory
     {
@@ -20,7 +18,7 @@ namespace SuperSafeBank.Web.API.Workers
         public IEventConsumer Build<TA, TKey>() where TA : IAggregateRoot<TKey>
         {
             using var scope = scopeFactory.CreateScope();
-            var consumer = scope.ServiceProvider.GetRequiredService<EventConsumer<TA, TKey>>();
+            var consumer = scope.ServiceProvider.GetRequiredService<IEventConsumer<TA, TKey>>();
 
             async Task onEventReceived(object s, IDomainEvent<TKey> e)
             {

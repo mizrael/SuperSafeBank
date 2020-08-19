@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using SuperSafeBank.Core.EventBus;
 using SuperSafeBank.Persistence.Kafka;
 using SuperSafeBank.Web.API.Workers;
 
@@ -9,14 +10,6 @@ namespace SuperSafeBank.Web.API.Registries
     {
         public static IServiceCollection RegisterWorker(this IServiceCollection services, IConfiguration config)
         {
-            var kafkaConnStr = config.GetConnectionString("kafka");
-            var eventsTopicName = config["eventsTopicName"];
-            var groupName = config["eventsTopicGroupName"];
-            var consumerConfig = new EventConsumerConfig(kafkaConnStr, eventsTopicName, groupName);
-            services.AddSingleton(consumerConfig);
-
-            services.AddSingleton(typeof(EventConsumer<,>));
-
             services.AddSingleton<IEventConsumerFactory, EventConsumerFactory>();
 
             services.AddHostedService(ctx =>

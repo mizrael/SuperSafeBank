@@ -1,4 +1,5 @@
 using System;
+using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -12,45 +13,39 @@ using SuperSafeBank.Core.Models;
 using SuperSafeBank.Domain;
 using SuperSafeBank.Persistence.EventStore;
 using SuperSafeBank.Persistence.Kafka;
-using SuperSafeBank.Web.API.Infrastructure;
+using SuperSafeBank.Web.Persistence.Mongo;
+using SuperSafeBank.Web.Persistence.Mongo.EventHandlers;
 
 namespace SuperSafeBank.Web.API.Registries
 {
     public static class InfrastructureRegistry
     {
-        public static IServiceCollection AddMongoDb(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddEventStore(this IServiceCollection services, IConfiguration config)
         {
-            BsonDefaults.GuidRepresentation = GuidRepresentation.Standard;
-            
-            BsonSerializer.RegisterSerializer(typeof(decimal), new DecimalSerializer(BsonType.Decimal128));
-            BsonSerializer.RegisterSerializer(typeof(decimal?), new NullableSerializer<decimal>(new DecimalSerializer(BsonType.Decimal128)));
+            services.Scan(scan =>
+            {
+                scan.FromAssembliesOf(typeof(CustomerDetailsHandler))
+                    .RegisterHandlers(typeof(IRequestHandler<>))
+                    .RegisterHandlers(typeof(IRequestHandler<,>))
+                    .RegisterHandlers(typeof(INotificationHandler<>));
+            }).AddMongoDb(config);
 
-            return services.AddSingleton(ctx =>
-                {
-                    var connStr = configuration.GetConnectionString("mongo");
-                    return new MongoClient(connectionString: connStr);
-                })
-                .AddSingleton(ctx =>
-                {
-                    var dbName = configuration["queryDbName"];
-                    var client = ctx.GetRequiredService<MongoClient>();
-                    var database = client.GetDatabase(dbName);
-                    return database;
-                }).AddSingleton<IQueryDbContext, QueryDbContext>();
-        }
+            var kafkaConnStr = config.GetConnectionString("kafka");
+            var eventsTopicName = config["eventsTopicName"];
+            var groupName = config["eventsTopicGroupName"];
+            var consumerConfig = new EventConsumerConfig(kafkaConnStr, eventsTopicName, groupName);
 
-        public static IServiceCollection AddEventStore(this IServiceCollection services, IConfiguration configuration)
-        {
-            return services.AddSingleton<IEventStoreConnectionWrapper>(ctx =>
+            return services.RegisterKafkaConsumer(consumerConfig)
+                .AddSingleton<IEventStoreConnectionWrapper>(ctx =>
                 {
-                    var connStr = configuration.GetConnectionString("eventstore");
+                    var connStr = config.GetConnectionString("eventstore");
                     var logger = ctx.GetRequiredService<ILogger<EventStoreConnectionWrapper>>();
                     return new EventStoreConnectionWrapper(new Uri(connStr), logger);
                 }).AddEventsRepository<Customer, Guid>()
-                .AddEventProducer<Customer, Guid>(configuration)
+                .AddEventProducer<Customer, Guid>(config)
                 .AddEventsService<Customer, Guid>()
                 .AddEventsRepository<Account, Guid>()
-                .AddEventProducer<Account, Guid>(configuration)
+                .AddEventProducer<Account, Guid>(config)
                 .AddEventsService<Account, Guid>();
         }
 

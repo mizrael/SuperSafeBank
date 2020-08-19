@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace SuperSafeBank.Web.API.Workers
+namespace SuperSafeBank.Core.EventBus
 {
     public class EventReceived<TE> : INotification
     {

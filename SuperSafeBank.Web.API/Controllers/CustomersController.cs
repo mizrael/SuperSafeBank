@@ -4,9 +4,9 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using SuperSafeBank.Domain;
-using SuperSafeBank.Web.API.Commands;
+using SuperSafeBank.Domain.Commands;
 using SuperSafeBank.Web.API.DTOs;
-using SuperSafeBank.Web.API.Queries;
+using SuperSafeBank.Web.Core.Queries;
 
 namespace SuperSafeBank.Web.API.Controllers
 {

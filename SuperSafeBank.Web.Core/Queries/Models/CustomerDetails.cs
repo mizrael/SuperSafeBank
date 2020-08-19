@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using SuperSafeBank.Domain;
 
-namespace SuperSafeBank.Web.API.Queries.Models
+namespace SuperSafeBank.Web.Core.Queries.Models
 {
     public class CustomerDetails
     {

@@ -12,7 +12,7 @@ using SuperSafeBank.Core.Models;
 
 namespace SuperSafeBank.Persistence.Kafka
 {
-    public class EventConsumer<TA, TKey> : IDisposable, IEventConsumer where TA : IAggregateRoot<TKey>
+    public class EventConsumer<TA, TKey> : IDisposable, IEventConsumer<TA, TKey> where TA : IAggregateRoot<TKey>
     {
         private IConsumer<TKey, string> _consumer;
         private readonly IEventDeserializer _eventDeserializer;
@@ -81,8 +81,8 @@ namespace SuperSafeBank.Persistence.Kafka
             }, stoppingToken);
         }
 
-        public delegate Task EventReceivedHandler(object sender, IDomainEvent<TKey> e);
-        public event EventReceivedHandler EventReceived;
+        public event EventReceivedHandler<TKey> EventReceived;
+
         protected virtual Task OnEventReceived(IDomainEvent<TKey> e)
         {
             var handler = EventReceived;
@@ -99,6 +99,7 @@ namespace SuperSafeBank.Persistence.Kafka
 
         public delegate void ConsumerStoppedHandler(object sender);
         public event ConsumerStoppedHandler ConsumerStopped;
+
         protected virtual void OnConsumerStopped()
         {
             var handler = ConsumerStopped;
