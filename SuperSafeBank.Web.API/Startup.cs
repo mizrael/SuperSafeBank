@@ -11,7 +11,6 @@ using SuperSafeBank.Domain.Events;
 using SuperSafeBank.Domain.Services;
 using SuperSafeBank.Web.API.EventHandlers;
 using SuperSafeBank.Web.API.Registries;
-//using SuperSafeBank.Web.Persistence.Mongo.EventHandlers;
 
 namespace SuperSafeBank.Web.API
 {
