@@ -10,7 +10,7 @@ namespace SuperSafeBank.Persistence.Kafka
 {
     public static class IServiceCollectionExtensions
     {
-        public static IServiceCollection RegisterKafka(this IServiceCollection services, EventConsumerConfig consumerConfig)
+        public static IServiceCollection AddKafka(this IServiceCollection services, EventConsumerConfig consumerConfig)
         {
             return services.AddSingleton(consumerConfig)
                 .AddSingleton(typeof(IEventConsumer<,>), typeof(EventConsumer<,>))
