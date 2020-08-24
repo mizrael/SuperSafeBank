@@ -1,33 +1,27 @@
-using System;
-using System.Runtime.Serialization;
 using System.Threading.Tasks;
+using MediatR;
 using Microsoft.Azure.ServiceBus;
 using Microsoft.Azure.WebJobs;
-using Microsoft.Extensions.Logging;
 using SuperSafeBank.Core;
 
 namespace SuperSafeBank.Web.Persistence.Azure.Functions
 {
-    public class CustomerFunctions
+    public class CustomerFunctions : BaseFunction
     {
-        private readonly IEventSerializer _eventSerializer;
-
-        public CustomerFunctions(IEventSerializer eventSerializer)
+        public CustomerFunctions(IEventSerializer eventSerializer, IMediator mediator) : base(eventSerializer, mediator)
         {
-            _eventSerializer = eventSerializer ?? throw new ArgumentNullException(nameof(eventSerializer));
         }
 
-        [FunctionName("Archive")]
-        public async Task Run([ServiceBusTrigger("aggregate-customer", "archive", Connection = "AzureWebJobsServiceBus")]Message msg, ILogger log)
+        [FunctionName("CustomerArchive")]
+        public async Task Archive([ServiceBusTrigger("aggregate-customer", "archive", Connection = "AzureWebJobsServiceBus")]Message msg)
         {
-            log.LogInformation($"C# ServiceBus topic trigger function processed message: {msg}");
+            await HandleMessage(msg);
+        }
 
-            var eventType = msg.UserProperties["type"] as string;
-            var @event = _eventSerializer.Deserialize<Guid>(eventType, msg.Body);
-            if (null == @event)
-                throw new SerializationException($"unable to deserialize event {eventType} : {msg.Body}");
-
-          
+        [FunctionName("CustomerDetails")]
+        public async Task Details([ServiceBusTrigger("aggregate-customer", "details", Connection = "AzureWebJobsServiceBus")]Message msg)
+        {
+            await HandleMessage(msg);
         }
     }
 }

@@ -1,8 +1,10 @@
+using MediatR;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using SuperSafeBank.Core;
 using SuperSafeBank.Domain.Events;
 using SuperSafeBank.Web.Persistence.Azure.Functions;
+using SuperSafeBank.Web.Persistence.Azure.Functions.EventHandlers;
 
 [assembly: FunctionsStartup(typeof(Startup))]
 namespace SuperSafeBank.Web.Persistence.Azure.Functions
@@ -15,6 +17,8 @@ namespace SuperSafeBank.Web.Persistence.Azure.Functions
             {
                 typeof(CustomerCreated).Assembly
             }));
+
+            builder.Services.AddMediatR(typeof(CustomersArchiveHandler));
         }
     }
 }
