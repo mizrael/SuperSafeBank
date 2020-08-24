@@ -25,7 +25,7 @@ namespace SuperSafeBank.Persistence.EventStore
             return services.AddSingleton<IEventsRepository<TA, TK>>(ctx =>
             {
                 var connectionWrapper = ctx.GetRequiredService<IEventStoreConnectionWrapper>();
-                var eventDeserializer = ctx.GetRequiredService<IEventDeserializer>();
+                var eventDeserializer = ctx.GetRequiredService<IEventSerializer>();
                 return new EventsRepository<TA, TK>(connectionWrapper, eventDeserializer);
             });
         }

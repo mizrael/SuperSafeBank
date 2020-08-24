@@ -10,6 +10,11 @@ namespace SuperSafeBank.Core.Models
         /// </summary>
         protected BaseDomainEvent() { }
 
+        /// <summary>
+        /// every subclass should call this one
+        /// TODO: note to future self: I don't like it and neither should you. Find a better way.
+        /// </summary>
+        /// <param name="aggregateRoot"></param>
         protected BaseDomainEvent(TA aggregateRoot)
         {
             if(aggregateRoot is null)

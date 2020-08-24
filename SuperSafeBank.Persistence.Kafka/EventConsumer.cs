@@ -15,10 +15,10 @@ namespace SuperSafeBank.Persistence.Kafka
     public class EventConsumer<TA, TKey> : IDisposable, IEventConsumer<TA, TKey> where TA : IAggregateRoot<TKey>
     {
         private IConsumer<TKey, string> _consumer;
-        private readonly IEventDeserializer _eventDeserializer;
+        private readonly IEventSerializer _eventDeserializer;
         private readonly ILogger<EventConsumer<TA, TKey>> _logger;
 
-        public EventConsumer(IEventDeserializer eventDeserializer, EventConsumerConfig config, ILogger<EventConsumer<TA, TKey>> logger)
+        public EventConsumer(IEventSerializer eventDeserializer, EventConsumerConfig config, ILogger<EventConsumer<TA, TKey>> logger)
         {
             _eventDeserializer = eventDeserializer;
             _logger = logger;

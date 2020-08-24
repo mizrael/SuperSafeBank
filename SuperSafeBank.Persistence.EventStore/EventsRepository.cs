@@ -14,9 +14,9 @@ namespace SuperSafeBank.Persistence.EventStore
     {
         private readonly IEventStoreConnectionWrapper _connectionWrapper;
         private readonly string _streamBaseName;
-        private readonly IEventDeserializer _eventDeserializer;
+        private readonly IEventSerializer _eventDeserializer;
 
-        public EventsRepository(IEventStoreConnectionWrapper connectionWrapper, IEventDeserializer eventDeserializer)
+        public EventsRepository(IEventStoreConnectionWrapper connectionWrapper, IEventSerializer eventDeserializer)
         {
             _connectionWrapper = connectionWrapper;
             _eventDeserializer = eventDeserializer;

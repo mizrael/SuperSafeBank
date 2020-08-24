@@ -2,15 +2,22 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using SuperSafeBank.Core.Models;
 
 namespace SuperSafeBank.Core
 {
-    public class JsonEventDeserializer : IEventDeserializer
+    public class JsonEventSerializer : IEventSerializer
     {
         private readonly IEnumerable<Assembly> _assemblies;
+        
+        private static readonly Newtonsoft.Json.JsonSerializerSettings JsonSerializerSettings = new Newtonsoft.Json.JsonSerializerSettings()
+        {
+            ConstructorHandling = Newtonsoft.Json.ConstructorHandling.AllowNonPublicDefaultConstructor,
+            ContractResolver = new PrivateSetterContractResolver()
+        };
 
-        public JsonEventDeserializer(IEnumerable<Assembly> assemblies)
+        public JsonEventSerializer(IEnumerable<Assembly> assemblies)
         {
             _assemblies = assemblies ?? new[] {Assembly.GetExecutingAssembly()};
         }
@@ -33,14 +40,16 @@ namespace SuperSafeBank.Core
             // https://docs.microsoft.com/en-us/dotnet/standard/serialization/system-text-json-how-to
             // apparently it's being worked on: https://github.com/dotnet/runtime/issues/29895
             
-            var result = Newtonsoft.Json.JsonConvert.DeserializeObject(data, eventType,
-                new Newtonsoft.Json.JsonSerializerSettings()
-                {
-                    ConstructorHandling = Newtonsoft.Json.ConstructorHandling.AllowNonPublicDefaultConstructor,
-                    ContractResolver = new PrivateSetterContractResolver()
-                });
+            var result = Newtonsoft.Json.JsonConvert.DeserializeObject(data, eventType, JsonSerializerSettings);
 
             return (IDomainEvent<TKey>) result;
+        }
+
+        public byte[] Serialize<TKey>(IDomainEvent<TKey> @event)
+        {
+            var json = System.Text.Json.JsonSerializer.Serialize((dynamic)@event);
+            var data = Encoding.UTF8.GetBytes(json);
+            return data;
         }
     }
 }

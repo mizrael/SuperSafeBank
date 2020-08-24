@@ -2,11 +2,11 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <Configurations>Debug;Release;DebugOnPremise;DebugAzure</Configurations>
+    <Configurations>Debug;Release;DebugAzure</Configurations>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MediatR" Version="8.1.0" />
+    <PackageReference Include="Microsoft.Azure.Cosmos" Version="*" />
   </ItemGroup>
 
   <ItemGroup>

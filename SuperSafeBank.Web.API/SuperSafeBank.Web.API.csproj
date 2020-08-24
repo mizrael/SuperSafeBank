@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <Configurations>Debug;Release;DebugOnPremise</Configurations>
+    <Configurations>Debug;Release;DebugOnPremise;DebugAzure</Configurations>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugOnPremise|AnyCPU'">

@@ -45,7 +45,7 @@ namespace SuperSafeBank.Worker.Notifications
                 })
                 .ConfigureServices((hostContext, services) =>
                 {
-                    services.AddSingleton<IEventDeserializer>(new JsonEventDeserializer(new[]
+                    services.AddSingleton<IEventSerializer>(new JsonEventSerializer(new[]
                     {
                         typeof(CustomerCreated).Assembly
                     }));
@@ -72,7 +72,7 @@ namespace SuperSafeBank.Worker.Notifications
                     services.AddHostedService(ctx =>
                     {
                         var logger = ctx.GetRequiredService<ILogger<EventConsumer<Account, Guid>>>();
-                        var eventsDeserializer = ctx.GetRequiredService<IEventDeserializer>();
+                        var eventsDeserializer = ctx.GetRequiredService<IEventSerializer>();
                         var consumerConfig = ctx.GetRequiredService<EventConsumerConfig>();
                         var notificationsFactory = ctx.GetRequiredService<INotificationsFactory>();
                         var notificationsService = ctx.GetRequiredService<INotificationsService>();

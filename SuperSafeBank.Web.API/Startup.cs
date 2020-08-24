@@ -30,7 +30,7 @@ namespace SuperSafeBank.Web.API
 
             services.AddSingleton<ICurrencyConverter, FakeCurrencyConverter>();
 
-            services.AddSingleton<IEventDeserializer>(new JsonEventDeserializer(new[]
+            services.AddSingleton<IEventSerializer>(new JsonEventSerializer(new[]
             {
                 typeof(CustomerCreated).Assembly
             })).AddInfrastructure(this.Configuration);
