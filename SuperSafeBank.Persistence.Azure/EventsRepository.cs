@@ -4,9 +4,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
 using SuperSafeBank.Core;
 using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos;
+using Microsoft.Azure.Cosmos.Linq;
 using Newtonsoft.Json;
 
 namespace SuperSafeBank.Persistence.Azure
@@ -16,8 +18,10 @@ namespace SuperSafeBank.Persistence.Azure
         where TA : class, IAggregateRoot<TKey>
     {
         private readonly Container _container;
-        private const string ContainerName = "Events";
+        private const string EventsContainerName = "Events";
+        private const string VersionsContainerName = "Versions";
         private readonly IEventSerializer _eventSerializer;
+        private static readonly SemaphoreSlim _lock = new SemaphoreSlim(1, 1);
 
         public EventsRepository(CosmosClient client, string dbName, IEventSerializer eventDeserializer)
         {
@@ -28,7 +32,7 @@ namespace SuperSafeBank.Persistence.Azure
             _eventSerializer = eventDeserializer ?? throw new ArgumentNullException(nameof(eventDeserializer));
 
             var database = client.GetDatabase(dbName);
-            _container = database.GetContainer(ContainerName);
+            _container = database.GetContainer(EventsContainerName);
         }
 
         public async Task AppendAsync(TA aggregateRoot)
@@ -41,21 +45,45 @@ namespace SuperSafeBank.Persistence.Azure
 
             var partitionKey = new PartitionKey(aggregateRoot.Id.ToString());
 
-            var transaction = _container.CreateTransactionalBatch(partitionKey);
-            
-            foreach (var @event in aggregateRoot.Events)
+            var firstEvent = aggregateRoot.Events.First();
+            var expectedVersion = Math.Max(0, firstEvent.AggregateVersion - 1);
+
+            await _lock.WaitAsync();
+            try
             {
-                var data = _eventSerializer.Serialize(@event);
-                var eventType = @event.GetType();
-                var eventData = EventData<TKey>.Create(aggregateRoot.Id, eventType.AssemblyQualifiedName, data);
-                transaction.CreateItem(eventData);
+                var dbVersionResp = await _container.GetItemLinqQueryable<EventData<TKey>>(
+                        requestOptions: new QueryRequestOptions()
+                        {
+                            PartitionKey = partitionKey
+                        }).Select(e => e.AggregateVersion)
+                    .MaxAsync();
+                if (null != dbVersionResp && dbVersionResp.StatusCode == HttpStatusCode.OK)
+                {
+                    if (dbVersionResp.Resource != expectedVersion)
+                        throw new AggregateException(
+                            $"aggregate version mismatch, expected {expectedVersion} , got {dbVersionResp.Resource}");
+                }
+
+                var transaction = _container.CreateTransactionalBatch(partitionKey);
+
+                foreach (var @event in aggregateRoot.Events)
+                {
+                    var data = _eventSerializer.Serialize(@event);
+                    var eventType = @event.GetType();
+                    var eventData = EventData<TKey>.Create(aggregateRoot.Id, aggregateRoot.Version,
+                        eventType.AssemblyQualifiedName, data);
+                    transaction.CreateItem(eventData);
+                }
+
+                using var response = await transaction.ExecuteAsync();
+                if (!response.IsSuccessStatusCode)
+                    throw new Exception(
+                        $"an error has occurred while persisting events for aggregate '{aggregateRoot.Id}' : {response.Diagnostics}");
             }
-
-            using var response = await transaction.ExecuteAsync();
-            if (!response.IsSuccessStatusCode)
-                throw new Exception($"an error has occurred while persisting events for aggregate '{aggregateRoot.Id}' : {response.Diagnostics}");
-
-            //todo check aggregate version
+            finally
+            {
+                _lock.Release();
+            }
         }
 
         public async Task<TA> RehydrateAsync(TKey key)
@@ -85,10 +113,11 @@ namespace SuperSafeBank.Persistence.Azure
         [JsonProperty(PropertyName = "id")]
         public Guid Id { get; set; }
         public TKey AggregateId { get; set; }
+        public long AggregateVersion { get; set; }
         public string Type { get; set; }
         public byte[] Data { get; set; }
 
-        public static EventData<TKey> Create(TKey aggregateId, string type, byte[] data)
+        public static EventData<TKey> Create(TKey aggregateId, long aggregateVersion, string type, byte[] data)
         {
             if (data == null) 
                 throw new ArgumentNullException(nameof(data));
@@ -100,6 +129,7 @@ namespace SuperSafeBank.Persistence.Azure
             {
                 Id = Guid.NewGuid(),
                 AggregateId = aggregateId,
+                AggregateVersion = aggregateVersion,
                 Type = type,
                 Data = data
             };
