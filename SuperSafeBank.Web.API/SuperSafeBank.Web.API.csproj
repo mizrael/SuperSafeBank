@@ -38,6 +38,7 @@
 
   <ItemGroup Condition="$(DefineConstants.Contains('OnAzure'))">
     <ProjectReference Include="..\SuperSafeBank.Persistence.Azure\SuperSafeBank.Persistence.Azure.csproj" />
+    <ProjectReference Include="..\SuperSafeBank.Web.Persistence.Azure\SuperSafeBank.Web.Persistence.Azure.csproj" />
   </ItemGroup>
 
 </Project>

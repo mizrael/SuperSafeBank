@@ -17,6 +17,7 @@ using SuperSafeBank.Web.Persistence.Mongo.EventHandlers;
 
 #if OnAzure
 using SuperSafeBank.Persistence.Azure;
+using SuperSafeBank.Web.Persistence.Azure.QueryHandlers;
 #endif
 
 namespace SuperSafeBank.Web.API.Registries
@@ -33,6 +34,13 @@ namespace SuperSafeBank.Web.API.Registries
 
 #if OnAzure
             services.AddAzureInfrastructure(config);
+            services.Scan(scan =>
+            {
+                scan.FromAssembliesOf(typeof(CustomersArchiveHandler))
+                    .RegisterHandlers(typeof(IRequestHandler<>))
+                    .RegisterHandlers(typeof(IRequestHandler<,>))
+                    .RegisterHandlers(typeof(INotificationHandler<>));
+            });
 #endif
             return services
                 .AddEventsService<Customer, Guid>()
