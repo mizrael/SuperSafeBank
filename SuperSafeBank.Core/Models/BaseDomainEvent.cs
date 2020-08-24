@@ -22,9 +22,11 @@ namespace SuperSafeBank.Core.Models
 
             this.AggregateVersion = aggregateRoot.Version;
             this.AggregateId = aggregateRoot.Id;
+            this.Timestamp = DateTime.UtcNow;
         }
 
         public long AggregateVersion { get; private set; }
         public TKey AggregateId { get; private set; }
+        public DateTime Timestamp { get; private set; }
     }
 }
