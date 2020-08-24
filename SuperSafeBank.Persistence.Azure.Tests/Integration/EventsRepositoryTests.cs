@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.Azure.Cosmos.Linq;
 using SuperSafeBank.Core;
+using SuperSafeBank.Core.EventBus;
 using SuperSafeBank.Persistence.Azure.Tests.Integration.Fixtures;
 using SuperSafeBank.Persistence.Azure.Tests.Models;
 using Xunit;
