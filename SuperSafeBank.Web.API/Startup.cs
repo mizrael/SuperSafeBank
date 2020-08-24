@@ -48,7 +48,9 @@ namespace SuperSafeBank.Web.API
 
             services.Decorate(typeof(INotificationHandler<>), typeof(RetryDecorator<>));
 
+#if OnPremise
             services.RegisterWorker(this.Configuration);
+#endif
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

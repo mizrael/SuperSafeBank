@@ -1,3 +1,4 @@
+using System;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
@@ -17,6 +18,20 @@ namespace SuperSafeBank.Web.API
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
+                .ConfigureAppConfiguration((ctx, builder)=>
+                {
+                    builder.AddJsonFile("appsettings.json", optional: false);
+                    
+#if OnPremise
+                    builder.AddJsonFile($"appsettings.OnPremise-{ctx.HostingEnvironment.EnvironmentName}.json", optional: true);
+#endif
+
+#if OnAzure
+                    builder.AddJsonFile($"appsettings.OnAzure-{ctx.HostingEnvironment.EnvironmentName}.json", optional: true);
+#endif
+
+                    builder.AddUserSecrets<Startup>();
+                })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();

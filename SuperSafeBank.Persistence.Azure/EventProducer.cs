@@ -20,6 +20,11 @@ namespace SuperSafeBank.Persistence.Azure
 
         public EventProducer(ITopicClientFactory topicFactory, string topicBaseName, IEventSerializer eventSerializer, ILogger<EventProducer<TA, TKey>> logger)
         {
+            if (topicFactory == null) 
+                throw new ArgumentNullException(nameof(topicFactory));
+            if (string.IsNullOrWhiteSpace(topicBaseName))
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(topicBaseName));
+
             _logger = logger;
             _eventSerializer = eventSerializer;
             var aggregateType = typeof(TA);

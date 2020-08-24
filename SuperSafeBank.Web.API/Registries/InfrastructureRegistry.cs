@@ -1,5 +1,6 @@
 using System;
 using MediatR;
+using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SuperSafeBank.Core;
@@ -14,6 +15,10 @@ using SuperSafeBank.Web.Persistence.Mongo;
 using SuperSafeBank.Web.Persistence.Mongo.EventHandlers;
 #endif
 
+#if OnAzure
+using SuperSafeBank.Persistence.Azure;
+#endif
+
 namespace SuperSafeBank.Web.API.Registries
 {
     public static class InfrastructureRegistry
@@ -24,6 +29,10 @@ namespace SuperSafeBank.Web.API.Registries
 
 #if OnPremise
             services.AddOnPremiseInfrastructure(config);
+#endif
+
+#if OnAzure
+            services.AddAzureInfrastructure(config);
 #endif
             return services
                 .AddEventsService<Customer, Guid>()

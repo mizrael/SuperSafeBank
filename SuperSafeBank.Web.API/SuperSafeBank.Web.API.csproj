@@ -2,11 +2,16 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <Configurations>Debug;Release;DebugOnPremise;DebugAzure</Configurations>
+    <Configurations>Debug;Release;DebugOnPremise;DebugAzure;</Configurations>
+    <UserSecretsId>70be17c8-2171-4e52-b990-52de4dd6ec94</UserSecretsId>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugOnPremise|AnyCPU'">
     <DefineConstants>TRACE;OnPremise</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugAzure|AnyCPU'">
+    <DefineConstants>TRACE;OnAzure</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
@@ -30,5 +35,9 @@
     <ProjectReference Include="..\SuperSafeBank.Web.Persistence.Mongo\SuperSafeBank.Web.Persistence.Mongo.csproj" />
   </ItemGroup>
 
+
+  <ItemGroup Condition="$(DefineConstants.Contains('OnAzure'))">
+    <ProjectReference Include="..\SuperSafeBank.Persistence.Azure\SuperSafeBank.Persistence.Azure.csproj" />
+  </ItemGroup>
 
 </Project>
