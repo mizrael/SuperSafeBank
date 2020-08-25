@@ -13,21 +13,21 @@ namespace SuperSafeBank.Web.Persistence.Azure.QueryHandlers
 {
     public class CustomersArchiveHandler : IRequestHandler<CustomersArchive, IEnumerable<CustomerArchiveItem>>
     {
-        private readonly Container _archiveContainer;
+        private readonly Container _container;
 
         public CustomersArchiveHandler(IDbContainerProvider containerProvider)
         {
             if (containerProvider == null)
                 throw new ArgumentNullException(nameof(containerProvider));
             
-            _archiveContainer = containerProvider.GetContainer("CustomersArchive");
+            _container = containerProvider.GetContainer("CustomersArchive");
         }
 
         public async Task<IEnumerable<CustomerArchiveItem>> Handle(CustomersArchive request, CancellationToken cancellationToken)
         {
             var results = new List<CustomerArchiveItem>();
 
-            var iterator = _archiveContainer.GetItemLinqQueryable<CustomerArchiveItem>().ToFeedIterator();
+            var iterator = _container.GetItemLinqQueryable<CustomerArchiveItem>().ToFeedIterator();
             while (iterator.HasMoreResults)
             {
                 foreach (var item in await iterator.ReadNextAsync(cancellationToken))

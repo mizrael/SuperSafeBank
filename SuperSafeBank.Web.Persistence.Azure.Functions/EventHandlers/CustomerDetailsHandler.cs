@@ -1,115 +1,105 @@
-﻿//using System;
-//using System.Threading;
-//using System.Threading.Tasks;
-//using MediatR;
-//using Microsoft.Extensions.Logging;
-//using MongoDB.Driver;
-//using SuperSafeBank.Core.EventBus;
-//using SuperSafeBank.Domain;
-//using SuperSafeBank.Domain.Events;
-//using SuperSafeBank.Web.Core.Queries.Models;
+﻿using System;
+using System.Linq;
+using System.Net;
+using System.Threading;
+using System.Threading.Tasks;
+using MediatR;
+using Microsoft.Azure.Cosmos;
+using Microsoft.Extensions.Logging;
+using SuperSafeBank.Core.EventBus;
+using SuperSafeBank.Domain;
+using SuperSafeBank.Domain.Events;
+using SuperSafeBank.Persistence.Azure;
+using SuperSafeBank.Web.Core.Queries.Models;
 
-//namespace SuperSafeBank.Web.Persistence.Mongo.EventHandlers
-//{
-//    public class CustomerDetailsHandler :
-//        INotificationHandler<EventReceived<CustomerCreated>>,
-//        INotificationHandler<EventReceived<AccountCreated>>,
-//        INotificationHandler<EventReceived<Deposit>>,
-//        INotificationHandler<EventReceived<Withdrawal>>
-//    {
-//        private readonly IQueryDbContext _db;
+namespace SuperSafeBank.Web.Persistence.Azure.Functions.EventHandlers
+{
+    public class CustomerDetailsHandler :
+        INotificationHandler<EventReceived<CustomerCreated>>,
+        INotificationHandler<EventReceived<AccountCreated>>,
+        INotificationHandler<EventReceived<Deposit>>,
+        INotificationHandler<EventReceived<Withdrawal>>
+    {
+        private readonly ILogger<CustomerDetailsHandler> _logger;
+        private readonly Container _container;
 
-//        private readonly ILogger<CustomerDetailsHandler> _logger;
+        public CustomerDetailsHandler(IDbContainerProvider containerProvider, ILogger<CustomerDetailsHandler> logger)
+        {
+            if (containerProvider == null)
+                throw new ArgumentNullException(nameof(containerProvider));
 
-//        public CustomerDetailsHandler(IQueryDbContext db, ILogger<CustomerDetailsHandler> logger)
-//        {
-//            _db = db;
-//            _logger = logger;
-//        }
+            _logger = logger;
 
-//        public async Task Handle(EventReceived<CustomerCreated> @event, CancellationToken cancellationToken)
-//        {
-//            _logger.LogInformation("creating customer details for {AggregateId} ...", @event.Event.AggregateId);
+            _container = containerProvider.GetContainer("CustomersDetails");
+        }
 
-//            var filter = Builders<CustomerDetails>.Filter
-//                .Eq(a => a.Id, @event.Event.AggregateId);
+        public async Task Handle(EventReceived<CustomerCreated> @event, CancellationToken cancellationToken)
+        {
+            _logger.LogInformation("creating customer details for {AggregateId} ...", @event.Event.AggregateId);
 
-//            var update = Builders<CustomerDetails>.Update
-//                .Set(a => a.Id, @event.Event.AggregateId)
-//                .Set(a => a.Version, @event.Event.AggregateVersion)
-//                .Set(a => a.Firstname, @event.Event.Firstname)
-//                .Set(a => a.Lastname, @event.Event.Lastname)
-//                .Set(a => a.Email, @event.Event.Email)
-//                .Set(a => a.TotalBalance, new Money(Currency.CanadianDollar, 0));
+            var partitionKey = new PartitionKey(@event.Event.AggregateId.ToString());
 
-//            await _db.CustomersDetails.UpdateOneAsync(filter,
-//                cancellationToken: cancellationToken,
-//                update: update,
-//                options: new UpdateOptions() { IsUpsert = true });
+            var customer = new CustomerDetails(@event.Event.AggregateId, @event.Event.Firstname, @event.Event.Lastname, @event.Event.Email, null, new Money(Currency.CanadianDollar, 0));
 
-//            _logger.LogInformation("created customer details {AggregateId}", @event.Event.AggregateId);
-//        }
+            var response = await _container.UpsertItemAsync(customer, partitionKey, cancellationToken: cancellationToken);
+            if (response.StatusCode != HttpStatusCode.Created)
+            {
+                var msg = $"an error has occurred while processing an event: {response.Diagnostics}";
+                throw new Exception(msg);
+            }
 
-//        public async Task Handle(EventReceived<AccountCreated> @event, CancellationToken cancellationToken)
-//        {
-//            var filter = Builders<CustomerDetails>.Filter
-//                .Eq(a => a.Id, @event.Event.OwnerId);
+            _logger.LogInformation("created customer details {AggregateId}", @event.Event.AggregateId);
+        }
 
-//            var update = Builders<CustomerDetails>.Update
-//                .AddToSet(a => a.Accounts, @event.Event.AggregateId);
+        public async Task Handle(EventReceived<AccountCreated> @event, CancellationToken cancellationToken)
+        {
+            var partitionKey = new PartitionKey(@event.Event.OwnerId.ToString());
 
-//            await _db.CustomersDetails.UpdateOneAsync(filter,
-//                cancellationToken: cancellationToken,
-//                update: update,
-//                options: new UpdateOptions() { IsUpsert = true });
+            var response = await _container.ReadItemAsync<CustomerDetails>(@event.Event.OwnerId.ToString(),
+                partitionKey,
+                null, cancellationToken);
 
-//            _logger.LogInformation($"updated customer details accounts {@event.Event.AggregateId}");
-//        }
+            var customer = response.Resource;
 
-//        public async Task Handle(EventReceived<Withdrawal> @event, CancellationToken cancellationToken)
-//        {
-//            var filter = Builders<AccountDetails>.Filter.Eq(a => a.Id, @event.Event.AggregateId);
-//            var account = await (await _db.AccountsDetails.FindAsync(filter, null, cancellationToken)).FirstOrDefaultAsync(cancellationToken);
-//            if (null == account)
-//            {
-//                _logger.LogWarning("unable to find account by id {AggregateId}", @event.Event.AggregateId);
-//                throw new ArgumentOutOfRangeException(nameof(@event.Event.AggregateId), $"unable to find account by id {@event.Event.AggregateId}" );
-//            }
+            var accounts = (customer.Accounts ?? Enumerable.Empty<Guid>()).ToList();
+            accounts.Add(@event.Event.AggregateId);
 
-//            var customerFilter = Builders<CustomerDetails>.Filter.Eq(a => a.Id, account.OwnerId);
-//            var update = Builders<CustomerDetails>.Update
-//                .Inc(a => a.TotalBalance.Value, -@event.Event.Amount.Value);
+            var updatedCustomer = new CustomerDetails(customer.Id, customer.Firstname, customer.Lastname, customer.Email, accounts, customer.TotalBalance );
+            await _container.ReplaceItemAsync(updatedCustomer, @event.Event.OwnerId.ToString(), partitionKey, null, cancellationToken);
 
-//            var res = await _db.CustomersDetails.FindOneAndUpdateAsync(customerFilter, update, null, cancellationToken);
-//            if (null == res)
-//            {
-//                var msg = $"unable to find customer by id {account.OwnerId}";
-//                _logger.LogWarning(msg);
-//                throw new ArgumentOutOfRangeException(nameof(account.OwnerId), msg);
-//            }
-//        }
+            _logger.LogInformation($"updated customer details accounts {@event.Event.AggregateId}");
+        }
 
-//        public async Task Handle(EventReceived<Deposit> @event, CancellationToken cancellationToken)
-//        {
-//            var filter = Builders<AccountDetails>.Filter.Eq(a => a.Id, @event.Event.AggregateId);
-//            var account = await (await _db.AccountsDetails.FindAsync(filter, null, cancellationToken)).FirstOrDefaultAsync(cancellationToken);
-//            if (null == account)
-//            {
-//                _logger.LogWarning("unable to find account by id {AggregateId}", @event.Event.AggregateId);
-//                throw new ArgumentOutOfRangeException(nameof(@event.Event.AggregateId), $"unable to find account by id {@event.Event.AggregateId}");
-//            }
+        public async Task Handle(EventReceived<Withdrawal> @event, CancellationToken cancellationToken)
+        {
+            var partitionKey = new PartitionKey(@event.Event.OwnerId.ToString());
 
-//            var customerFilter = Builders<CustomerDetails>.Filter.Eq(a => a.Id, account.OwnerId);
-//            var update = Builders<CustomerDetails>.Update
-//                .Inc(a => a.TotalBalance.Value, @event.Event.Amount.Value);
+            var response = await _container.ReadItemAsync<CustomerDetails>(@event.Event.OwnerId.ToString(),
+                partitionKey,
+                null, cancellationToken);
 
-//            var res = await _db.CustomersDetails.FindOneAndUpdateAsync(customerFilter, update, null, cancellationToken);
-//            if (null == res)
-//            {
-//                var msg = $"unable to find customer by id {account.OwnerId}";
-//                _logger.LogWarning(msg);
-//                throw new ArgumentOutOfRangeException(nameof(account.OwnerId), msg);
-//            }
-//        }
-//    }
-//}
+            var customer = response.Resource;
+            var balance = (customer.TotalBalance ?? new Money(Currency.CanadianDollar, 0));
+            var newBalance = balance.Subtract(@event.Event.Amount.Value);
+
+            var updatedCustomer = new CustomerDetails(customer.Id, customer.Firstname, customer.Lastname, customer.Email, customer.Accounts, newBalance);
+            await _container.ReplaceItemAsync(updatedCustomer, @event.Event.OwnerId.ToString(), partitionKey, null, cancellationToken);
+        }
+
+        public async Task Handle(EventReceived<Deposit> @event, CancellationToken cancellationToken)
+        {
+            var partitionKey = new PartitionKey(@event.Event.OwnerId.ToString());
+
+            var response = await _container.ReadItemAsync<CustomerDetails>(@event.Event.OwnerId.ToString(),
+                partitionKey,
+                null, cancellationToken);
+
+            var customer = response.Resource;
+            var balance = (customer.TotalBalance ?? new Money(Currency.CanadianDollar, 0));
+            var newBalance = balance.Add(@event.Event.Amount.Value);
+
+            var updatedCustomer = new CustomerDetails(customer.Id, customer.Firstname, customer.Lastname, customer.Email, customer.Accounts, newBalance);
+            await _container.ReplaceItemAsync(updatedCustomer, @event.Event.OwnerId.ToString(), partitionKey, null, cancellationToken);
+        }
+    }
+}

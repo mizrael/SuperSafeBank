@@ -43,7 +43,7 @@ namespace SuperSafeBank.Persistence.Azure
             var partitionKey = new PartitionKey(aggregateRoot.Id.ToString());
 
             var firstEvent = aggregateRoot.Events.First();
-            var expectedVersion = Math.Max(0, firstEvent.AggregateVersion - 1);
+            var expectedVersion = firstEvent.AggregateVersion;
 
             await _lock.WaitAsync();
             try

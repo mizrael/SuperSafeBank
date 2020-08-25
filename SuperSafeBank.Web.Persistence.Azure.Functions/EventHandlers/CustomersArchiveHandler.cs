@@ -18,7 +18,7 @@ namespace SuperSafeBank.Web.Persistence.Azure.Functions.EventHandlers
         INotificationHandler<EventReceived<AccountCreated>>
     {
         private readonly ILogger<CustomersArchiveHandler> _logger;
-        private readonly Container _archiveContainer;
+        private readonly Container _container;
 
         public CustomersArchiveHandler(IDbContainerProvider containerProvider, ILogger<CustomersArchiveHandler> logger)
         {
@@ -27,7 +27,7 @@ namespace SuperSafeBank.Web.Persistence.Azure.Functions.EventHandlers
 
             _logger = logger;
             
-            _archiveContainer = containerProvider.GetContainer("CustomersArchive");
+            _container = containerProvider.GetContainer("CustomersArchive");
         }
 
         public async Task Handle(EventReceived<CustomerCreated> @event, CancellationToken cancellationToken)
@@ -36,49 +36,34 @@ namespace SuperSafeBank.Web.Persistence.Azure.Functions.EventHandlers
 
             var partitionKey = new PartitionKey(@event.Event.AggregateId.ToString());
 
-            try
+            var customer = new CustomerArchiveItem(@event.Event.AggregateId, @event.Event.Firstname, @event.Event.Lastname, null);
+            
+            var response = await _container.UpsertItemAsync(customer, partitionKey, cancellationToken: cancellationToken);
+            if (response.StatusCode != HttpStatusCode.Created)
             {
-                var item = new
-                {
-                    id = @event.Event.AggregateId,
-                    @event.Event.Firstname,
-                    @event.Event.Lastname
-                };
-
-                var response = await _archiveContainer.UpsertItemAsync(item, partitionKey, cancellationToken: cancellationToken);
-                if (response.StatusCode != HttpStatusCode.Created)
-                {
-                    var msg = $"an error has occurred while processing an event: {response.Diagnostics}";
-                    throw new Exception(msg);
-                }
-
-                _logger.LogInformation($"created customer archive item {@event.Event.AggregateId}");
+                var msg = $"an error has occurred while processing an event: {response.Diagnostics}";
+                throw new Exception(msg);
             }
-            catch (Exception e)
-            {
-                var msg = $"an error has occurred while processing an event: {e.Message}";
-                _logger.LogError(e, msg);
-                throw;
-            }
-         
+
+            _logger.LogInformation($"created customer archive item {@event.Event.AggregateId}");
         }
 
         public async Task Handle(EventReceived<AccountCreated> @event, CancellationToken cancellationToken)
         {
             var partitionKey = new PartitionKey(@event.Event.OwnerId.ToString());
 
-            var customer = await _archiveContainer.ReadItemAsync<CustomerArchiveItem>(@event.Event.OwnerId.ToString(),
-                                                                                      partitionKey,
-                                                                                      null, cancellationToken);
+            var response = await _container.ReadItemAsync<CustomerArchiveItem>(@event.Event.OwnerId.ToString(),
+                partitionKey,
+                null, cancellationToken);
 
-            var accounts = (customer.Resource.Accounts ?? Enumerable.Empty<Guid>()).ToList();
+            var customer = response.Resource;
+
+            var accounts = (customer.Accounts ?? Enumerable.Empty<Guid>()).ToList();
             accounts.Add(@event.Event.AggregateId);
 
-            await _archiveContainer.UpsertItemAsync(new
-            {
-                id = @event.Event.OwnerId,
-                Accounts = accounts
-            }, partitionKey, null, cancellationToken);
+            var updatedCustomer = new CustomerArchiveItem(customer.Id, customer.Firstname, customer.Lastname, accounts);
+
+            await _container.ReplaceItemAsync(updatedCustomer, @event.Event.OwnerId.ToString(), partitionKey, null, cancellationToken);
 
             _logger.LogInformation($"updated customer archive item accounts {@event.Event.AggregateId}");
         }
