@@ -13,6 +13,5 @@ namespace SuperSafeBank.Web.Core.Queries.Models
         public string Email { get; private set; }
         public IEnumerable<Guid> Accounts { get; private set; }
         public Money TotalBalance {get;private set; }
-        public long Version { get; private set; }
     }
 }

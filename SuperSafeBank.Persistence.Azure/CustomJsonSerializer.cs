@@ -5,7 +5,7 @@ using SuperSafeBank.Core;
 
 namespace SuperSafeBank.Persistence.Azure
 {
-    internal class CustomJsonSerializer : CosmosSerializer
+    public class CustomJsonSerializer : CosmosSerializer
     {
         private static readonly Newtonsoft.Json.JsonSerializer Serializer = JsonSerializer.Create( new JsonSerializerSettings()
         {

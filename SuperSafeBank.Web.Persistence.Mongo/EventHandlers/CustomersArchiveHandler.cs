@@ -31,7 +31,6 @@ namespace SuperSafeBank.Web.Persistence.Mongo.EventHandlers
 
             var update = Builders<CustomerArchiveItem>.Update
                 .Set(a => a.Id, @event.Event.AggregateId)
-                .Set(a => a.Version, @event.Event.AggregateVersion)
                 .Set(a => a.Firstname, @event.Event.Firstname)
                 .Set(a => a.Lastname, @event.Event.Lastname);
 

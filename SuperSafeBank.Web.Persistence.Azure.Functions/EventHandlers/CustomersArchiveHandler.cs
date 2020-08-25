@@ -41,12 +41,11 @@ namespace SuperSafeBank.Web.Persistence.Azure.Functions.EventHandlers
                 var item = new
                 {
                     id = @event.Event.AggregateId,
-                    Firstname = @event.Event.Firstname,
-                    Lastname = @event.Event.Lastname,
-                    Version = @event.Event.AggregateVersion,
+                    @event.Event.Firstname,
+                    @event.Event.Lastname
                 };
 
-                var response = await _archiveContainer.UpsertItemAsync(item, partitionKey);
+                var response = await _archiveContainer.UpsertItemAsync(item, partitionKey, cancellationToken: cancellationToken);
                 if (response.StatusCode != HttpStatusCode.Created)
                 {
                     var msg = $"an error has occurred while processing an event: {response.Diagnostics}";
@@ -66,19 +65,18 @@ namespace SuperSafeBank.Web.Persistence.Azure.Functions.EventHandlers
 
         public async Task Handle(EventReceived<AccountCreated> @event, CancellationToken cancellationToken)
         {
-            var partitionKey = new PartitionKey(@event.Event.AggregateId.ToString());
+            var partitionKey = new PartitionKey(@event.Event.OwnerId.ToString());
 
-            var customer = await _archiveContainer.ReadItemAsync<CustomerArchiveItem>(@event.Event.AggregateId.ToString(),
-                                                                                    partitionKey, null, cancellationToken);
+            var customer = await _archiveContainer.ReadItemAsync<CustomerArchiveItem>(@event.Event.OwnerId.ToString(),
+                                                                                      partitionKey,
+                                                                                      null, cancellationToken);
 
-            if(null == customer)
-                throw new ArgumentException($"invalid aggregate id: {@event.Event.AggregateId}");
-
-            var accounts = customer.Resource.Accounts.ToList();
+            var accounts = (customer.Resource.Accounts ?? Enumerable.Empty<Guid>()).ToList();
             accounts.Add(@event.Event.AggregateId);
 
             await _archiveContainer.UpsertItemAsync(new
             {
+                id = @event.Event.OwnerId,
                 Accounts = accounts
             }, partitionKey, null, cancellationToken);
 

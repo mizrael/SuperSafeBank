@@ -23,8 +23,13 @@ namespace SuperSafeBank.Web.Persistence.Azure.Functions
 
             builder.Services.AddSingleton<CosmosClient>(ctx =>
             {
+
+                var options = new CosmosClientOptions()
+                {
+                    Serializer = new CustomJsonSerializer()
+                };
                 var connectionString = Environment.GetEnvironmentVariable("cosmos");
-                return new CosmosClient(connectionString);
+                return new CosmosClient(connectionString, options);
             });
             builder.Services.AddSingleton<IDbContainerProvider>(ctx =>
             {

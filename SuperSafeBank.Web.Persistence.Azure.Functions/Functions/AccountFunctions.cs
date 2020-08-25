@@ -12,20 +12,8 @@ namespace SuperSafeBank.Web.Persistence.Azure.Functions.Functions
         {
         }
 
-        [FunctionName("Deposit")]
-        public async Task Deposit([ServiceBusTrigger("aggregate-account", "deposit", Connection = "AzureWebJobsServiceBus")]Message msg)
-        {
-            await HandleMessage(msg);
-        }
-
-        [FunctionName("Withdraw")]
-        public async Task Withdraw([ServiceBusTrigger("aggregate-account", "withdraw", Connection = "AzureWebJobsServiceBus")]Message msg)
-        {
-            await HandleMessage(msg);
-        }
-
-        [FunctionName("AccountDetails")]
-        public async Task Details([ServiceBusTrigger("aggregate-account", "details", Connection = "AzureWebJobsServiceBus")]Message msg)
+        [FunctionName("AccountCreated")]
+        public async Task AccountCreated([ServiceBusTrigger("aggregate-account", "created", Connection = "AzureWebJobsServiceBus")]Message msg)
         {
             await HandleMessage(msg);
         }

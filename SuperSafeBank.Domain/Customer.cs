@@ -36,6 +36,7 @@ namespace SuperSafeBank.Domain
                     this.Id = c.AggregateId;
                     this.Firstname = c.Firstname;
                     this.Lastname = c.Lastname;
+                    this.Email = c.Email;
                     break;
             }
         }
