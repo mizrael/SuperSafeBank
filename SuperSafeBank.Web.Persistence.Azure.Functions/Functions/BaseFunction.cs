@@ -7,7 +7,7 @@ using Microsoft.Azure.ServiceBus;
 using SuperSafeBank.Core;
 using SuperSafeBank.Core.EventBus;
 
-namespace SuperSafeBank.Web.Persistence.Azure.Functions
+namespace SuperSafeBank.Web.Persistence.Azure.Functions.Functions
 {
     public abstract class BaseFunction
     {

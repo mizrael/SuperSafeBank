@@ -4,7 +4,7 @@ using Microsoft.Azure.ServiceBus;
 using Microsoft.Azure.WebJobs;
 using SuperSafeBank.Core;
 
-namespace SuperSafeBank.Web.Persistence.Azure.Functions
+namespace SuperSafeBank.Web.Persistence.Azure.Functions.Functions
 {
     public class AccountFunctions : BaseFunction
     {

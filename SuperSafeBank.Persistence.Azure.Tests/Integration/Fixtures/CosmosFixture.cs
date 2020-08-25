@@ -32,7 +32,7 @@ namespace SuperSafeBank.Persistence.Azure.Tests.Integration.Fixtures
             _dbs = new List<Database>();
         }
 
-        public async Task<Database> CreateTestDatabaseAsync()
+        public async Task<IDbContainerProvider> CreateTestDatabaseAsync()
         {
             var dbName = $"{_dbNamePrefix}{Guid.NewGuid()}";
             var response = await _client.CreateDatabaseAsync(dbName);
@@ -42,7 +42,7 @@ namespace SuperSafeBank.Persistence.Azure.Tests.Integration.Fixtures
             await response.Database.CreateContainerIfNotExistsAsync(_eventsContainerName, $"/{nameof(DummyEvent.AggregateId)}");
 
             _dbs.Add(response.Database);
-            return response.Database;
+            return new DbContainerProvider(response.Database);
         }
 
         public void Dispose()

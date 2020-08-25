@@ -15,9 +15,13 @@ namespace SuperSafeBank.Persistence.Azure
         public static IServiceCollection AddAzureInfrastructure(this IServiceCollection services, IConfiguration config)
         {
             return services.AddSingleton<CosmosClient>(ctx =>
-            {
+                {
+                    var options = new CosmosClientOptions()
+                    {
+                        Serializer = new CustomJsonSerializer()
+                    };
                 var connectionString = config.GetConnectionString("cosmos");
-                return new CosmosClient(connectionString);
+                return new CosmosClient(connectionString, options);
             }).AddSingleton<ITopicClientFactory>(ctx =>
             {
                 var connectionString = config.GetConnectionString("producer");
@@ -31,12 +35,17 @@ namespace SuperSafeBank.Persistence.Azure
         private static IServiceCollection AddEventsRepository<TA, TK>(this IServiceCollection services, IConfiguration config)
             where TA : class, IAggregateRoot<TK>
         {
-            var dbName = config["dbName"];
-            return services.AddSingleton<IEventsRepository<TA, TK>>(ctx =>
+            return services.AddSingleton<IDbContainerProvider>(ctx =>
             {
-                var connectionWrapper = ctx.GetRequiredService<CosmosClient>();
+                var cosmos = ctx.GetRequiredService<CosmosClient>();
+                var dbName = config["dbName"];
+                var db = cosmos.GetDatabase(dbName);
+                return new DbContainerProvider(db);
+            }).AddSingleton<IEventsRepository<TA, TK>>(ctx =>
+            {
+                var containerProvider = ctx.GetRequiredService<IDbContainerProvider>();
                 var eventDeserializer = ctx.GetRequiredService<IEventSerializer>();
-                return new EventsRepository<TA, TK>(connectionWrapper, dbName, eventDeserializer);
+                return new EventsRepository<TA, TK>(containerProvider, eventDeserializer);
             });
         }
 

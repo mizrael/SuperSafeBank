@@ -7,7 +7,7 @@ namespace SuperSafeBank.Core
     /// <summary>
     /// https://www.mking.net/blog/working-with-private-setters-in-json-net
     /// </summary>
-    internal class PrivateSetterContractResolver : DefaultContractResolver
+    public class PrivateSetterContractResolver : DefaultContractResolver
     {
         protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization memberSerialization)
         {

@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.Azure.Cosmos.Linq;
 using SuperSafeBank.Core;
-using SuperSafeBank.Core.EventBus;
 using SuperSafeBank.Persistence.Azure.Tests.Integration.Fixtures;
 using SuperSafeBank.Persistence.Azure.Tests.Models;
 using Xunit;
@@ -33,7 +32,7 @@ namespace SuperSafeBank.Persistence.Azure.Tests.Integration
         {
             var db = await _fixture.CreateTestDatabaseAsync();
 
-            var sut = new EventsRepository<DummyAggregate, Guid>(db.Client, db.Id, _eventSerializer);
+            var sut = new EventsRepository<DummyAggregate, Guid>(db, _eventSerializer);
 
             var aggregate = new DummyAggregate(Guid.NewGuid());
             aggregate.DoSomething("foo");
@@ -53,7 +52,7 @@ namespace SuperSafeBank.Persistence.Azure.Tests.Integration
         {
             var db = await _fixture.CreateTestDatabaseAsync();
 
-            var sut = new EventsRepository<DummyAggregate, Guid>(db.Client, db.Id, _eventSerializer);
+            var sut = new EventsRepository<DummyAggregate, Guid>(db, _eventSerializer);
 
             var aggregateId = Guid.NewGuid();
 
@@ -73,7 +72,7 @@ namespace SuperSafeBank.Persistence.Azure.Tests.Integration
         {
             var db = await _fixture.CreateTestDatabaseAsync();
 
-            var sut = new EventsRepository<DummyAggregate, Guid>(db.Client, db.Id, _eventSerializer);
+            var sut = new EventsRepository<DummyAggregate, Guid>(db, _eventSerializer);
 
             var aggregate = new DummyAggregate(Guid.NewGuid());
             aggregate.DoSomething("lorem");

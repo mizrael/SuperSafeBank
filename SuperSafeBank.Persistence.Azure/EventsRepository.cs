@@ -22,16 +22,14 @@ namespace SuperSafeBank.Persistence.Azure
         private readonly IEventSerializer _eventSerializer;
         private static readonly SemaphoreSlim _lock = new SemaphoreSlim(1, 1);
 
-        public EventsRepository(CosmosClient client, string dbName, IEventSerializer eventDeserializer)
+        public EventsRepository(IDbContainerProvider containerProvider, IEventSerializer eventDeserializer)
         {
-            if (client == null)
-                throw new ArgumentNullException(nameof(client));
-            if (string.IsNullOrWhiteSpace(dbName))
-                throw new ArgumentException("Value cannot be null or whitespace.", nameof(dbName));
+            if (containerProvider == null)
+                throw new ArgumentNullException(nameof(containerProvider));
+            
             _eventSerializer = eventDeserializer ?? throw new ArgumentNullException(nameof(eventDeserializer));
 
-            var database = client.GetDatabase(dbName);
-            _container = database.GetContainer(EventsContainerName);
+            _container = containerProvider.GetContainer(EventsContainerName);
         }
 
         public async Task AppendAsync(TA aggregateRoot)
