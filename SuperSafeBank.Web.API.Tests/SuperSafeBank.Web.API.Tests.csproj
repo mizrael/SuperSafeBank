@@ -6,10 +6,16 @@
     <IsPackable>false</IsPackable>
 
     <Configurations>Debug;Release;DebugOnPremise;DebugAzure</Configurations>
+
+    <UserSecretsId>67a63f27-36cf-46e2-b905-04388b3560a5</UserSecretsId>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugOnPremise|AnyCPU'">
     <DefineConstants>TRACE;OnPremise</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugAzure|AnyCPU'">
+    <DefineConstants>TRACE;OnAzure</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
@@ -25,6 +31,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="3.0.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.7.1" />
     <PackageReference Include="xunit" Version="2.4.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3">

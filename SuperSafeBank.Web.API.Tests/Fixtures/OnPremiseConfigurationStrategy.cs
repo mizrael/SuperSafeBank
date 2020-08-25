@@ -7,12 +7,12 @@ using MongoDB.Driver;
 
 namespace SuperSafeBank.Web.API.Tests.Fixtures
 {
-    public class OnPremiseWebApiFixture<TStartup> : BaseWebApiFixture<TStartup> where TStartup : class
+    public class OnPremiseConfigurationStrategy : IConfigurationStrategy, IDisposable
     {
         private string _queryDbName;
         private string _queryDbConnectionString;
 
-        protected override void OnConfigureAppConfiguration(IConfigurationBuilder configurationBuilder)
+        public void OnConfigureAppConfiguration(IConfigurationBuilder configurationBuilder)
         {
             configurationBuilder.AddInMemoryCollection(new[]
             {

@@ -10,14 +10,14 @@ namespace SuperSafeBank.Web.API.Tests.Contract
 {
     public class AccountTests
 #if OnPremise
-        : IClassFixture<OnPremiseWebApiFixture<Startup>>
+        : IClassFixture<OnPremiseConfigurationStrategy>
 #endif
 
     {
-        private readonly BaseWebApiFixture<Startup> _fixture;
+        private readonly WebApiFixture<Startup> _fixture;
 
 #if OnPremise
-        public AccountTests(OnPremiseWebApiFixture<Startup> fixture)
+        public AccountTests(OnPremiseConfigurationStrategy fixture)
         {
             _fixture = fixture;
         }

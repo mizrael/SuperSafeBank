@@ -8,20 +8,15 @@ using Xunit;
 
 namespace SuperSafeBank.Web.API.Tests.Contract
 {
-    public class CustomerTests 
-#if OnPremise 
-    : IClassFixture<OnPremiseWebApiFixture<Startup>>
-#endif
+    public class CustomerTests : IClassFixture<WebApiFixture<Startup>>
 
     {
-        private readonly BaseWebApiFixture<Startup> _fixture;
+        private readonly WebApiFixture<Startup> _fixture;
 
-#if OnPremise
-        public CustomerTests(OnPremiseWebApiFixture<Startup> fixture)
+        public CustomerTests(WebApiFixture<Startup> fixture)
         {
             _fixture = fixture;
         }
-#endif
 
         [Fact]
         public async Task GetDetails_should_return_404_if_id_invalid()
@@ -53,7 +48,7 @@ namespace SuperSafeBank.Web.API.Tests.Contract
                 detailsResponse.IsSuccessStatusCode.Should().BeTrue();
 
                 var details = await detailsResponse.Content.ReadAsAsync<dynamic>();
-                
+
                 string firstName = details.firstname;
                 payload.firstname.Should().Be(firstName);
 
@@ -64,7 +59,7 @@ namespace SuperSafeBank.Web.API.Tests.Contract
                 payload.email.Should().Be(email);
 
                 return true;
-            }, "failed to fetch customer by id");
+            }, "failed to fetch customer by id", 3);
         }
     }
 }

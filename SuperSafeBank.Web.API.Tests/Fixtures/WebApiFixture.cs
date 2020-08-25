@@ -7,11 +7,22 @@ using Serilog;
 
 namespace SuperSafeBank.Web.API.Tests.Fixtures
 {
-    public abstract class BaseWebApiFixture<TStartup> : IDisposable
+    public class WebApiFixture<TStartup> : IDisposable
         where TStartup : class
     {
-        protected BaseWebApiFixture()
+        private readonly IConfigurationStrategy _configurationStrategy;
+
+        public WebApiFixture()
         {
+
+#if OnPremise
+            _configurationStrategy = new OnPremiseConfigurationStrategy();
+#endif
+
+#if OnAzure
+            _configurationStrategy = new AzureConfigurationStrategy();
+#endif
+
             var builder = new WebHostBuilder()
                 .UseEnvironment("Development")
                 .ConfigureAppConfiguration((ctx, configurationBuilder) =>
@@ -22,7 +33,9 @@ namespace SuperSafeBank.Web.API.Tests.Fixtures
                     if (!string.IsNullOrWhiteSpace(aspEnv))
                         configurationBuilder.AddJsonFile($"appsettings.{aspEnv}.json", true);
 
-                   
+                    configurationBuilder.AddUserSecrets<WebApiFixture<TStartup>>();
+
+                    _configurationStrategy.OnConfigureAppConfiguration(configurationBuilder);
                 })
                 .UseSerilog()
                 .UseStartup<TStartup>();
@@ -31,8 +44,6 @@ namespace SuperSafeBank.Web.API.Tests.Fixtures
             this.HttpClient = server.CreateClient();
         }
 
-        protected abstract void OnConfigureAppConfiguration(IConfigurationBuilder configurationBuilder);
-
         public void Dispose()
         {
             if (null != this.HttpClient)
@@ -40,6 +51,9 @@ namespace SuperSafeBank.Web.API.Tests.Fixtures
                 this.HttpClient.Dispose();
                 this.HttpClient = null;
             }
+
+            if(_configurationStrategy is IDisposable ds)
+                ds.Dispose();
         }
 
         public HttpClient HttpClient { get; private set; }

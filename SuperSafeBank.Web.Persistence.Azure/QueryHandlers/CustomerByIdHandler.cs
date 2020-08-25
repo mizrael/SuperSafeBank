@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
@@ -25,8 +24,14 @@ namespace SuperSafeBank.Web.Persistence.Azure.QueryHandlers
         public async Task<CustomerDetails> Handle(CustomerById request, CancellationToken cancellationToken)
         {
             var partitionKey = new PartitionKey(request.Id.ToString());
-            var response = await _container.ReadItemAsync<CustomerDetails>(request.Id.ToString(), partitionKey, cancellationToken: cancellationToken);
-            return response.Resource;
+
+            //by design, ReadItemAsync() throws is item not found
+
+            var response = await _container.ReadItemStreamAsync(request.Id.ToString(), partitionKey, cancellationToken: cancellationToken);
+            if (!response.IsSuccessStatusCode)
+                return null;
+
+            return _container.Database.Client.ClientOptions.Serializer.FromStream<CustomerDetails>(response.Content);
         }
     }
 }
