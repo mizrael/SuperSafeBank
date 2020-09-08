@@ -8,20 +8,15 @@ using Xunit;
 
 namespace SuperSafeBank.Web.API.Tests.Contract
 {
-    public class AccountTests
-#if OnPremise
-        : IClassFixture<OnPremiseConfigurationStrategy>
-#endif
-
+    public class AccountTests : IClassFixture<WebApiFixture<Startup>>
     {
         private readonly WebApiFixture<Startup> _fixture;
 
-#if OnPremise
-        public AccountTests(OnPremiseConfigurationStrategy fixture)
+        public AccountTests(WebApiFixture<Startup> fixture)
         {
             _fixture = fixture;
         }
-#endif
+
         [Fact]
         public async Task GetDetails_should_return_404_if_id_invalid()
         {
@@ -30,6 +25,19 @@ namespace SuperSafeBank.Web.API.Tests.Contract
             response.Should().NotBeNull();
             response.IsSuccessStatusCode.Should().BeFalse();
             response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        }
+
+        [Fact]
+        public async Task Post_should_not_create_account_if_customer_invalid()
+        {
+            var customerId = Guid.NewGuid();
+
+            var createAccountPayload = new
+            {
+                currencyCode = "cad"
+            };
+            var response = await _fixture.HttpClient.PostAsJsonAsync($"customers/{customerId}/accounts", createAccountPayload);
+            response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         }
 
         [Fact]
@@ -53,18 +61,6 @@ namespace SuperSafeBank.Web.API.Tests.Contract
             };
             response = await _fixture.HttpClient.PostAsJsonAsync($"customers/{customerId}/accounts", createAccountPayload);
             response.StatusCode.Should().Be(HttpStatusCode.Created);
-
-            await TestUtils.Retry(async () =>
-            {
-                var detailsResponse = await _fixture.HttpClient.GetAsync(response.Headers.Location);
-                detailsResponse.IsSuccessStatusCode.Should().BeTrue();
-
-                var details = await detailsResponse.Content.ReadAsAsync<dynamic>();
-                Guid accountCustomerId = details.ownerId;
-                customerId.Should().Be(accountCustomerId);
-
-                return true;
-            }, "failed to fetch account by id");
         }
 
         [Fact]
@@ -99,19 +95,6 @@ namespace SuperSafeBank.Web.API.Tests.Contract
             };
             response = await _fixture.HttpClient.PutAsJsonAsync($"accounts/{accountId}/deposit", depositPayload);
             response.StatusCode.Should().Be(HttpStatusCode.OK);
-
-            await TestUtils.Retry(async () =>
-            {
-                var detailsResponse = await _fixture.HttpClient.GetAsync($"accounts/{accountId}");
-                detailsResponse.IsSuccessStatusCode.Should().BeTrue();
-
-                var details = await detailsResponse.Content.ReadAsAsync<dynamic>();
-                decimal value = details.balance.value;
-                value.Should().Be(depositPayload.amount);
-
-                return true;
-            }, "failed to fetch account by id");
         }
-
     }
 }

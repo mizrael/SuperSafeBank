@@ -99,8 +99,10 @@ namespace SuperSafeBank.Persistence.Azure
                 }
             }
 
-            var result = BaseAggregateRoot<TA, TKey>.Create(events.OrderBy(e => e.AggregateVersion));
+            if (!events.Any())
+                return null;
 
+            var result = BaseAggregateRoot<TA, TKey>.Create(events.OrderBy(e => e.AggregateVersion));
             return result;
         }
     }

@@ -1,3 +1,6 @@
+using System;
+using System.Net;
+using Hellang.Middleware.ProblemDetails;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -48,6 +51,11 @@ namespace SuperSafeBank.Web.API
 
             services.Decorate(typeof(INotificationHandler<>), typeof(RetryDecorator<>));
 
+            services.AddProblemDetails(opts =>
+            {
+                opts.MapToStatusCode<ArgumentOutOfRangeException>((int) HttpStatusCode.BadRequest);
+            });
+
 #if OnPremise
             services.RegisterWorker(this.Configuration);
 #endif
@@ -62,6 +70,8 @@ namespace SuperSafeBank.Web.API
             }
 
             app.UseSerilogRequestLogging();
+
+            app.UseProblemDetails();
 
             app.UseHttpsRedirection();
 

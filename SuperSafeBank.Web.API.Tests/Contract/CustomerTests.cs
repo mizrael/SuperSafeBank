@@ -9,7 +9,6 @@ using Xunit;
 namespace SuperSafeBank.Web.API.Tests.Contract
 {
     public class CustomerTests : IClassFixture<WebApiFixture<Startup>>
-
     {
         private readonly WebApiFixture<Startup> _fixture;
 
@@ -41,25 +40,30 @@ namespace SuperSafeBank.Web.API.Tests.Contract
             response.IsSuccessStatusCode.Should().BeTrue();
             response.StatusCode.Should().Be(HttpStatusCode.Created);
             response.Headers.Location.Should().NotBeNull();
+        }
 
-            await TestUtils.Retry(async () =>
+        [Fact]
+        public async Task Post_should_not_create_customer_if_email_already_exists() 
+        {
+            var payload = new
             {
-                var detailsResponse = await _fixture.HttpClient.GetAsync(response.Headers.Location);
-                detailsResponse.IsSuccessStatusCode.Should().BeTrue();
+                firstname = "existing",
+                lastname = "customer",
+                email = "existing@customer.com"
+            };
+            var response = await _fixture.HttpClient.PostAsJsonAsync("customers", payload);
+            response.IsSuccessStatusCode.Should().BeTrue();
+            response.StatusCode.Should().Be(HttpStatusCode.Created);
+            response.Headers.Location.Should().NotBeNull();
 
-                var details = await detailsResponse.Content.ReadAsAsync<dynamic>();
-
-                string firstName = details.firstname;
-                payload.firstname.Should().Be(firstName);
-
-                string lastName = details.lastname;
-                payload.lastname.Should().Be(lastName);
-
-                string email = details.email;
-                payload.email.Should().Be(email);
-
-                return true;
-            }, "failed to fetch customer by id", 3);
+            payload = new
+            {
+                firstname = "another",
+                lastname = "customer",
+                email = "existing@customer.com"
+            };
+            response = await _fixture.HttpClient.PostAsJsonAsync("customers", payload);
+            response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         }
     }
 }
