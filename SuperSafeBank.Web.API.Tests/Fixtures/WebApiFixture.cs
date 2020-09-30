@@ -37,6 +37,9 @@ namespace SuperSafeBank.Web.API.Tests.Fixtures
                         .AddUserSecrets<WebApiFixture<TStartup>>()
                         .AddEnvironmentVariables();
 
+                    if (null == _configurationStrategy)
+                        throw new Exception("configuration strategy not set");
+
                     _configurationStrategy.OnConfigureAppConfiguration(configurationBuilder);
                 })
                 .UseSerilog()
