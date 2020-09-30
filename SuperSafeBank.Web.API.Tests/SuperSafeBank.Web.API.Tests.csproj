@@ -14,6 +14,10 @@
     <DefineConstants>TRACE;OnPremise</DefineConstants>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>TRACE;OnAzure</DefineConstants>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugAzure|AnyCPU'">
     <DefineConstants>TRACE;OnAzure</DefineConstants>
   </PropertyGroup>
