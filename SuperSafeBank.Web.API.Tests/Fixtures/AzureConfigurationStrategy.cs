@@ -38,9 +38,14 @@ namespace SuperSafeBank.Web.API.Tests.Fixtures
             var configuration = configurationBuilder.Build();
 
             _cosmosConnStr = configuration.GetConnectionString("cosmos");
+            if (string.IsNullOrWhiteSpace(_cosmosConnStr))
+                throw new ArgumentException("invalid cosmos connection string");
             _cosmosClient = new CosmosClient(_cosmosConnStr);
 
             _serviceBusConnStr = configuration.GetConnectionString("producer");
+            if (string.IsNullOrWhiteSpace(_serviceBusConnStr))
+                throw new ArgumentException("invalid servicebus producer connection string");
+
             _serviceBusClient = new ManagementClient(_serviceBusConnStr);
 
             _topics.Add($"{topicsBaseName}-{typeof(Customer).Name}");

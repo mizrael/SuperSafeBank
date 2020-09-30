@@ -32,11 +32,14 @@ namespace SuperSafeBank.Persistence.Azure.Tests.Integration
         {
             var configuration = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-                .AddEnvironmentVariables()
                 .AddUserSecrets<EventProducerTests>()
+                .AddEnvironmentVariables()
                 .Build();
 
             _connStr = configuration.GetConnectionString("servicebus");
+
+            if (string.IsNullOrWhiteSpace(_connStr))
+                throw new ArgumentException("invalid servicebus connection string");
 
             _managementClient = new ManagementClient(_connStr);
         }

@@ -20,11 +20,13 @@ namespace SuperSafeBank.Persistence.Azure.Tests.Integration.Fixtures
         {
             var configuration = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-                .AddEnvironmentVariables()
                 .AddUserSecrets<CosmosFixture>()
+                .AddEnvironmentVariables()
                 .Build();
-
+            
             var connStr = configuration.GetConnectionString("cosmos");
+            if(string.IsNullOrWhiteSpace(connStr))
+                throw new ArgumentException("invalid cosmos connection string");
 
             _eventsContainerName = configuration["eventsContainerName"];
             _dbNamePrefix = configuration["testDbName"];
