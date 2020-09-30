@@ -1,5 +1,8 @@
 version: 2.1
 
+orbs:
+  azure-cli: circleci/azure-cli@1.1.0
+
 jobs:
   build:
     docker:
@@ -7,6 +10,8 @@ jobs:
       
     steps:
       - checkout
+
+      - azure-cli/install
 
       - run:
           name: Build solution
