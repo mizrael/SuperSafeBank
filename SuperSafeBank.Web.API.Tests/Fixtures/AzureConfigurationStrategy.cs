@@ -59,6 +59,7 @@ namespace SuperSafeBank.Web.API.Tests.Fixtures
                 .Union(new Task[]
                 {
                     db.CreateContainerAsync("Events", $"/{nameof(IDomainEvent<Guid>.AggregateId)}"),
+                    db.CreateContainerAsync("CustomerEmails", "/id"),
                     db.CreateContainerAsync("CustomersArchive", "/id"),
                     db.CreateContainerAsync("CustomersDetails", "/id"),
                 }).ToArray();

@@ -7,6 +7,7 @@ using SuperSafeBank.Core;
 using SuperSafeBank.Core.EventBus;
 using SuperSafeBank.Core.Models;
 using SuperSafeBank.Domain;
+using SuperSafeBank.Domain.Services;
 
 namespace SuperSafeBank.Persistence.Azure
 {
@@ -20,16 +21,16 @@ namespace SuperSafeBank.Persistence.Azure
                     {
                         Serializer = new CustomJsonSerializer()
                     };
-                var connectionString = config.GetConnectionString("cosmos");
-                return new CosmosClient(connectionString, options);
-            }).AddSingleton<ITopicClientFactory>(ctx =>
-            {
-                var connectionString = config.GetConnectionString("producer");
-                return new TopicClientFactory(connectionString);
-            }).AddEventsProducer<Customer, Guid>(config)
-              .AddEventsProducer<Account, Guid>(config)
-              .AddEventsRepository<Customer, Guid>(config)
-              .AddEventsRepository<Account, Guid>(config);
+                    var connectionString = config.GetConnectionString("cosmos");
+                    return new CosmosClient(connectionString, options);
+                }).AddSingleton<ITopicClientFactory>(ctx =>
+                {
+                    var connectionString = config.GetConnectionString("producer");
+                    return new TopicClientFactory(connectionString);
+                }).AddEventsProducer<Customer, Guid>(config)
+                .AddEventsProducer<Account, Guid>(config)
+                .AddEventsRepository<Customer, Guid>(config)
+                .AddEventsRepository<Account, Guid>(config);
         }
 
         private static IServiceCollection AddEventsRepository<TA, TK>(this IServiceCollection services, IConfiguration config)

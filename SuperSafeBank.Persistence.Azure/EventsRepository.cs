@@ -8,17 +8,15 @@ using SuperSafeBank.Core;
 using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Cosmos.Linq;
-using Newtonsoft.Json;
 
 namespace SuperSafeBank.Persistence.Azure
 {
-
     public class EventsRepository<TA, TKey> : IEventsRepository<TA, TKey>
         where TA : class, IAggregateRoot<TKey>
     {
         private readonly Container _container;
         private const string EventsContainerName = "Events";
-        private const string VersionsContainerName = "Versions";
+        
         private readonly IEventSerializer _eventSerializer;
         private static readonly SemaphoreSlim _lock = new SemaphoreSlim(1, 1);
 
@@ -104,34 +102,6 @@ namespace SuperSafeBank.Persistence.Azure
 
             var result = BaseAggregateRoot<TA, TKey>.Create(events.OrderBy(e => e.AggregateVersion));
             return result;
-        }
-    }
-
-    internal class EventData<TKey>
-    {
-        [JsonProperty(PropertyName = "id")]
-        public Guid Id { get; set; }
-        public TKey AggregateId { get; set; }
-        public long AggregateVersion { get; set; }
-        public string Type { get; set; }
-        public byte[] Data { get; set; }
-
-        public static EventData<TKey> Create(TKey aggregateId, long aggregateVersion, string type, byte[] data)
-        {
-            if (data == null) 
-                throw new ArgumentNullException(nameof(data));
-            
-            if (string.IsNullOrWhiteSpace(type))
-                throw new ArgumentException("Value cannot be null or whitespace.", nameof(type));
-
-            return new EventData<TKey>()
-            {
-                Id = Guid.NewGuid(),
-                AggregateId = aggregateId,
-                AggregateVersion = aggregateVersion,
-                Type = type,
-                Data = data
-            };
         }
     }
 }

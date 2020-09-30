@@ -15,8 +15,10 @@ using SuperSafeBank.Web.Persistence.Mongo.EventHandlers;
 #endif
 
 #if OnAzure
+using SuperSafeBank.Domain.Services;
 using SuperSafeBank.Persistence.Azure;
 using SuperSafeBank.Web.Persistence.Azure.QueryHandlers;
+using SuperSafeBank.Web.Persistence.Azure.Services;
 #endif
 
 namespace SuperSafeBank.Web.API.Registries
@@ -39,7 +41,8 @@ namespace SuperSafeBank.Web.API.Registries
                     .RegisterHandlers(typeof(IRequestHandler<>))
                     .RegisterHandlers(typeof(IRequestHandler<,>))
                     .RegisterHandlers(typeof(INotificationHandler<>));
-            });
+            })
+                .AddSingleton<ICustomerEmailsService, CustomerEmailsService>();
 #endif
             return services
                 .AddEventsService<Customer, Guid>()

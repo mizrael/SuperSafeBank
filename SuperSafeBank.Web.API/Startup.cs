@@ -54,6 +54,7 @@ namespace SuperSafeBank.Web.API
             services.AddProblemDetails(opts =>
             {
                 opts.MapToStatusCode<ArgumentOutOfRangeException>((int) HttpStatusCode.BadRequest);
+                opts.MapToStatusCode<ValidationException>((int)HttpStatusCode.BadRequest);
             });
 
 #if OnPremise
