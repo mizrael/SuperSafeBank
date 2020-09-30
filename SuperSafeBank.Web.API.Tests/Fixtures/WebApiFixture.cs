@@ -33,7 +33,8 @@ namespace SuperSafeBank.Web.API.Tests.Fixtures
                     if (!string.IsNullOrWhiteSpace(aspEnv))
                         configurationBuilder.AddJsonFile($"appsettings.{aspEnv}.json", true);
 
-                    configurationBuilder.AddUserSecrets<WebApiFixture<TStartup>>();
+                    configurationBuilder.AddEnvironmentVariables()
+                        .AddUserSecrets<WebApiFixture<TStartup>>();
 
                     _configurationStrategy.OnConfigureAppConfiguration(configurationBuilder);
                 })

@@ -29,7 +29,8 @@ namespace SuperSafeBank.Web.API
                     builder.AddJsonFile($"appsettings.OnAzure-{ctx.HostingEnvironment.EnvironmentName}.json", optional: true);
 #endif
 
-                    builder.AddUserSecrets<Startup>();
+                    builder.AddEnvironmentVariables()
+                           .AddUserSecrets<Startup>();
                 })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
