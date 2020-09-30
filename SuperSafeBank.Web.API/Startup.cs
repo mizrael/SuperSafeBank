@@ -9,6 +9,7 @@ using Microsoft.Extensions.Hosting;
 using MediatR;
 using Serilog;
 using SuperSafeBank.Core;
+using SuperSafeBank.Domain;
 using SuperSafeBank.Domain.Commands;
 using SuperSafeBank.Domain.Events;
 using SuperSafeBank.Domain.Services;
@@ -53,8 +54,15 @@ namespace SuperSafeBank.Web.API
 
             services.AddProblemDetails(opts =>
             {
+                opts.IncludeExceptionDetails = (ctx, ex) =>
+                {
+                    var env = ctx.RequestServices.GetRequiredService<IHostEnvironment>();
+                    return env.IsDevelopment() || env.IsStaging();
+                };
+
                 opts.MapToStatusCode<ArgumentOutOfRangeException>((int) HttpStatusCode.BadRequest);
                 opts.MapToStatusCode<ValidationException>((int)HttpStatusCode.BadRequest);
+                opts.MapToStatusCode<AccountTransactionException>((int)HttpStatusCode.BadRequest);
             });
 
 #if OnPremise
