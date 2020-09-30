@@ -32,6 +32,7 @@ namespace SuperSafeBank.Persistence.Azure.Tests.Integration
         {
             var configuration = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .AddEnvironmentVariables()
                 .AddUserSecrets<EventProducerTests>()
                 .Build();
 
