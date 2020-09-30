@@ -28,6 +28,7 @@ namespace SuperSafeBank.Web.API.Controllers
                 return BadRequest();
             var command = new CreateCustomer(Guid.NewGuid(), dto.FirstName, dto.LastName, dto.Email);
             await _mediator.Publish(command, cancellationToken);
+            
             return CreatedAtAction("GetCustomer", new { id = command.Id }, command);
         }
 

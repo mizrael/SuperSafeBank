@@ -47,7 +47,7 @@ namespace SuperSafeBank.Web.API.Tests.Contract
             {
                 firstname = "Customer",
                 lastname = "WithAccount",
-                email = "test@test.com"
+                email = "customer-with-new-account@test.com"
             };
             var response = await _fixture.HttpClient.PostAsJsonAsync("customers", createCustomerPayload);
             response.StatusCode.Should().Be(HttpStatusCode.Created);
@@ -70,7 +70,7 @@ namespace SuperSafeBank.Web.API.Tests.Contract
             {
                 firstname = "Customer",
                 lastname = "WithAccount",
-                email = "test@test.com"
+                email = "customer-with-account@test.com"
             };
             var response = await _fixture.HttpClient.PostAsJsonAsync("customers", createCustomerPayload);
             response.StatusCode.Should().Be(HttpStatusCode.Created);
@@ -94,6 +94,82 @@ namespace SuperSafeBank.Web.API.Tests.Contract
                 amount = 42
             };
             response = await _fixture.HttpClient.PutAsJsonAsync($"accounts/{accountId}/deposit", depositPayload);
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+        }
+
+        [Fact]
+        public async Task Should_not_be_able_to_withdraw_when_funds_not_available()
+        {
+            var createCustomerPayload = new
+            {
+                firstname = "Customer",
+                lastname = "WithAccount",
+                email = "not-enough-funds@test.com"
+            };
+            var response = await _fixture.HttpClient.PostAsJsonAsync("customers", createCustomerPayload);
+            response.StatusCode.Should().Be(HttpStatusCode.Created);
+            var result = await response.Content.ReadAsAsync<dynamic>();
+
+            Guid customerId = result.id;
+
+            var createAccountPayload = new
+            {
+                currencyCode = "cad"
+            };
+            response = await _fixture.HttpClient.PostAsJsonAsync($"customers/{customerId}/accounts", createAccountPayload);
+            var responseBody = await response.Content.ReadAsAsync<dynamic>();
+            Guid accountId = responseBody.accountId;
+
+            accountId.Should().NotBeEmpty();
+
+            var withdrawPayload = new
+            {
+                currencyCode = "cad",
+                amount = 42
+            };
+            response = await _fixture.HttpClient.PutAsJsonAsync($"accounts/{accountId}/withdraw", withdrawPayload);
+            response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        }
+
+        [Fact]
+        public async Task Should_be_able_to_withdraw_when_funds_available()
+        {
+            var createCustomerPayload = new
+            {
+                firstname = "Customer",
+                lastname = "WithAccount",
+                email = "enough-funds@test.com"
+            };
+            var response = await _fixture.HttpClient.PostAsJsonAsync("customers", createCustomerPayload);
+            response.StatusCode.Should().Be(HttpStatusCode.Created);
+            var result = await response.Content.ReadAsAsync<dynamic>();
+
+            Guid customerId = result.id;
+
+            var createAccountPayload = new
+            {
+                currencyCode = "cad"
+            };
+            response = await _fixture.HttpClient.PostAsJsonAsync($"customers/{customerId}/accounts", createAccountPayload);
+            var responseBody = await response.Content.ReadAsAsync<dynamic>();
+            Guid accountId = responseBody.accountId;
+
+            accountId.Should().NotBeEmpty();
+
+            var depositPayload = new
+            {
+                currencyCode = "cad",
+                amount = 71
+            };
+            response = await _fixture.HttpClient.PutAsJsonAsync($"accounts/{accountId}/deposit", depositPayload);
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+            var withdrawPayload = new
+            {
+                currencyCode = "cad",
+                amount = 42
+            };
+            response = await _fixture.HttpClient.PutAsJsonAsync($"accounts/{accountId}/withdraw", withdrawPayload);
             response.StatusCode.Should().Be(HttpStatusCode.OK);
         }
     }
