@@ -20,6 +20,7 @@ namespace SuperSafeBank.Persistence.Azure.Tests.Integration.Fixtures
         {
             var configuration = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .AddEnvironmentVariables()
                 .AddUserSecrets<CosmosFixture>()
                 .Build();
 
