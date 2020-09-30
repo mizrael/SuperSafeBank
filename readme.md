@@ -1,5 +1,7 @@
 # SuperSafeBank 
 
+[![SuperSafeBank](https://circleci.com/gh/mizrael/SuperSafeBank.svg?style=shield)](https://app.circleci.com/pipelines/github/mizrael/SuperSafeBank)
+
 This repository shows how to implement Event Sourcing, CQRS and DDD in .NET Core, using a Bank as example.
 
 An ASP.NET Core API is used as entry-point for all the client-facing operations:
