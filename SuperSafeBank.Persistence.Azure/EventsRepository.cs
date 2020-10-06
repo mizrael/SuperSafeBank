@@ -1,5 +1,6 @@
 ﻿using SuperSafeBank.Core.Models;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -18,7 +19,8 @@ namespace SuperSafeBank.Persistence.Azure
         private const string EventsContainerName = "Events";
         
         private readonly IEventSerializer _eventSerializer;
-        private static readonly SemaphoreSlim _lock = new SemaphoreSlim(1, 1);
+
+        private static readonly ConcurrentDictionary<TKey, SemaphoreSlim> _locks = new ConcurrentDictionary<TKey, SemaphoreSlim>();
 
         public EventsRepository(IDbContainerProvider containerProvider, IEventSerializer eventDeserializer)
         {
@@ -43,7 +45,9 @@ namespace SuperSafeBank.Persistence.Azure
             var firstEvent = aggregateRoot.Events.First();
             var expectedVersion = firstEvent.AggregateVersion;
 
-            await _lock.WaitAsync();
+            var aggregateLock = _locks.GetOrAdd(aggregateRoot.Id, (k) => new SemaphoreSlim(1, 1));
+            await aggregateLock.WaitAsync();
+
             try
             {
                 var dbVersionResp = await _container.GetItemLinqQueryable<EventData<TKey>>(
@@ -77,8 +81,10 @@ namespace SuperSafeBank.Persistence.Azure
             }
             finally
             {
-                _lock.Release();
+                aggregateLock.Release();
             }
+
+            _locks.Remove(aggregateRoot.Id, out _);
         }
 
         public async Task<TA> RehydrateAsync(TKey key)
