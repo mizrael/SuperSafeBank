@@ -37,6 +37,9 @@ namespace SuperSafeBank.Domain.Commands
 
         public async Task Handle(CreateCustomer command, CancellationToken cancellationToken)
         {
+            if(string.IsNullOrWhiteSpace(command.Email))
+                throw new ValidationException("Unable to create Customer", new ValidationError(nameof(CreateCustomer.Email), "email cannot be empty"));
+
             if (await _customerEmailsRepository.ExistsAsync(command.Email))
                 throw new ValidationException("Unable to create Customer", new ValidationError(nameof(CreateCustomer.Email), $"email '{command.Email}' already exists"));
 
