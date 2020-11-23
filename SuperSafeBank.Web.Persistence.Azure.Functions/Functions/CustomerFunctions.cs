@@ -12,7 +12,7 @@ namespace SuperSafeBank.Web.Persistence.Azure.Functions.Functions
         {
         }
 
-        [FunctionName("CustomerCreated")]
+        [FunctionName(nameof(CustomerCreated))]
         public async Task CustomerCreated([ServiceBusTrigger("aggregate-customer", "created", Connection = "AzureWebJobsServiceBus")]Message msg)
         {
             await HandleMessage(msg);
