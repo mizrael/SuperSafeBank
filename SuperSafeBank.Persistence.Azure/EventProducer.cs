@@ -62,8 +62,6 @@ namespace SuperSafeBank.Persistence.Azure
             }).ToList();
 
             await _topicClient.SendAsync(messages);
-            
-            aggregateRoot.ClearEvents();
         }
 
         public string TopicName { get; }

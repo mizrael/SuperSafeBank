@@ -61,8 +61,6 @@ namespace SuperSafeBank.Persistence.Kafka
                 
                 await _producer.ProduceAsync(_topicName, message);
             }
-
-            aggregateRoot.ClearEvents();
         }
 
         public void Dispose()
