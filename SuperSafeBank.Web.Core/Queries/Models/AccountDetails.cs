@@ -6,6 +6,16 @@ namespace SuperSafeBank.Web.Core.Queries.Models
     public class AccountDetails
     {
         private AccountDetails() { }
+        
+        public AccountDetails(Guid id, Guid ownerId, string ownerFirstName, string ownerLastName, Money balance, long version)
+        {
+            Id = id;
+            OwnerId = ownerId;
+            OwnerFirstName = ownerFirstName;
+            OwnerLastName = ownerLastName;
+            Balance = balance;
+            Version = version;
+        }
 
         public Guid Id { get; private set; }
         public Guid OwnerId { get; private set; }

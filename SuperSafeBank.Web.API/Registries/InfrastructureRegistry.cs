@@ -6,16 +6,18 @@ using SuperSafeBank.Core;
 using SuperSafeBank.Core.EventBus;
 using SuperSafeBank.Core.Models;
 using SuperSafeBank.Domain;
+using SuperSafeBank.Domain.Services;
 
 #if OnPremise
 using SuperSafeBank.Persistence.EventStore;
 using SuperSafeBank.Persistence.Kafka;
+using SuperSafeBank.Persistence.Mongo;
 using SuperSafeBank.Web.Persistence.Mongo;
 using SuperSafeBank.Web.Persistence.Mongo.EventHandlers;
+using MongoDB.Driver;
 #endif
 
 #if OnAzure
-using SuperSafeBank.Domain.Services;
 using SuperSafeBank.Persistence.Azure;
 using SuperSafeBank.Web.Persistence.Azure.QueryHandlers;
 using SuperSafeBank.Web.Persistence.Azure.Services;
@@ -31,6 +33,13 @@ namespace SuperSafeBank.Web.API.Registries
 
 #if OnPremise
             services.AddOnPremiseInfrastructure(config);
+            services.AddSingleton<ICustomerEmailsService>(ctx=>
+            {
+                var dbName = config["commandsDbName"];
+                var client = ctx.GetRequiredService<MongoClient>();
+                var database = client.GetDatabase(dbName);
+                return new CustomerEmailsService(database);
+            });
 #endif
 
 #if OnAzure
@@ -44,7 +53,7 @@ namespace SuperSafeBank.Web.API.Registries
             })
                 .AddSingleton<ICustomerEmailsService, CustomerEmailsService>();
 #endif
-            return services
+            return services                
                 .AddEventsService<Customer, Guid>()
                 .AddEventsService<Account, Guid>();
         }
