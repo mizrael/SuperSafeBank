@@ -3,7 +3,7 @@ version: '3.4'
 services:
   eventstore_db:
     image: eventstore/eventstore
-    command: --dev --enable-external-tcp --ext-ip=0.0.0.0 --int-ip=0.0.0.0 --disable-external-tcp-tls
+    command: --enable-external-tcp --ext-ip=0.0.0.0 --int-ip=0.0.0.0 --insecure
     environment:
       - EVENTSTORE_CLUSTER_SIZE=1
       - EVENTSTORE_INT_TCP_PORT=1112
