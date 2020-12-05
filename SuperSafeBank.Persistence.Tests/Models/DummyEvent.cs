@@ -1,7 +1,7 @@
 using System;
 using SuperSafeBank.Core.Models;
 
-namespace SuperSafeBank.Persistence.Azure.Tests.Models
+namespace SuperSafeBank.Persistence.Tests.Models
 {
     public class DummyEvent : BaseDomainEvent<DummyAggregate, Guid>
     {

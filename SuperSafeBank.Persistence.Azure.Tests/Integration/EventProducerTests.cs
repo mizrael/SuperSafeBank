@@ -9,7 +9,7 @@ using Microsoft.Azure.ServiceBus.Management;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using SuperSafeBank.Core;
-using SuperSafeBank.Persistence.Azure.Tests.Models;
+using SuperSafeBank.Persistence.Tests.Models;
 using Xunit;
 
 namespace SuperSafeBank.Persistence.Azure.Tests.Integration

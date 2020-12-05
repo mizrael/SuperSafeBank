@@ -37,5 +37,6 @@
   <ItemGroup>
     <ProjectReference Include="..\SuperSafeBank.Core\SuperSafeBank.Core.csproj" />
     <ProjectReference Include="..\SuperSafeBank.Persistence.Azure\SuperSafeBank.Persistence.Azure.csproj" />
+    <ProjectReference Include="..\SuperSafeBank.Persistence.Tests\SuperSafeBank.Persistence.Tests.csproj" />
   </ItemGroup>
 </Project>

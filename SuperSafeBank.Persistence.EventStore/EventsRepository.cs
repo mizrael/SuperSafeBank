@@ -84,6 +84,9 @@ namespace SuperSafeBank.Persistence.EventStore
                 events.AddRange(currentSlice.Events.Select(Map));
             } while (!currentSlice.IsEndOfStream);
 
+            if (!events.Any())
+                return null;
+
             var result = BaseAggregateRoot<TA, TKey>.Create(events.OrderBy(e => e.AggregateVersion));
             
             return result;
