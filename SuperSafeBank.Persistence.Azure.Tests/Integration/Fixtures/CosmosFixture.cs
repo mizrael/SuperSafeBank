@@ -5,7 +5,7 @@ using System.Net;
 using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Configuration;
-using SuperSafeBank.Persistence.Azure.Tests.Models;
+using SuperSafeBank.Persistence.Tests.Models;
 
 namespace SuperSafeBank.Persistence.Azure.Tests.Integration.Fixtures
 {

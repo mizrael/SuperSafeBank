@@ -6,14 +6,21 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using SuperSafeBank.Core;
 
-namespace SuperSafeBank.Persistence.EventStore.Tests
+namespace SuperSafeBank.Persistence.EventStore.Tests.Integration
 {
-    public class EventsRepositoryTests
+    public class EventsRepositoryTests : IClassFixture<Fixtures.EventStoreFixture>
     {
+        private readonly Fixtures.EventStoreFixture _fixture;
+
+        public EventsRepositoryTests(Fixtures.EventStoreFixture fixture)
+        {
+            _fixture = fixture;
+        }
+
         [Fact]
         public async Task AppendAsync_should_store_events()
         {
-            var connStr = new Uri(Settings.EventStoreConnectionString);
+            var connStr = new Uri(_fixture.ConnectionString);
             var logger = NSubstitute.Substitute.For<ILogger<EventStoreConnectionWrapper>>();
             using var conn = new EventStoreConnectionWrapper(connStr, logger);
 
@@ -35,7 +42,7 @@ namespace SuperSafeBank.Persistence.EventStore.Tests
         [Fact]
         public async Task RehydrateAsync_should_return_null_when_id_invalid()
         {
-            var connStr = new Uri(Settings.EventStoreConnectionString);
+            var connStr = new Uri(_fixture.ConnectionString);
             var logger = NSubstitute.Substitute.For<ILogger<EventStoreConnectionWrapper>>();
             using var conn = new EventStoreConnectionWrapper(connStr, logger);
 

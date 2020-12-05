@@ -4,15 +4,22 @@ using System.Threading.Tasks;
 using Xunit;
 using FluentAssertions;
 
-namespace SuperSafeBank.Persistence.EventStore.Tests
+namespace SuperSafeBank.Persistence.EventStore.Tests.Integration
 {
 
-    public class EventStoreConnectionWrapperTests
+    public class EventStoreConnectionWrapperTests : IClassFixture<Fixtures.EventStoreFixture>
     {
+        private readonly Fixtures.EventStoreFixture _fixture;
+
+        public EventStoreConnectionWrapperTests(Fixtures.EventStoreFixture fixture)
+        {
+            _fixture = fixture;
+        }
+
         [Fact]
         public async Task GetConnectionAsync_should_return_connection()
         {
-            var connStr = new Uri(Settings.EventStoreConnectionString);
+            var connStr = new Uri(_fixture.ConnectionString);
             var logger = NSubstitute.Substitute.For<ILogger<EventStoreConnectionWrapper>>();
             using var sut = new EventStoreConnectionWrapper(connStr, logger);
 
