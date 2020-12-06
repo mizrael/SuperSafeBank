@@ -1,4 +1,5 @@
 ﻿using System;
+using Newtonsoft.Json;
 using SuperSafeBank.Domain;
 
 namespace SuperSafeBank.Web.Core.Queries.Models
@@ -17,6 +18,7 @@ namespace SuperSafeBank.Web.Core.Queries.Models
             Version = version;
         }
 
+        [JsonProperty("id")]
         public Guid Id { get; private set; }
         public Guid OwnerId { get; private set; }
         public string OwnerFirstName { get; private set; }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -16,6 +17,7 @@ namespace SuperSafeBank.Web.Core.Queries.Models
             Accounts = (accounts ?? Enumerable.Empty<Guid>()).ToArray();
         }
 
+        [JsonProperty("id")]
         public Guid Id { get; private set; }
         public string Firstname { get; private set; }
         public string Lastname { get; private set; }       

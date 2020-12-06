@@ -17,6 +17,7 @@ namespace SuperSafeBank.Web.API.Tests.Fixtures
         private string _cosmosConnStr;
         private string _cosmosDbName;
         private CosmosClient _cosmosClient;
+        private Database _db;
 
         private string _serviceBusConnStr;
         private ManagementClient _serviceBusClient;
@@ -58,15 +59,16 @@ namespace SuperSafeBank.Web.API.Tests.Fixtures
                 }).ToArray();
             Task.WaitAll(tasks);
 
-            var db = _cosmosClient.GetDatabase(_cosmosDbName);
+            _db = _cosmosClient.GetDatabase(_cosmosDbName);
 
             tasks = _topics.Select(topic => _serviceBusClient.CreateSubscriptionAsync(topic, "created"))
                 .Union(new Task[]
                 {
-                    db.CreateContainerAsync("Events", $"/{nameof(IDomainEvent<Guid>.AggregateId)}"),
-                    db.CreateContainerAsync("CustomerEmails", "/id"),
-                    db.CreateContainerAsync("CustomersArchive", "/id"),
-                    db.CreateContainerAsync("CustomersDetails", "/id"),
+                    _db.CreateContainerAsync("Events", $"/{nameof(IDomainEvent<Guid>.AggregateId)}"),
+                    _db.CreateContainerAsync("CustomerEmails", "/id"),
+                    _db.CreateContainerAsync("CustomersArchive", "/id"),
+                    _db.CreateContainerAsync("CustomersDetails", "/id"),
+                    _db.CreateContainerAsync("AccountsDetails", "/id"),
                 }).ToArray();
             Task.WaitAll(tasks);
         }
@@ -76,11 +78,12 @@ namespace SuperSafeBank.Web.API.Tests.Fixtures
             var tasks = _topics.Select(topic => _serviceBusClient.DeleteTopicAsync(topic))
                 .Union(new Task[]
                 {
-                    _cosmosClient.GetDatabase(_cosmosDbName).DeleteAsync(),
-
+                    _db.DeleteAsync()
                 }).ToArray();
             Task.WaitAll(tasks);
         }
+
+        public IQueryModelsSeeder CreateSeeder() => new AzureQueryModelsSeeder(_db);
     }
 }
 

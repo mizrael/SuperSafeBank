@@ -22,6 +22,7 @@ namespace SuperSafeBank.Web.Core.Queries.Models
             TotalBalance = totalBalance;
         }
 
+        [JsonProperty("id")]
         public Guid Id { get; private set; }
         public string Firstname { get; private set; }
         public string Lastname { get; private set; }

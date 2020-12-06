@@ -88,7 +88,20 @@ namespace SuperSafeBank.Web.API.Tests.Contract
         }
 
         [Fact]
-        public async Task Should_be_able_to_deposit_funds()
+        public async Task Should_not_be_able_to_deposit_funds_when_account_does_not_exists()
+        {
+            var accountId = Guid.NewGuid();
+            var depositPayload = new
+            {
+                currencyCode = "cad",
+                amount = 42
+            };
+            var response = await _fixture.HttpClient.PutAsJsonAsync($"accounts/{accountId}/deposit", depositPayload);
+            response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        }
+
+        [Fact]
+        public async Task Should_be_able_to_deposit_funds_when_account_exists()
         {
             var createCustomerPayload = new
             {
