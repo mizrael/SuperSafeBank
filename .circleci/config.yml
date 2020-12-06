@@ -7,6 +7,10 @@ jobs:
   build:
     docker:
       - image: mcr.microsoft.com/dotnet/core/sdk
+      - image: 'circleci/mongo:latest'
+        environment:
+          MONGO_INITDB_ROOT_USERNAME: root
+          MONGO_INITDB_ROOT_PASSWORD: password
       
     steps:
       - checkout
