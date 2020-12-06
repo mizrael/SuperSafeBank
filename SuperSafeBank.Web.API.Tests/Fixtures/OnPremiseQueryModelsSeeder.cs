@@ -31,6 +31,14 @@ namespace SuperSafeBank.Web.API.Tests.Fixtures
             
             await _dbContext.CustomersDetails.InsertOneAsync(model);
         }
+
+        public async Task CreateCustomerArchiveItem(Core.Queries.Models.CustomerArchiveItem model)
+        {
+            if (model is null)
+                throw new ArgumentNullException(nameof(model));
+
+            await _dbContext.Customers.InsertOneAsync(model);
+        }
     }
 }
 

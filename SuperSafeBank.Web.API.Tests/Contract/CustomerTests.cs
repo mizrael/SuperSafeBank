@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -28,7 +29,7 @@ namespace SuperSafeBank.Web.API.Tests.Contract
         }
 
         [Fact]
-        public async Task GetDetails_should_return_200_when_id_valid()
+        public async Task GetDetails_should_return_customer_details()
         {
             var customerDetails = new Core.Queries.Models.CustomerDetails(Guid.NewGuid(),
                 "test", "customer", "customer@details.com", null, Domain.Money.Zero(Domain.Currency.CanadianDollar));
@@ -49,6 +50,33 @@ namespace SuperSafeBank.Web.API.Tests.Contract
             result.Email.Should().Be(customerDetails.Email);
             result.Accounts.Should().NotBeNull().And.BeEmpty();
             result.TotalBalance.Should().Be(customerDetails.TotalBalance);
+        }
+
+        [Fact]
+        public async Task GetArchive_should_return_customers_archive()
+        {
+            var customerItem = new Core.Queries.Models.CustomerArchiveItem(
+                Guid.NewGuid(),
+                "test", "customer", null);
+            await _fixture.QueryModelsSeeder.CreateCustomerArchiveItem(customerItem);
+
+            var endpoint = $"customers/";
+            var response = await _fixture.HttpClient.GetAsync(endpoint);
+            response.Should().NotBeNull();
+            response.IsSuccessStatusCode.Should().BeTrue();
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+            var result = await response.Content.ReadAsAsync<Core.Queries.Models.CustomerArchiveItem[]>();
+            result.Should().NotBeNull();
+            result.Length.Should().BeGreaterThan(0);
+
+            var customer = result.FirstOrDefault(c => c.Id == customerItem.Id);
+            customer.Should().NotBeNull();
+
+            customer.Id.Should().Be(customerItem.Id);
+            customer.Firstname.Should().Be(customerItem.Firstname);
+            customer.Lastname.Should().Be(customerItem.Lastname);
+            customer.Accounts.Should().NotBeNull().And.BeEmpty();
         }
 
         [Fact]
