@@ -11,7 +11,7 @@ namespace SuperSafeBank.Web.API.Tests.Fixtures
         where TStartup : class
     {
         private readonly IConfigurationStrategy _configurationStrategy;
-
+        
         public WebApiFixture()
         {
 
@@ -41,6 +41,7 @@ namespace SuperSafeBank.Web.API.Tests.Fixtures
                         throw new Exception("configuration strategy not set");
 
                     _configurationStrategy.OnConfigureAppConfiguration(configurationBuilder);
+                    this.QueryModelsSeeder = _configurationStrategy.CreateSeeder();
                 })
                 .UseSerilog()
                 .UseStartup<TStartup>();
@@ -62,5 +63,6 @@ namespace SuperSafeBank.Web.API.Tests.Fixtures
         }
 
         public HttpClient HttpClient { get; private set; }
+        public IQueryModelsSeeder QueryModelsSeeder { get; private set; }
     }
 }

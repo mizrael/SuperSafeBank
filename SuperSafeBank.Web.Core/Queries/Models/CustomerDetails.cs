@@ -18,16 +18,15 @@ namespace SuperSafeBank.Web.Core.Queries.Models
             Firstname = firstname;
             Lastname = lastname;
             Email = email;
-            Accounts = (accounts ?? Enumerable.Empty<Guid>());
+            Accounts = (accounts ?? Enumerable.Empty<Guid>()).ToArray();
             TotalBalance = totalBalance;
         }
 
-        [JsonProperty("id")]
         public Guid Id { get; private set; }
         public string Firstname { get; private set; }
         public string Lastname { get; private set; }
         public string Email { get; private set; }
-        public IEnumerable<Guid> Accounts { get; private set; }
+        public Guid[] Accounts { get; private set; }
         public Money TotalBalance {get;private set; }
     }
 }

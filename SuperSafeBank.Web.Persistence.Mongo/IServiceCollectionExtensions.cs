@@ -31,6 +31,9 @@ namespace SuperSafeBank.Web.Persistence.Mongo
 
         public static IServiceCollection AddMongoDb(this IServiceCollection services, IConfiguration configuration)
         {
+            //https://stackoverflow.com/questions/63443445/trouble-with-mongodb-c-sharp-driver-when-performing-queries-using-guidrepresenta
+            BsonDefaults.GuidRepresentationMode = GuidRepresentationMode.V3;
+
             BsonSerializer.RegisterSerializationProvider(new CustomSerializationProvider());
             
             return services.AddSingleton(ctx =>

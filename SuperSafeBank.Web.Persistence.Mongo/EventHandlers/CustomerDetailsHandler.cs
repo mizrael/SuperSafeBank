@@ -39,6 +39,7 @@ namespace SuperSafeBank.Web.Persistence.Mongo.EventHandlers
                 .Set(a => a.Firstname, @event.Event.Firstname)
                 .Set(a => a.Lastname, @event.Event.Lastname)
                 .Set(a => a.Email, @event.Event.Email)
+                .Set(a => a.Accounts, new System.Guid[] { })
                 .Set(a => a.TotalBalance, new Money(Currency.CanadianDollar, 0));
 
             await _db.CustomersDetails.UpdateOneAsync(filter,

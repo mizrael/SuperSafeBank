@@ -32,7 +32,8 @@ namespace SuperSafeBank.Web.Persistence.Mongo.EventHandlers
             var update = Builders<CustomerArchiveItem>.Update
                 .Set(a => a.Id, @event.Event.AggregateId)
                 .Set(a => a.Firstname, @event.Event.Firstname)
-                .Set(a => a.Lastname, @event.Event.Lastname);
+                .Set(a => a.Lastname, @event.Event.Lastname)                
+                .Set(a => a.Accounts, new System.Guid[] { });
 
             await _db.Customers.UpdateOneAsync(filter,
                 cancellationToken: cancellationToken,

@@ -28,6 +28,30 @@ namespace SuperSafeBank.Web.API.Tests.Contract
         }
 
         [Fact]
+        public async Task GetDetails_should_return_200_when_id_valid()
+        {
+            var customerDetails = new Core.Queries.Models.CustomerDetails(Guid.NewGuid(),
+                "test", "customer", "customer@details.com", null, Domain.Money.Zero(Domain.Currency.CanadianDollar));
+
+            await _fixture.QueryModelsSeeder.CreateCustomerDetails(customerDetails);
+
+            var endpoint = $"customers/{customerDetails.Id}";
+            var response = await _fixture.HttpClient.GetAsync(endpoint);
+            response.Should().NotBeNull();
+            response.IsSuccessStatusCode.Should().BeTrue();
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+            var result = await response.Content.ReadAsAsync<Core.Queries.Models.CustomerDetails>();
+            
+            result.Id.Should().Be(customerDetails.Id);
+            result.Firstname.Should().Be(customerDetails.Firstname);            
+            result.Lastname.Should().Be(customerDetails.Lastname);
+            result.Email.Should().Be(customerDetails.Email);
+            result.Accounts.Should().NotBeNull().And.BeEmpty();
+            result.TotalBalance.Should().Be(customerDetails.TotalBalance);
+        }
+
+        [Fact]
         public async Task Post_should_create_customer()
         {
             var payload = new

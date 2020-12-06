@@ -12,7 +12,7 @@ namespace SuperSafeBank.Web.API.Tests.Fixtures
         private string _commandsDbName;
         private string _queryDbName;
         private string _queryDbConnectionString;
-
+        
         public void OnConfigureAppConfiguration(IConfigurationBuilder configurationBuilder)
         {
             configurationBuilder.AddInMemoryCollection(new[]
@@ -25,18 +25,20 @@ namespace SuperSafeBank.Web.API.Tests.Fixtures
             var cfg = configurationBuilder.Build();
             _queryDbName = cfg["queryDbName"];
             _commandsDbName = cfg["commandsDbName"];
-            _queryDbConnectionString = cfg.GetConnectionString("mongo");
+            _queryDbConnectionString = cfg.GetConnectionString("mongo");            
         }
 
         public void Dispose()
         {
             if (!string.IsNullOrWhiteSpace(_queryDbConnectionString))
             {
-                var client = new MongoClient(_queryDbConnectionString);                
+                var client = new MongoClient(_queryDbConnectionString);
                 client.DropDatabase(_queryDbName);
-                client.DropDatabase(_commandsDbName);
+                client.DropDatabase(_commandsDbName);               
             }
         }
+
+        public IQueryModelsSeeder CreateSeeder() => new OnPremiseQueryModelsSeeder(_queryDbConnectionString, _queryDbName);
     }
 }
 
