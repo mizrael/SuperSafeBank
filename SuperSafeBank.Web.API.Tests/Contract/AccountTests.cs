@@ -28,6 +28,30 @@ namespace SuperSafeBank.Web.API.Tests.Contract
         }
 
         [Fact]
+        public async Task GetDetails_should_return_account_details()
+        {
+            var expectedAccount = new Core.Queries.Models.AccountDetails(Guid.NewGuid(), Guid.NewGuid(),
+                "John", "Doe", new Domain.Money(Domain.Currency.CanadianDollar, 42), 1);
+
+            await _fixture.QueryModelsSeeder.CreateAccountDetails(expectedAccount);
+
+            var endpoint = $"accounts/{expectedAccount.Id}";
+            var response = await _fixture.HttpClient.GetAsync(endpoint);
+            response.Should().NotBeNull();
+            response.IsSuccessStatusCode.Should().BeTrue();
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+            var account = await response.Content.ReadAsAsync<Core.Queries.Models.AccountDetails>();
+            account.Should().NotBeNull();
+            account.Id.Should().Be(expectedAccount.Id);
+            account.OwnerFirstName.Should().Be(expectedAccount.OwnerFirstName);
+            account.OwnerLastName.Should().Be(expectedAccount.OwnerLastName);
+            account.OwnerId.Should().Be(expectedAccount.OwnerId);
+            account.Version.Should().Be(expectedAccount.Version);
+            account.Balance.Should().Be(expectedAccount.Balance);
+        }
+
+        [Fact]
         public async Task Post_should_not_create_account_if_customer_invalid()
         {
             var customerId = Guid.NewGuid();
