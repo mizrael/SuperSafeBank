@@ -23,6 +23,4 @@ The system is hosted on Azure, using [CosmosDB](https://docs.microsoft.com/en-us
 The on-premise infrastructure can be spin up by simply running `docker-compose up` from the root folder. 
 
 ## Give a Star! ⭐️
-Did you like this project? Give it a star, fork it, send me a PR or buy me a coffee!
-
-<a href="https://www.buymeacoffee.com/davideguida" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" width="200"  ></a>
+Did you like this project? Give it a star, fork it, send me a PR or sponsor me!
