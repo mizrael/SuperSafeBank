@@ -31,7 +31,7 @@ namespace SuperSafeBank.Web.API.Tests.Contract
         public async Task GetDetails_should_return_account_details()
         {
             var expectedAccount = new Core.Queries.Models.AccountDetails(Guid.NewGuid(), Guid.NewGuid(),
-                "John", "Doe", new Domain.Money(Domain.Currency.CanadianDollar, 42), 1);
+                "John", "Doe", new Domain.Money(Domain.Currency.CanadianDollar, 42));
 
             await _fixture.QueryModelsSeeder.CreateAccountDetails(expectedAccount);
 
@@ -47,7 +47,6 @@ namespace SuperSafeBank.Web.API.Tests.Contract
             account.OwnerFirstName.Should().Be(expectedAccount.OwnerFirstName);
             account.OwnerLastName.Should().Be(expectedAccount.OwnerLastName);
             account.OwnerId.Should().Be(expectedAccount.OwnerId);
-            account.Version.Should().Be(expectedAccount.Version);
             account.Balance.Should().Be(expectedAccount.Balance);
         }
 

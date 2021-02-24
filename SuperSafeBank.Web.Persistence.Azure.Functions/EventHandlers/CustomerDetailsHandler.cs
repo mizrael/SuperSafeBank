@@ -79,7 +79,8 @@ namespace SuperSafeBank.Web.Persistence.Azure.Functions.EventHandlers
                 null, cancellationToken);
 
             var customer = response.Resource;
-            var balance = (customer.TotalBalance ?? new Money(Currency.CanadianDollar, 0));
+            
+            var balance = customer.TotalBalance ?? Money.Zero(Currency.CanadianDollar);
             var newBalance = balance.Subtract(@event.Event.Amount.Value);
 
             var updatedCustomer = new CustomerDetails(customer.Id, customer.Firstname, customer.Lastname, customer.Email, customer.Accounts, newBalance);
@@ -95,7 +96,8 @@ namespace SuperSafeBank.Web.Persistence.Azure.Functions.EventHandlers
                 null, cancellationToken);
 
             var customer = response.Resource;
-            var balance = (customer.TotalBalance ?? new Money(Currency.CanadianDollar, 0));
+
+            var balance = customer.TotalBalance ?? Money.Zero(Currency.CanadianDollar);
             var newBalance = balance.Add(@event.Event.Amount.Value);
 
             var updatedCustomer = new CustomerDetails(customer.Id, customer.Firstname, customer.Lastname, customer.Email, customer.Accounts, newBalance);

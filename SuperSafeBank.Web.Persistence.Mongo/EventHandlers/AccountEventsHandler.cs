@@ -46,7 +46,6 @@ namespace SuperSafeBank.Web.Persistence.Mongo.EventHandlers
 
             var update = Builders<AccountDetails>.Update
                 .Set(a => a.Id, @event.Event.AggregateId)
-                .Set(a => a.Version, @event.Event.AggregateVersion)
                 .Set(a => a.OwnerFirstName, customer.Firstname)
                 .Set(a => a.OwnerLastName, customer.Lastname)
                 .Set(a => a.OwnerId, @event.Event.OwnerId)
@@ -65,11 +64,9 @@ namespace SuperSafeBank.Web.Persistence.Mongo.EventHandlers
             _logger.LogInformation("processing deposit of {Amount} on account {AggregateId} ...", @event.Event.Amount, @event.Event.AggregateId);
 
             var filter = Builders<AccountDetails>.Filter
-                .And(Builders<AccountDetails>.Filter.Eq(a => a.Id, @event.Event.AggregateId),
-                       Builders<AccountDetails>.Filter.Eq(a => a.Version, @event.Event.AggregateVersion-1));
+                .And(Builders<AccountDetails>.Filter.Eq(a => a.Id, @event.Event.AggregateId));
 
             var update = Builders<AccountDetails>.Update
-                .Set(a => a.Version, @event.Event.AggregateVersion)
                 .Inc(a => a.Balance.Value, @event.Event.Amount.Value);
             var res = await _db.AccountsDetails.FindOneAndUpdateAsync(
                 filter: filter,
@@ -88,11 +85,9 @@ namespace SuperSafeBank.Web.Persistence.Mongo.EventHandlers
             _logger.LogInformation("processing withdrawal of {Amount} on account {AggregateId} ...", @event.Event.Amount, @event.Event.AggregateId);
 
             var filter = Builders<AccountDetails>.Filter
-                .And(Builders<AccountDetails>.Filter.Eq(a => a.Id, @event.Event.AggregateId),
-                    Builders<AccountDetails>.Filter.Eq(a => a.Version, @event.Event.AggregateVersion-1));
+                .And(Builders<AccountDetails>.Filter.Eq(a => a.Id, @event.Event.AggregateId));
 
             var update = Builders<AccountDetails>.Update
-                .Set(a => a.Version, @event.Event.AggregateVersion)
                 .Inc(a => a.Balance.Value, -@event.Event.Amount.Value);
             var res = await _db.AccountsDetails.FindOneAndUpdateAsync(
                 filter: filter,

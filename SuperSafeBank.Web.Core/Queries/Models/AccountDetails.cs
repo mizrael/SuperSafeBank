@@ -8,14 +8,13 @@ namespace SuperSafeBank.Web.Core.Queries.Models
     {
         private AccountDetails() { }
         
-        public AccountDetails(Guid id, Guid ownerId, string ownerFirstName, string ownerLastName, Money balance, long version)
+        public AccountDetails(Guid id, Guid ownerId, string ownerFirstName, string ownerLastName, Money balance)
         {
             Id = id;
             OwnerId = ownerId;
             OwnerFirstName = ownerFirstName;
             OwnerLastName = ownerLastName;
             Balance = balance;
-            Version = version;
         }
 
         [JsonProperty("id")]
@@ -24,6 +23,5 @@ namespace SuperSafeBank.Web.Core.Queries.Models
         public string OwnerFirstName { get; private set; }
         public string OwnerLastName { get; private set; }
         public Money Balance { get; private set; }
-        public long Version { get; private set; }
     }
 }
