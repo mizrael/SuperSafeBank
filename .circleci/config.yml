@@ -23,6 +23,11 @@ jobs:
     steps:
       - checkout
 
+      - run:
+          name: Install dependencies
+          command: |
+            apt-get install gnupg
+
       - azure-cli/install
 
       - run:
