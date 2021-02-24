@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -11,6 +12,8 @@ using Xunit;
 
 namespace SuperSafeBank.Persistence.Azure.Tests.Integration
 {
+    [Trait("Category", "Integration")]
+    [Category("Integration")]
     public class EventsRepositoryTests : IClassFixture<CosmosFixture>
     {
         private readonly CosmosFixture _fixture;

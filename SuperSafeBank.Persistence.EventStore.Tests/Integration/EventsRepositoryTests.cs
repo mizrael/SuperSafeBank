@@ -8,6 +8,7 @@ using SuperSafeBank.Core;
 
 namespace SuperSafeBank.Persistence.EventStore.Tests.Integration
 {
+    
     public class EventsRepositoryTests : IClassFixture<Fixtures.EventStoreFixture>
     {
         private readonly Fixtures.EventStoreFixture _fixture;

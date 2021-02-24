@@ -1,10 +1,13 @@
 using System;
+using System.ComponentModel;
 using System.Threading.Tasks;
 using Xunit;
 using FluentAssertions;
 
 namespace SuperSafeBank.Persistence.Mongo.Tests.Integration
 {
+    [Trait("Category", "Integration")]
+    [Category("Integration")]
     public class CustomerEmailsServiceTests : IClassFixture<Fixtures.MongoFixture>
     {
         private readonly Fixtures.MongoFixture _fixture;

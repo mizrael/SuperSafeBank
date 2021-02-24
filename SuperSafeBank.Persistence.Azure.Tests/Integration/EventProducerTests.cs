@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
@@ -14,6 +15,8 @@ using Xunit;
 
 namespace SuperSafeBank.Persistence.Azure.Tests.Integration
 {
+    [Trait("Category", "Integration")]
+    [Category("Integration")]
     public class EventProducerTests : IDisposable
     {
         private static readonly JsonEventSerializer _eventSerializer;

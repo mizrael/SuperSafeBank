@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -8,6 +9,8 @@ using Xunit;
 
 namespace SuperSafeBank.Web.API.Tests.Contract
 {
+    [Trait("Category", "E2E")]
+    [Category("E2E")]
     public class AccountTests : IClassFixture<WebApiFixture<Startup>>
     {
         private readonly WebApiFixture<Startup> _fixture;

@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using System;
+using System.ComponentModel;
 using System.Threading.Tasks;
 using Xunit;
 using FluentAssertions;
@@ -7,6 +8,8 @@ using FluentAssertions;
 namespace SuperSafeBank.Persistence.EventStore.Tests.Integration
 {
 
+    [Trait("Category", "Integration")]
+    [Category("Integration")]
     public class EventStoreConnectionWrapperTests : IClassFixture<Fixtures.EventStoreFixture>
     {
         private readonly Fixtures.EventStoreFixture _fixture;
