@@ -24,16 +24,21 @@ jobs:
       - checkout
 
       - run:
+          name: Install dependencies
+          command: |
+            wget https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
+            dpkg -i packages-microsoft-prod.deb
+            apt-get update -y && apt-get upgrade -y
+            apt-get install gnupg2 -y
+            apt-get install -y dotnet-sdk-3.1
+
+      - run:
           name: Build solution
           command: |
             dotnet restore
             dotnet build --no-restore
 
-      - run:
-          name: Install dependencies
-          command: |
-            apt-get update -y && apt-get upgrade -y
-            apt-get install gnupg2 -y
+      
 
       - azure-cli/install
 
