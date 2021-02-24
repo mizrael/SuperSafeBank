@@ -6,7 +6,7 @@ orbs:
 jobs:
   build:
     docker:
-      - image: mcr.microsoft.com/dotnet/sdk:5.0.101-focal-amd64
+      - image: mcr.microsoft.com/dotnet/sdk:5.0
       - image: eventstore/eventstore
         command: [--enable-external-tcp, --ext-ip=0.0.0.0, --int-ip=0.0.0.0, --insecure]
         environment:
