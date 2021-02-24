@@ -24,16 +24,16 @@ jobs:
       - checkout
 
       - run:
+          name: Build solution
+          command: dotnet build
+
+      - run:
           name: Install dependencies
           command: |
             apt-get update -y && apt-get upgrade -y
             apt-get install gnupg2 -y
 
       - azure-cli/install
-
-      - run:
-          name: Build solution
-          command: dotnet build
 
       - run:
           name: Test
