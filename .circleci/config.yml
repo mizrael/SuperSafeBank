@@ -25,7 +25,9 @@ jobs:
 
       - run:
           name: Build solution
-          command: dotnet build
+          command: |
+            dotnet restore
+            dotnet build --no-restore
 
       - run:
           name: Install dependencies
