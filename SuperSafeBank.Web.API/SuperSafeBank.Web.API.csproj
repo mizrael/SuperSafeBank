@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <Configurations>Debug;Release;DebugOnPremise;DebugAzure;</Configurations>
     <UserSecretsId>70be17c8-2171-4e52-b990-52de4dd6ec94</UserSecretsId>
   </PropertyGroup>
