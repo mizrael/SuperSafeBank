@@ -26,7 +26,8 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            apt-get install gnupg
+            apt-get update && apt-get upgrade -y
+            apt-get install gnupg2
 
       - azure-cli/install
 
