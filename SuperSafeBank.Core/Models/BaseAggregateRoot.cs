@@ -47,7 +47,7 @@ namespace SuperSafeBank.Core.Models
             CTor = aggregateType.GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public,
                 null, new Type[0], new ParameterModifier[0]);
             if (null == CTor)
-                throw new AggregateException($"Unable to find required private parameterless constructor for Aggregate of type '{aggregateType.Name}'");
+                throw new InvalidOperationException($"Unable to find required private parameterless constructor for Aggregate of type '{aggregateType.Name}'");
         }
 
         public static TA Create(IEnumerable<IDomainEvent<TKey>> events)
