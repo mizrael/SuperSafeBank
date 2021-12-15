@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using SuperSafeBank.Core.Models;
 
 namespace SuperSafeBank.Domain
 {
-    public class Currency : ValueObject<Currency>
+    public record Currency
     {
         public Currency(string name, string symbol)
         {
@@ -19,13 +18,6 @@ namespace SuperSafeBank.Domain
 
         public string Name { get; }
         public string Symbol { get; }
-
-        protected override bool EqualsCore(Currency other)
-        {
-            return this.Symbol == other.Symbol;
-        }
-
-        protected override int GetHashCodeCore() => this.Symbol.GetHashCode();
 
         public override string ToString()
         {

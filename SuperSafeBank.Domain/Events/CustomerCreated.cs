@@ -3,7 +3,7 @@ using SuperSafeBank.Core.Models;
 
 namespace SuperSafeBank.Domain.Events
 {
-    public class CustomerCreated : BaseDomainEvent<Customer, Guid>
+    public record CustomerCreated : BaseDomainEvent<Customer, Guid>
     {
         /// <summary>
         /// for deserialization

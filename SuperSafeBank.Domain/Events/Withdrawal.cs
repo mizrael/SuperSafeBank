@@ -3,7 +3,7 @@ using SuperSafeBank.Core.Models;
 
 namespace SuperSafeBank.Domain.Events
 {
-    public class Withdrawal : BaseDomainEvent<Account, Guid>
+    public record Withdrawal : BaseDomainEvent<Account, Guid>
     {
         /// <summary>
         /// for deserialization

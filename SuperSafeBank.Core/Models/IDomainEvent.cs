@@ -6,6 +6,6 @@ namespace SuperSafeBank.Core.Models
     {
         long AggregateVersion { get; }
         TKey AggregateId { get; }
-        DateTime Timestamp { get; }
+        DateTime When { get; }
     }
 }

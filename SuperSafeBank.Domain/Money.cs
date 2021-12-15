@@ -1,9 +1,8 @@
 ﻿using System;
-using SuperSafeBank.Core.Models;
 
 namespace SuperSafeBank.Domain
 {
-    public class Money : ValueObject<Money>
+    public record Money
     {
         public Money(Currency currency, decimal value)
         {
@@ -17,12 +16,6 @@ namespace SuperSafeBank.Domain
         public Money Subtract(decimal amount) => new Money(this.Currency, this.Value - amount);
 
         public Money Add(decimal amount) => new Money(this.Currency, this.Value + amount);
-
-        protected override int GetHashCodeCore() => HashCode.Combine(this.Value, this.Currency);
-
-        protected override bool EqualsCore(Money other)
-            => this.Value == other.Value &&
-               this.Currency == other.Currency;
 
         public override string ToString() => $"{Value} {Currency}";
 

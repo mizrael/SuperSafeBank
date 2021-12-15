@@ -3,7 +3,7 @@ using SuperSafeBank.Core.Models;
 
 namespace SuperSafeBank.Persistence.Tests.Models
 {
-    public class DummyEvent : BaseDomainEvent<DummyAggregate, Guid>
+    public record DummyEvent : BaseDomainEvent<DummyAggregate, Guid>
     {
         private DummyEvent() { }
         public DummyEvent(DummyAggregate aggregate, string type) : base(aggregate)
