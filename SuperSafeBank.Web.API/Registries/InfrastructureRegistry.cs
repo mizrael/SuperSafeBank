@@ -19,6 +19,7 @@ using MongoDB.Driver;
 
 #if OnAzure
 using SuperSafeBank.Persistence.Azure;
+using SuperSafeBank.Transport.Azure;
 using SuperSafeBank.Web.Persistence.Azure.QueryHandlers;
 using SuperSafeBank.Web.Persistence.Azure.Services;
 #endif
@@ -27,31 +28,15 @@ namespace SuperSafeBank.Web.API.Registries
 {
     public static class InfrastructureRegistry
     {
-        public static IServiceCollection AddInfrastructure(this IServiceCollection services,
-            IConfiguration config)
+        public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration config)
         {
 
 #if OnPremise
-            services.AddOnPremiseInfrastructure(config);
-            services.AddSingleton<ICustomerEmailsService>(ctx=>
-            {
-                var dbName = config["commandsDbName"];
-                var client = ctx.GetRequiredService<MongoClient>();
-                var database = client.GetDatabase(dbName);
-                return new CustomerEmailsService(database);
-            });
+            services.AddOnPremise(config);
 #endif
 
 #if OnAzure
-            services.AddAzureInfrastructure(config);
-            services.Scan(scan =>
-            {
-                scan.FromAssembliesOf(typeof(CustomersArchiveHandler))
-                    .RegisterHandlers(typeof(IRequestHandler<>))
-                    .RegisterHandlers(typeof(IRequestHandler<,>))
-                    .RegisterHandlers(typeof(INotificationHandler<>));
-            })
-                .AddSingleton<ICustomerEmailsService, CustomerEmailsService>();
+            services.AddAzure(config);
 #endif
             return services                
                 .AddEventsService<Customer, Guid>()
@@ -60,7 +45,7 @@ namespace SuperSafeBank.Web.API.Registries
 
 #if OnPremise
 
-        private static IServiceCollection AddOnPremiseInfrastructure(this IServiceCollection services, IConfiguration config)
+        private static IServiceCollection AddOnPremise(this IServiceCollection services, IConfiguration config)
         {
             services.Scan(scan =>
             {
@@ -78,8 +63,30 @@ namespace SuperSafeBank.Web.API.Registries
             var eventstoreConnStr = config.GetConnectionString("eventstore");
 
             return services.AddKafka(consumerConfig)
-                .AddEventStore(eventstoreConnStr);
+                .AddEventStore(eventstoreConnStr)
+                .AddSingleton<ICustomerEmailsService>(ctx=>
+                {
+                    var dbName = config["commandsDbName"];
+                    var client = ctx.GetRequiredService<MongoClient>();
+                    var database = client.GetDatabase(dbName);
+                    return new CustomerEmailsService(database);
+                });
         }
+
+#endif
+#if OnAzure
+        
+        private static IServiceCollection AddAzure(this IServiceCollection services,IConfiguration config)
+            =>services.AddAzurePersistence(config)
+                    .AddAzureTransport(config)
+                    .Scan(scan =>
+                    {
+                        scan.FromAssembliesOf(typeof(CustomersArchiveHandler))
+                            .RegisterHandlers(typeof(IRequestHandler<>))
+                            .RegisterHandlers(typeof(IRequestHandler<,>))
+                            .RegisterHandlers(typeof(INotificationHandler<>));
+                    })
+                .AddSingleton<ICustomerEmailsService, CustomerEmailsService>();
 
 #endif
 

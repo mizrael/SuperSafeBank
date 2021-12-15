@@ -67,10 +67,8 @@ namespace SuperSafeBank.Persistence.Azure
 
                 foreach (var @event in aggregateRoot.Events)
                 {
-                    var data = _eventSerializer.Serialize(@event);
-                    var eventType = @event.GetType();
-                    var eventData = EventData<TKey>.Create(aggregateRoot.Id, aggregateRoot.Version,
-                        eventType.AssemblyQualifiedName, data);
+                    var eventData = EventData<TKey>.Create(@event, _eventSerializer);
+
                     transaction.CreateItem(eventData);
                 }
 

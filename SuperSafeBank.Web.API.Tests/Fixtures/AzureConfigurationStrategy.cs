@@ -1,12 +1,10 @@
-
-using System.Linq;
 #if OnAzure
+using System.Linq;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Azure.Cosmos;
-using Microsoft.Azure.ServiceBus.Management;
 using SuperSafeBank.Core.Models;
 using SuperSafeBank.Domain;
 

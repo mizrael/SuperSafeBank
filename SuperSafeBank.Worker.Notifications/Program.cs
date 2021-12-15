@@ -5,14 +5,13 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Formatting.Compact;
-#if OnPremise
-using Serilog.Sinks.Grafana.Loki;
-#endif
 using SuperSafeBank.Core;
 using SuperSafeBank.Domain;
 using SuperSafeBank.Domain.Events;
-using SuperSafeBank.Transport.Kafka;
 using SuperSafeBank.Worker.Notifications.ApiClients;
+using Serilog.Sinks.Grafana.Loki;
+using SuperSafeBank.Transport.Kafka;
+
 
 namespace SuperSafeBank.Worker.Notifications
 {
@@ -42,11 +41,8 @@ namespace SuperSafeBank.Worker.Notifications
                         .Enrich.WithProperty("Environment", ctx.HostingEnvironment.EnvironmentName)
                         .WriteTo.Console(new RenderedCompactJsonFormatter());
 
-#if OnPremise
-                    var connStr = ctx.Configuration.GetConnectionString("loki"); 
+                    var connStr = ctx.Configuration.GetConnectionString("loki");
                     cfg.WriteTo.GrafanaLoki(connStr);
-#endif
-
                 })
                 .ConfigureServices((hostContext, services) =>
                 {

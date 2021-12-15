@@ -7,7 +7,7 @@ using SuperSafeBank.Core.EventBus;
 using SuperSafeBank.Core.Models;
 using Azure.Messaging.ServiceBus;
 
-namespace SuperSafeBank.Persistence.Azure
+namespace SuperSafeBank.Transport.Azure
 {
     public class EventProducer<TA, TKey> : IEventProducer<TA, TKey>, IAsyncDisposable
         where TA : IAggregateRoot<TKey>
