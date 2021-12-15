@@ -37,7 +37,7 @@
 
   <ItemGroup Condition="$(DefineConstants.Contains('OnPremise'))">
     <ProjectReference Include="..\SuperSafeBank.Persistence.EventStore\SuperSafeBank.Persistence.EventStore.csproj" />
-    <ProjectReference Include="..\SuperSafeBank.Web.Persistence.Mongo\SuperSafeBank.Web.Persistence.Mongo.csproj" />
+	<ProjectReference Include="..\SuperSafeBank.Web.Persistence.Mongo\SuperSafeBank.Web.Persistence.Mongo.csproj" />
 	<ProjectReference Include="..\SuperSafeBank.Transport.Kafka\SuperSafeBank.Transport.Kafka.csproj" />
   </ItemGroup>
 

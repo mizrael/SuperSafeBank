@@ -6,10 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Remove="C:\Users\davidguida\.nuget\packages\microsoft.azure.cosmos\3.23.0\contentFiles\any\netstandard2.0\ThirdPartyNotice.txt" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.23.0" />
   </ItemGroup>
 

@@ -58,4 +58,8 @@
     <ProjectReference Include="..\SuperSafeBank.Web.API\SuperSafeBank.Web.API.csproj" />
   </ItemGroup>
 
+	<ItemGroup Condition="$(DefineConstants.Contains('OnPremise'))">
+		<ProjectReference Include="..\SuperSafeBank.Web.Persistence.Mongo\SuperSafeBank.Web.Persistence.Mongo.csproj" />
+	</ItemGroup>
+
 </Project>

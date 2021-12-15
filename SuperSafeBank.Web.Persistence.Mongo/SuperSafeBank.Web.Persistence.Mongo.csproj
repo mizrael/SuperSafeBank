@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-    <Configurations>Debug;Release;DebugOnPremise;DebugAzure</Configurations>
+    <Configurations>Debug;Release;DebugOnPremise</Configurations>
   </PropertyGroup>
 
   <ItemGroup>
