@@ -2,8 +2,8 @@ using System;
 using System.Runtime.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
+using Azure.Messaging.ServiceBus;
 using MediatR;
-using Microsoft.Azure.ServiceBus;
 using SuperSafeBank.Core;
 using SuperSafeBank.Core.EventBus;
 
@@ -20,10 +20,12 @@ namespace SuperSafeBank.Web.Persistence.Azure.Functions.Functions
             _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
         }
 
-        protected async Task HandleMessage(Message msg)
+        protected async Task HandleMessage(ServiceBusMessage msg)
         {
-            var eventType = msg.UserProperties["type"] as string;
-            var domainEvent = _eventSerializer.Deserialize<Guid>(eventType, msg.Body);
+            var eventType = msg.ApplicationProperties["type"] as string;
+
+            //TODO: evaluate move to async deserialization to avoid .ToArray() call
+            var domainEvent = _eventSerializer.Deserialize<Guid>(eventType, msg.Body.ToArray());
             if (null == domainEvent)
                 throw new SerializationException($"unable to deserialize event {eventType} : {msg.Body}");
 

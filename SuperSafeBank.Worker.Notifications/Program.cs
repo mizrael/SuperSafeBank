@@ -5,7 +5,9 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Formatting.Compact;
-using Serilog.Sinks.Loki;
+#if OnPremise
+using Serilog.Sinks.Grafana.Loki;
+#endif
 using SuperSafeBank.Core;
 using SuperSafeBank.Domain;
 using SuperSafeBank.Domain.Events;
@@ -34,14 +36,17 @@ namespace SuperSafeBank.Worker.Notifications
                 })
                 .UseSerilog((ctx, cfg) =>
                 {
-                    var credentials = new NoAuthCredentials(ctx.Configuration.GetConnectionString("loki"));
-                    
                     cfg.MinimumLevel.Verbose()
                         .Enrich.FromLogContext()
                         .Enrich.WithProperty("Application", ctx.HostingEnvironment.ApplicationName)
                         .Enrich.WithProperty("Environment", ctx.HostingEnvironment.EnvironmentName)
-                        .WriteTo.Console(new RenderedCompactJsonFormatter())
-                        .WriteTo.LokiHttp(credentials);
+                        .WriteTo.Console(new RenderedCompactJsonFormatter());
+
+#if OnPremise
+                    var connStr = ctx.Configuration.GetConnectionString("loki"); 
+                    cfg.WriteTo.GrafanaLoki(connStr);
+#endif
+
                 })
                 .ConfigureServices((hostContext, services) =>
                 {

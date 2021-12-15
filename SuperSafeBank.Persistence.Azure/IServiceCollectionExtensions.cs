@@ -1,4 +1,5 @@
 ﻿using System;
+using Azure.Messaging.ServiceBus;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,7 +8,6 @@ using SuperSafeBank.Core;
 using SuperSafeBank.Core.EventBus;
 using SuperSafeBank.Core.Models;
 using SuperSafeBank.Domain;
-using SuperSafeBank.Domain.Services;
 
 namespace SuperSafeBank.Persistence.Azure
 {
@@ -23,10 +23,10 @@ namespace SuperSafeBank.Persistence.Azure
                     };
                     var connectionString = config.GetConnectionString("cosmos");
                     return new CosmosClient(connectionString, options);
-                }).AddSingleton<ITopicClientFactory>(ctx =>
+                }).AddSingleton(ctx =>
                 {
                     var connectionString = config.GetConnectionString("producer");
-                    return new TopicClientFactory(connectionString);
+                    return new ServiceBusClient(connectionString);
                 }).AddEventsProducer<Customer, Guid>(config)
                 .AddEventsProducer<Account, Guid>(config)
                 .AddEventsRepository<Customer, Guid>(config)
@@ -56,7 +56,7 @@ namespace SuperSafeBank.Persistence.Azure
             var topicsBaseName = config["topicsBaseName"];
             return services.AddSingleton<IEventProducer<TA, TK>>(ctx =>
             {
-                var clientFactory = ctx.GetRequiredService<ITopicClientFactory>();
+                var clientFactory = ctx.GetRequiredService<ServiceBusClient>();
                 var eventDeserializer = ctx.GetRequiredService<IEventSerializer>();
                 var logger = ctx.GetRequiredService<ILogger<EventProducer<TA, TK>>>();
                 return new EventProducer<TA, TK>(clientFactory, topicsBaseName, eventDeserializer, logger);

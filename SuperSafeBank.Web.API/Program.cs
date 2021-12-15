@@ -4,7 +4,10 @@ using Microsoft.Extensions.Hosting;
 using Serilog;
 using Serilog.Events;
 using Serilog.Formatting.Compact;
-using Serilog.Sinks.Loki;
+
+#if OnPremise
+using Serilog.Sinks.Grafana.Loki;
+#endif
 
 namespace SuperSafeBank.Web.API
 {
@@ -37,14 +40,17 @@ namespace SuperSafeBank.Web.API
                     webBuilder.UseStartup<Startup>();
                 }).UseSerilog((ctx, cfg) =>
                 {
-                    var credentials = new NoAuthCredentials(ctx.Configuration.GetConnectionString("loki"));
-
                     cfg.MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
                         .Enrich.FromLogContext()
                         .Enrich.WithProperty("Application", ctx.HostingEnvironment.ApplicationName)
                         .Enrich.WithProperty("Environment", ctx.HostingEnvironment.EnvironmentName)
-                        .WriteTo.Console(new RenderedCompactJsonFormatter())
-                        .WriteTo.LokiHttp(credentials);
+                        .WriteTo.Console(new RenderedCompactJsonFormatter());
+
+#if OnPremise
+                    var connStr = ctx.Configuration.GetConnectionString("loki"); 
+                    cfg.WriteTo.GrafanaLoki(connStr);
+#endif
+
                 });
     }
 }

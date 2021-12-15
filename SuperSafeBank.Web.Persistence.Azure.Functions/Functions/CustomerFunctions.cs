@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
+using Azure.Messaging.ServiceBus;
 using MediatR;
-using Microsoft.Azure.ServiceBus;
 using Microsoft.Azure.WebJobs;
 using SuperSafeBank.Core;
 
@@ -13,7 +13,7 @@ namespace SuperSafeBank.Web.Persistence.Azure.Functions.Functions
         }
 
         [FunctionName(nameof(CustomerCreated))]
-        public async Task CustomerCreated([ServiceBusTrigger("aggregate-customer", "created", Connection = "AzureWebJobsServiceBus")]Message msg)
+        public async Task CustomerCreated([ServiceBusTrigger("aggregate-customer", "created", Connection = "AzureWebJobsServiceBus")] ServiceBusMessage msg)
         {
             await HandleMessage(msg);
         }
