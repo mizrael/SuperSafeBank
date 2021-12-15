@@ -39,7 +39,7 @@ namespace SuperSafeBank.Web.Persistence.Azure.Functions.EventHandlers
 
             var partitionKey = new PartitionKey(@event.Event.AggregateId.ToString());
 
-            var customer = new CustomerDetails(@event.Event.AggregateId, @event.Event.Firstname, @event.Event.Lastname, @event.Event.Email, null, new Money(Currency.CanadianDollar, 0));
+            var customer = new CustomerDetails(@event.Event.AggregateId, @event.Event.Firstname, @event.Event.Lastname, @event.Event.Email.Value, null, new Money(Currency.CanadianDollar, 0));
 
             var response = await _container.UpsertItemAsync(customer, partitionKey, cancellationToken: cancellationToken);
             if (response.StatusCode != HttpStatusCode.Created)

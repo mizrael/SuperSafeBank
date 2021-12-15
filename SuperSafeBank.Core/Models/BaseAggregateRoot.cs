@@ -26,16 +26,16 @@ namespace SuperSafeBank.Core.Models
             _events.Clear();
         }
 
-        protected void AddEvent(IDomainEvent<TKey> @event)
+        protected void Append(IDomainEvent<TKey> @event)
         {
             _events.Enqueue(@event);
            
-            this.Apply(@event);
+            this.When(@event);
 
             this.Version++;
         }
 
-        protected abstract void Apply(IDomainEvent<TKey> @event);
+        protected abstract void When(IDomainEvent<TKey> @event);
 
         #region Factory
 
@@ -59,7 +59,7 @@ namespace SuperSafeBank.Core.Models
             var baseAggregate =  result as BaseAggregateRoot<TA, TKey>;
             if (baseAggregate != null) 
                 foreach (var @event in events)
-                    baseAggregate.AddEvent(@event);
+                    baseAggregate.Append(@event);
 
             result.ClearEvents();
 

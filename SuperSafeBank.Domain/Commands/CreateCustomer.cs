@@ -42,8 +42,10 @@ namespace SuperSafeBank.Domain.Commands
 
             if (await _customerEmailsRepository.ExistsAsync(command.Email))
                 throw new ValidationException("Unable to create Customer", new ValidationError(nameof(CreateCustomer.Email), $"email '{command.Email}' already exists"));
+            
+            var email = new Email(command.Email);
 
-            var customer = new Customer(command.Id, command.FirstName, command.LastName, command.Email);
+            var customer = new Customer(command.Id, command.FirstName, command.LastName, email);
             await _eventsService.PersistAsync(customer);
             await _customerEmailsRepository.CreateAsync(command.Email, command.Id);
         }

@@ -16,7 +16,7 @@ namespace SuperSafeBank.Domain.Events
             OwnerId = account.OwnerId;
         }
 
-        public Money Amount { get; private set; }
-        public Guid OwnerId { get; private set; }
+        public Money Amount { get; init; }
+        public Guid OwnerId { get; init; }
     }
 }

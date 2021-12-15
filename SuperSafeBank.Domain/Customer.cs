@@ -8,27 +8,25 @@ namespace SuperSafeBank.Domain
     {
         private Customer() { }
         
-        public Customer(Guid id, string firstname, string lastname, string email) : base(id)
+        public Customer(Guid id, string firstname, string lastname, Email email) : base(id)
         {
             if(string.IsNullOrWhiteSpace(firstname))
-                throw new ArgumentOutOfRangeException(nameof(firstname));
+                throw new ArgumentNullException(nameof(firstname));
             if (string.IsNullOrWhiteSpace(lastname))
-                throw new ArgumentOutOfRangeException(nameof(lastname));
-            if (string.IsNullOrWhiteSpace(email))
-                throw new ArgumentOutOfRangeException(nameof(email));
-
+                throw new ArgumentNullException(nameof(lastname));
+            
             Firstname = firstname;
             Lastname = lastname;
-            Email = email;
+            Email = email ?? throw new ArgumentNullException(nameof(email));
 
-            this.AddEvent(new CustomerCreated(this));
+            this.Append(new CustomerCreated(this));
         }
 
         public string Firstname { get; private set; }
         public string Lastname { get; private set; }
-        public string Email { get; private set; } //TODO: use value object instead of string
+        public Email Email { get; private set; }
 
-        protected override void Apply(IDomainEvent<Guid> @event)
+        protected override void When(IDomainEvent<Guid> @event)
         {
             switch (@event)
             {
@@ -43,7 +41,7 @@ namespace SuperSafeBank.Domain
 
         public static Customer Create(string firstName, string lastName, string email)
         {
-            return new Customer(Guid.NewGuid(), firstName, lastName, email);
+            return new Customer(Guid.NewGuid(), firstName, lastName, new Email(email));
         }
     }
 }

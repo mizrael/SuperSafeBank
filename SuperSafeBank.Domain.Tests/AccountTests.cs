@@ -15,7 +15,7 @@ namespace SuperSafeBank.Domain.Tests
         public void Create_should_create_valid_Account_instance()
         {
             var currencyConverter = new FakeCurrencyConverter();
-            var customer = new Customer(Guid.NewGuid(), "lorem", "ipsum", "test@test.com");
+            var customer = Customer.Create("lorem", "ipsum", "test@test.com");
             var account = Account.Create(customer, Currency.CanadianDollar);
             account.Deposit(new Money(Currency.CanadianDollar, 10), currencyConverter);
             account.Deposit(new Money(Currency.CanadianDollar, 42), currencyConverter);

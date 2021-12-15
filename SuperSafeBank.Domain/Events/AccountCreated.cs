@@ -16,7 +16,7 @@ namespace SuperSafeBank.Domain.Events
             Currency = account.Balance.Currency;
         }
 
-        public Guid OwnerId { get; private set; }
-        public Currency Currency { get; private set; }
+        public Guid OwnerId { get; init; }
+        public Currency Currency { get; init; }
     }
 }

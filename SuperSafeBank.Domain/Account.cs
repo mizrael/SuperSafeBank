@@ -19,7 +19,7 @@ namespace SuperSafeBank.Domain
             this.OwnerId = owner.Id;
             this.Balance = Money.Zero(currency);
             
-            this.AddEvent(new AccountCreated(this));
+            this.Append(new AccountCreated(this));
         }
 
         public Guid OwnerId { get; private set; }
@@ -34,7 +34,7 @@ namespace SuperSafeBank.Domain
             if (normalizedAmount.Value > this.Balance.Value)
                 throw new AccountTransactionException($"unable to withdrawn {normalizedAmount} from account {this.Id}", this);
 
-            this.AddEvent(new Withdrawal(this, amount));
+            this.Append(new Withdrawal(this, amount));
         }
 
         public void Deposit(Money amount, ICurrencyConverter currencyConverter)
@@ -44,10 +44,10 @@ namespace SuperSafeBank.Domain
             
             var normalizedAmount = currencyConverter.Convert(amount, this.Balance.Currency);
             
-            this.AddEvent(new Deposit(this, normalizedAmount));
+            this.Append(new Deposit(this, normalizedAmount));
         }
 
-        protected override void Apply(IDomainEvent<Guid> @event)
+        protected override void When(IDomainEvent<Guid> @event)
         {
             switch (@event)
             {

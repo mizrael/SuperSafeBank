@@ -10,12 +10,12 @@ namespace SuperSafeBank.Persistence.Tests.Models
         private DummyAggregate() { }
         public DummyAggregate(Guid id) : base(id)
         {
-            AddEvent(new DummyEvent(this, "created"));
+            Append(new DummyEvent(this, "created"));
         }
 
-        public void DoSomething(string what) => AddEvent(new DummyEvent(this, what));
+        public void DoSomething(string what) => Append(new DummyEvent(this, what));
 
-        protected override void Apply(IDomainEvent<Guid> @event)
+        protected override void When(IDomainEvent<Guid> @event)
         {
             Id = @event.AggregateId;
 
