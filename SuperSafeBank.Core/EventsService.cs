@@ -32,8 +32,6 @@ namespace SuperSafeBank.Core
         }
 
         public Task<TA> RehydrateAsync(TKey key)
-        {
-            return _eventsRepository.RehydrateAsync(key);
-        }
+            => _eventsRepository.RehydrateAsync(key);
     }
 }
