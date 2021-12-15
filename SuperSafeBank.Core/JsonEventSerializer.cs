@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -10,6 +11,7 @@ namespace SuperSafeBank.Core
     public class JsonEventSerializer : IEventSerializer
     {
         private readonly IEnumerable<Assembly> _assemblies;
+        private ConcurrentDictionary<string, Type> _typesCache = new();
         
         private static readonly Newtonsoft.Json.JsonSerializerSettings JsonSerializerSettings = new Newtonsoft.Json.JsonSerializerSettings()
         {
@@ -30,9 +32,8 @@ namespace SuperSafeBank.Core
 
         public IDomainEvent<TKey> Deserialize<TKey>(string type, string data)
         {
-            //TODO: cache types
-            var eventType = _assemblies.Select(a => a.GetType(type, false))
-                                .FirstOrDefault(t => t != null) ?? Type.GetType(type);
+            var eventType = _typesCache.GetOrAdd(type, _ => _assemblies.Select(a => a.GetType(type, false))
+                                                                        .FirstOrDefault(t => t != null) ?? Type.GetType(type));            
             if (null == eventType)
                 throw new ArgumentOutOfRangeException(nameof(type), $"invalid event type: {type}");
 
