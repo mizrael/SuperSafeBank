@@ -5,7 +5,7 @@ using SuperSafeBank.Core.EventBus;
 using SuperSafeBank.Core.Models;
 using SuperSafeBank.Domain;
 
-namespace SuperSafeBank.Persistence.Kafka
+namespace SuperSafeBank.Transport.Kafka
 {
     public static class IServiceCollectionExtensions
     {

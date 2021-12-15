@@ -7,7 +7,7 @@ using SuperSafeBank.Core.EventBus;
 using SuperSafeBank.Core.Models;
 using SuperSafeBank.Domain;
 using SuperSafeBank.Domain.Events;
-using SuperSafeBank.Persistence.Kafka;
+using SuperSafeBank.Transport.Kafka;
 
 namespace SuperSafeBank.Worker.Notifications
 {

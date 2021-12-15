@@ -10,7 +10,7 @@ using SuperSafeBank.Core;
 using SuperSafeBank.Core.EventBus;
 using SuperSafeBank.Core.Models;
 
-namespace SuperSafeBank.Persistence.Kafka
+namespace SuperSafeBank.Transport.Kafka
 {
     public class EventConsumer<TA, TKey> : IDisposable, IEventConsumer<TA, TKey> where TA : IAggregateRoot<TKey>
     {

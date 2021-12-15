@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SuperSafeBank.Persistence.Kafka
+namespace SuperSafeBank.Transport.Kafka
 {
     public class EventConsumerConfig
     {

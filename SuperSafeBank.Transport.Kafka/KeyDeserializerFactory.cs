@@ -1,7 +1,7 @@
 ﻿using System;
 using Confluent.Kafka;
 
-namespace SuperSafeBank.Persistence.Kafka
+namespace SuperSafeBank.Transport.Kafka
 {
     internal class KeyDeserializerFactory
     {

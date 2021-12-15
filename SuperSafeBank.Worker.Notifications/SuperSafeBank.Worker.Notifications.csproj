@@ -43,8 +43,11 @@
   <ItemGroup>
     <ProjectReference Include="..\SuperSafeBank.Core\SuperSafeBank.Core.csproj" />
     <ProjectReference Include="..\SuperSafeBank.Domain\SuperSafeBank.Domain.csproj" />
-    <ProjectReference Include="..\SuperSafeBank.Persistence.Kafka\SuperSafeBank.Persistence.Kafka.csproj" />
   </ItemGroup>
+
+	<ItemGroup Condition="$(DefineConstants.Contains('OnPremise'))">
+	    <ProjectReference Include="..\SuperSafeBank.Transport.Kafka\SuperSafeBank.Transport.Kafka.csproj" />
+    </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Properties\" />

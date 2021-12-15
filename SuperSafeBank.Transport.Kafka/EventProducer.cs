@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 using SuperSafeBank.Core.EventBus;
 using SuperSafeBank.Core.Models;
 
-namespace SuperSafeBank.Persistence.Kafka
+namespace SuperSafeBank.Transport.Kafka
 {
     public class EventProducer<TA, TKey> : IDisposable, IEventProducer<TA, TKey>
         where TA : IAggregateRoot<TKey>

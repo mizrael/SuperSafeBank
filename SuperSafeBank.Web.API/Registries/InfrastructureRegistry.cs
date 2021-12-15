@@ -10,7 +10,7 @@ using SuperSafeBank.Domain.Services;
 
 #if OnPremise
 using SuperSafeBank.Persistence.EventStore;
-using SuperSafeBank.Persistence.Kafka;
+using SuperSafeBank.Transport.Kafka;
 using SuperSafeBank.Persistence.Mongo;
 using SuperSafeBank.Web.Persistence.Mongo;
 using SuperSafeBank.Web.Persistence.Mongo.EventHandlers;

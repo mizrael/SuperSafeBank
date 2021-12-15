@@ -11,7 +11,7 @@ using Serilog.Sinks.Grafana.Loki;
 using SuperSafeBank.Core;
 using SuperSafeBank.Domain;
 using SuperSafeBank.Domain.Events;
-using SuperSafeBank.Persistence.Kafka;
+using SuperSafeBank.Transport.Kafka;
 using SuperSafeBank.Worker.Notifications.ApiClients;
 
 namespace SuperSafeBank.Worker.Notifications
