@@ -1,3 +1,4 @@
+#if DebugOnPremise 
 //TODO: add tests
 
 //using System;
@@ -22,7 +23,7 @@
 //    public class EventProducerTests : IAsyncDisposable
 //    {
 //        private static readonly JsonEventSerializer _eventSerializer;
-        
+
 //        static EventProducerTests()
 //        {
 //            _eventSerializer = new JsonEventSerializer(new[] { typeof(DummyAggregate).Assembly });
@@ -93,7 +94,7 @@
 //            await _sbClient.Topics.CreateOrUpdateAsync(topicName);
 //            _sbClient.Subscriptions.CreateOrUpdateAsync()
 //            await _sbClient.CreateSubscriptionAsync(new SubscriptionDescription(topicName, SubscriptionName));
-            
+
 //            _topicNames.Add(topicName);
 //        }
 
@@ -147,7 +148,7 @@
 //                    await _sbClient.DeleteSubscriptionAsync(t, SubscriptionName);
 
 //                    await _sbClient.GetTopicAsync(t);
-                    
+
 //                    await _sbClient.DeleteTopicAsync(t);
 //                })
 //                .ToArray();
@@ -155,3 +156,4 @@
 //        }
 //    }
 //}
+#endif

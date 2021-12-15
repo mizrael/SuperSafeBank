@@ -1,3 +1,4 @@
+#if DebugOnPremise 
 using System;
 using System.ComponentModel;
 using System.Linq;
@@ -94,3 +95,4 @@ namespace SuperSafeBank.Persistence.Azure.Tests.Integration
         }
     }
 }
+#endif
