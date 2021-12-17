@@ -10,14 +10,6 @@
     <DefineConstants>TRACE;OnPremise</DefineConstants>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DefineConstants>TRACE;OnAzure</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugAzure|AnyCPU'">
-    <DefineConstants>TRACE;OnAzure</DefineConstants>
-  </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="Hellang.Middleware.ProblemDetails" Version="6.3.0" />
     <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
@@ -33,18 +25,9 @@
     <ProjectReference Include="..\SuperSafeBank.Domain\SuperSafeBank.Domain.csproj" />
     <ProjectReference Include="..\SuperSafeBank.Persistence.Mongo\SuperSafeBank.Persistence.Mongo.csproj" />
     <ProjectReference Include="..\SuperSafeBank.Web.Core\SuperSafeBank.Web.Core.csproj" />
-  </ItemGroup>
-
-  <ItemGroup Condition="$(DefineConstants.Contains('OnPremise'))">
-    <ProjectReference Include="..\SuperSafeBank.Persistence.EventStore\SuperSafeBank.Persistence.EventStore.csproj" />
+	<ProjectReference Include="..\SuperSafeBank.Persistence.EventStore\SuperSafeBank.Persistence.EventStore.csproj" />
 	<ProjectReference Include="..\SuperSafeBank.Web.Persistence.Mongo\SuperSafeBank.Web.Persistence.Mongo.csproj" />
 	<ProjectReference Include="..\SuperSafeBank.Transport.Kafka\SuperSafeBank.Transport.Kafka.csproj" />
-  </ItemGroup>
-
-  <ItemGroup Condition="$(DefineConstants.Contains('OnAzure'))">
-	<ProjectReference Include="..\SuperSafeBank.Transport.Azure\SuperSafeBank.Transport.Azure.csproj" />
-    <ProjectReference Include="..\SuperSafeBank.Persistence.Azure\SuperSafeBank.Persistence.Azure.csproj" />
-    <ProjectReference Include="..\SuperSafeBank.Web.Persistence.Azure\SuperSafeBank.Web.Persistence.Azure.csproj" />
   </ItemGroup>
 
 </Project>

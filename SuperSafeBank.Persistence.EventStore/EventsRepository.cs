@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using EventStore.ClientAPI;
 using SuperSafeBank.Core;
@@ -25,32 +26,27 @@ namespace SuperSafeBank.Persistence.EventStore
             _streamBaseName = aggregateType.Name;
         }
 
-        public async Task AppendAsync(TA aggregateRoot)
+        public async Task AppendAsync(TA aggregateRoot, CancellationToken cancellationToken = default)
         {
             if (null == aggregateRoot)
                 throw new ArgumentNullException(nameof(aggregateRoot));
 
             if (!aggregateRoot.Events.Any())
                 return;
-
-            var connection = await _connectionWrapper.GetConnectionAsync();
-
+            
             var streamName = GetStreamName(aggregateRoot.Id);
 
             var firstEvent = aggregateRoot.Events.First();
             var version = firstEvent.AggregateVersion - 1;
 
-            using var transaction = await connection.StartTransactionAsync(streamName, version);
+            var connection = await _connectionWrapper.GetConnectionAsync().ConfigureAwait(false);
+            using var transaction = await connection.StartTransactionAsync(streamName, version).ConfigureAwait(false);
 
             try
             {
-                foreach (var @event in aggregateRoot.Events)
-                {
-                    var eventData = Map(@event);
-                    await transaction.WriteAsync(eventData);
-                }
-
-                await transaction.CommitAsync();
+                var newEvents = aggregateRoot.Events.Select(Map).ToArray();
+                await transaction.WriteAsync(newEvents).ConfigureAwait(false);
+                await transaction.CommitAsync().ConfigureAwait(false);
             }
             catch
             {
@@ -59,15 +55,9 @@ namespace SuperSafeBank.Persistence.EventStore
             }
         }
 
-        private string GetStreamName(TKey aggregateKey)
+        public async Task<TA> RehydrateAsync(TKey key, CancellationToken cancellationToken = default)
         {
-            var streamName = $"{_streamBaseName}_{aggregateKey}";
-            return streamName;
-        }
-
-        public async Task<TA> RehydrateAsync(TKey key)
-        {
-            var connection = await _connectionWrapper.GetConnectionAsync();
+            var connection = await _connectionWrapper.GetConnectionAsync().ConfigureAwait(false); ;
             
             var streamName = GetStreamName(key);
 
@@ -77,7 +67,8 @@ namespace SuperSafeBank.Persistence.EventStore
             long nextSliceStart = StreamPosition.Start;
             do
             {
-                currentSlice = await connection.ReadStreamEventsForwardAsync(streamName, nextSliceStart, 200, false);
+                currentSlice = await connection.ReadStreamEventsForwardAsync(streamName, nextSliceStart, 200, false)
+                                               .ConfigureAwait(false);
 
                 nextSliceStart = currentSlice.NextEventNumber;
 
@@ -91,6 +82,9 @@ namespace SuperSafeBank.Persistence.EventStore
             
             return result;
         }
+
+        private string GetStreamName(TKey aggregateKey)
+            => $"{_streamBaseName}_{aggregateKey}";
 
         private IDomainEvent<TKey> Map(ResolvedEvent resolvedEvent)
         {

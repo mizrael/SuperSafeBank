@@ -1,18 +1,40 @@
 ﻿using System;
-using Newtonsoft.Json;
+using Azure;
+using Azure.Data.Tables;
 using SuperSafeBank.Core;
 using SuperSafeBank.Core.Models;
 
 namespace SuperSafeBank.Persistence.Azure
 {
-    internal class EventData<TKey>
+    internal record EventData<TKey> : ITableEntity
     {
-        [JsonProperty(PropertyName = "id")]
-        public Guid Id { get; init; }
-        public TKey AggregateId { get; init; }
-        public long AggregateVersion { get; init; }
+        /// <summary>
+        /// this is the Aggregate id        
+        /// </summary>
+        public string PartitionKey { get; set; }
+        
+        /// <summary>
+        /// aggregate version on the event
+        /// </summary>
+        public string RowKey { get; set; } 
+        
+        /// <summary>
+        /// the event type
+        /// </summary>
         public string Type { get; init; }
-        public byte[] Data { get; set; }
+
+        /// <summary>
+        /// serialized event data
+        /// </summary>
+        public byte[] Data { get; init; }
+
+        /// <summary>
+        /// aggregate version on the event
+        /// </summary>
+        public long AggregateVersion { get; init; }
+        
+        public DateTimeOffset? Timestamp { get; set; }
+        public ETag ETag { get; set; }
 
         public static EventData<TKey> Create(IDomainEvent<TKey> @event, IEventSerializer eventSerializer)
         {
@@ -26,9 +48,9 @@ namespace SuperSafeBank.Persistence.Azure
             var eventType = @event.GetType();
 
             return new EventData<TKey>()
-            {
-                Id = Guid.NewGuid(),
-                AggregateId = @event.AggregateId,
+            {                
+                PartitionKey = @event.AggregateId.ToString(),
+                RowKey = @event.AggregateVersion.ToString(),
                 AggregateVersion = @event.AggregateVersion,
                 Type = eventType.AssemblyQualifiedName,
                 Data = data

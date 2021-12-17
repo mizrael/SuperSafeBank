@@ -1,17 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Newtonsoft.Json;
 using SuperSafeBank.Domain;
 
 namespace SuperSafeBank.Web.Core.Queries.Models
 {
-    public class CustomerDetails
+    public record CustomerDetails
     {
-        private CustomerDetails()
-        {
-        }
-
         public CustomerDetails(Guid id, string firstname, string lastname, string email, IEnumerable<Guid> accounts, Money totalBalance)
         {
             Id = id;
@@ -22,12 +17,11 @@ namespace SuperSafeBank.Web.Core.Queries.Models
             TotalBalance = totalBalance;
         }
 
-        [JsonProperty("id")]
-        public Guid Id { get; private set; }
-        public string Firstname { get; private set; }
-        public string Lastname { get; private set; }
-        public string Email { get; private set; }
-        public Guid[] Accounts { get; private set; }
-        public Money TotalBalance {get;private set; }
+        public Guid Id { get; }
+        public string Firstname { get; }
+        public string Lastname { get; }
+        public string Email { get; }
+        public Guid[] Accounts { get; }
+        public Money TotalBalance { get; }
     }
 }

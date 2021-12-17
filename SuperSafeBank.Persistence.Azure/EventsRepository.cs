@@ -1,46 +1,39 @@
-﻿using SuperSafeBank.Core.Models;
+﻿using Azure.Data.Tables;
+using SuperSafeBank.Core;
+using SuperSafeBank.Core.Models;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Threading;
-using SuperSafeBank.Core;
 using System.Threading.Tasks;
-using Microsoft.Azure.Cosmos;
-using Microsoft.Azure.Cosmos.Linq;
 
 namespace SuperSafeBank.Persistence.Azure
 {
     public class EventsRepository<TA, TKey> : IEventsRepository<TA, TKey>
         where TA : class, IAggregateRoot<TKey>
     {
-        private readonly Container _container;
-        private const string EventsContainerName = "Events";
-        
+        private readonly TableClient _client;
+                
         private readonly IEventSerializer _eventSerializer;
 
         private static readonly ConcurrentDictionary<TKey, SemaphoreSlim> _locks = new ConcurrentDictionary<TKey, SemaphoreSlim>();
 
-        public EventsRepository(IDbContainerProvider containerProvider, IEventSerializer eventDeserializer)
+        public EventsRepository(TableClient tableClient, IEventSerializer eventDeserializer)
         {
-            if (containerProvider == null)
-                throw new ArgumentNullException(nameof(containerProvider));
+            if (tableClient is null)
+                throw new ArgumentNullException(nameof(tableClient));
             
-            _eventSerializer = eventDeserializer ?? throw new ArgumentNullException(nameof(eventDeserializer));
-
-            _container = containerProvider.GetContainer(EventsContainerName);
+            _eventSerializer = eventDeserializer ?? throw new ArgumentNullException(nameof(eventDeserializer));         
         }
 
-        public async Task AppendAsync(TA aggregateRoot)
+        public async Task AppendAsync(TA aggregateRoot, CancellationToken cancellationToken = default)
         {
             if (aggregateRoot == null)
                 throw new ArgumentNullException(nameof(aggregateRoot));
 
             if (!aggregateRoot.Events.Any())
                 return;
-
-            var partitionKey = new PartitionKey(aggregateRoot.Id.ToString());
 
             var firstEvent = aggregateRoot.Events.First();
             var expectedVersion = firstEvent.AggregateVersion;
@@ -50,32 +43,23 @@ namespace SuperSafeBank.Persistence.Azure
 
             try
             {
-                var dbVersionResp = await _container.GetItemLinqQueryable<EventData<TKey>>(
-                        requestOptions: new QueryRequestOptions()
-                        {
-                            PartitionKey = partitionKey
-                        }).Select(e => e.AggregateVersion)
-                    .MaxAsync();
-                if (null != dbVersionResp && dbVersionResp.StatusCode == HttpStatusCode.OK)
+                var prevAggregateEvents = _client.QueryAsync<EventData<TKey>>(ed => ed.PartitionKey == aggregateRoot.Id.ToString() &&
+                                                                                    ed.AggregateVersion >= expectedVersion)
+                                                .ConfigureAwait(false);
+
+                await foreach (var @event in prevAggregateEvents)
                 {
-                    if (dbVersionResp.Resource != expectedVersion)
-                        throw new AggregateException(
-                            $"aggregate version mismatch, expected {expectedVersion} , got {dbVersionResp.Resource}");
+                    if (@event.AggregateVersion >= expectedVersion)
+                        throw new ArgumentOutOfRangeException($"aggregate version mismatch, expected {expectedVersion}, got {@event.AggregateVersion}");
                 }
 
-                var transaction = _container.CreateTransactionalBatch(partitionKey);
-
-                foreach (var @event in aggregateRoot.Events)
+                var newEvents = aggregateRoot.Events.Select(evt =>
                 {
-                    var eventData = EventData<TKey>.Create(@event, _eventSerializer);
+                    var eventData = EventData<TKey>.Create(evt, _eventSerializer);
+                    return new TableTransactionAction(TableTransactionActionType.Add, eventData);
+                }).ToArray();
 
-                    transaction.CreateItem(eventData);
-                }
-
-                using var response = await transaction.ExecuteAsync();
-                if (!response.IsSuccessStatusCode)
-                    throw new Exception(
-                        $"an error has occurred while persisting events for aggregate '{aggregateRoot.Id}' : {response.Diagnostics}");
+                await _client.SubmitTransactionAsync(newEvents);
             }
             finally
             {
@@ -85,20 +69,16 @@ namespace SuperSafeBank.Persistence.Azure
             _locks.Remove(aggregateRoot.Id, out _);
         }
 
-        public async Task<TA> RehydrateAsync(TKey key)
+        public async Task<TA> RehydrateAsync(TKey key, CancellationToken cancellationToken = default)
         {
-            var partitionKey = new PartitionKey(key.ToString());
+            var aggregateEvents = _client.QueryAsync<EventData<TKey>>(ed => ed.PartitionKey == key.ToString())
+                                         .ConfigureAwait(false);
 
             var events = new List<IDomainEvent<TKey>>();
 
-            using var setIterator = _container.GetItemQueryIterator<EventData<TKey>>(requestOptions: new QueryRequestOptions { MaxItemCount = 100, PartitionKey = partitionKey });
-            while (setIterator.HasMoreResults)
-            {
-                foreach (var item in await setIterator.ReadNextAsync())
-                {
-                    var @event = _eventSerializer.Deserialize<TKey>(item.Type, item.Data);
-                    events.Add(@event);
-                }
+            await foreach (var @row in aggregateEvents) {
+                var @event = _eventSerializer.Deserialize<TKey>(@row.Type, @row.Data);
+                events.Add(@event);
             }
 
             if (!events.Any())

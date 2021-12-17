@@ -1,14 +1,11 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace SuperSafeBank.Web.Core.Queries.Models
 {
-    public class CustomerArchiveItem
+    public record CustomerArchiveItem
     {
-        private CustomerArchiveItem() { }
-
         public CustomerArchiveItem(Guid id, string firstname, string lastname, IEnumerable<Guid> accounts)
         {
             Id = id;
@@ -17,11 +14,10 @@ namespace SuperSafeBank.Web.Core.Queries.Models
             Accounts = (accounts ?? Enumerable.Empty<Guid>()).ToArray();
         }
 
-        [JsonProperty("id")]
-        public Guid Id { get; private set; }
-        public string Firstname { get; private set; }
-        public string Lastname { get; private set; }       
-        public Guid[] Accounts { get; private set; }
+        public Guid Id { get; }
+        public string Firstname { get; }
+        public string Lastname { get; }       
+        public Guid[] Accounts { get; }
 
         
     }

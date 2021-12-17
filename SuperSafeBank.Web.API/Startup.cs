@@ -65,9 +65,7 @@ namespace SuperSafeBank.Web.API
                 opts.MapToStatusCode<AccountTransactionException>((int)HttpStatusCode.BadRequest);
             });
 
-#if OnPremise
             services.RegisterWorker(this.Configuration);
-#endif
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -90,6 +88,5 @@ namespace SuperSafeBank.Web.API
 
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
         }
-
     }
 }

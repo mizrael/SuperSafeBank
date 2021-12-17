@@ -5,21 +5,13 @@
 
     <IsPackable>false</IsPackable>
 
-    <Configurations>Debug;Release;DebugOnPremise;DebugAzure</Configurations>
+    <Configurations>Debug;Release;DebugOnPremise</Configurations>
 
     <UserSecretsId>67a63f27-36cf-46e2-b905-04388b3560a5</UserSecretsId>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugOnPremise|AnyCPU'">
     <DefineConstants>TRACE;OnPremise</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DefineConstants>TRACE;OnAzure</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugAzure|AnyCPU'">
-    <DefineConstants>TRACE;OnAzure</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
@@ -56,10 +48,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SuperSafeBank.Web.API\SuperSafeBank.Web.API.csproj" />
+	<ProjectReference Include="..\SuperSafeBank.Web.Persistence.Mongo\SuperSafeBank.Web.Persistence.Mongo.csproj" />
   </ItemGroup>
-
-	<ItemGroup Condition="$(DefineConstants.Contains('OnPremise'))">
-		<ProjectReference Include="..\SuperSafeBank.Web.Persistence.Mongo\SuperSafeBank.Web.Persistence.Mongo.csproj" />
-	</ItemGroup>
 
 </Project>

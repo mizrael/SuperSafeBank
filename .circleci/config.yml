@@ -7,6 +7,8 @@ jobs:
   build:
     docker:
       - image: mcr.microsoft.com/dotnet/sdk:6.0
+      - image: mcr.microsoft.com/azure-storage/azurite
+        command: azurite --blobHost 0.0.0.0 --blobPort 10000 --queueHost 0.0.0.0 --queuePort 10001 --tableHost 0.0.0.0 --tablePort 10002
       - image: eventstore/eventstore:20.10.2-buster-slim
         environment:
           EVENTSTORE_CLUSTER_SIZE: 1
