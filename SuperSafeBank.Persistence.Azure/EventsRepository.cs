@@ -21,9 +21,7 @@ namespace SuperSafeBank.Persistence.Azure
 
         public EventsRepository(TableClient tableClient, IEventSerializer eventDeserializer)
         {
-            if (tableClient is null)
-                throw new ArgumentNullException(nameof(tableClient));
-            
+            _client = tableClient ?? throw new ArgumentNullException(nameof(tableClient));
             _eventSerializer = eventDeserializer ?? throw new ArgumentNullException(nameof(eventDeserializer));         
         }
 

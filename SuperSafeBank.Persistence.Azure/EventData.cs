@@ -6,7 +6,7 @@ using SuperSafeBank.Core.Models;
 
 namespace SuperSafeBank.Persistence.Azure
 {
-    internal record EventData<TKey> : ITableEntity
+    public record EventData<TKey> : ITableEntity
     {
         /// <summary>
         /// this is the Aggregate id        

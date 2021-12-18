@@ -1,4 +1,3 @@
-#if DebugOnPremise 
 using System;
 using System.ComponentModel;
 using System.Linq;
@@ -15,9 +14,9 @@ namespace SuperSafeBank.Persistence.Azure.Tests.Integration
 {
     [Trait("Category", "Integration")]
     [Category("Integration")]
-    public class EventsRepositoryTests : IClassFixture<CosmosFixture>
+    public class EventsRepositoryTests : IClassFixture<StorageTableFixutre>
     {
-        private readonly CosmosFixture _fixture;
+        private readonly StorageTableFixutre _fixture;
         private static readonly JsonEventSerializer _eventSerializer;
         
         static EventsRepositoryTests()
@@ -25,7 +24,7 @@ namespace SuperSafeBank.Persistence.Azure.Tests.Integration
             _eventSerializer = new JsonEventSerializer(new[] {typeof(DummyAggregate).Assembly});
         }
 
-        public EventsRepositoryTests(CosmosFixture fixture)
+        public EventsRepositoryTests(StorageTableFixutre fixture)
         {
             _fixture = fixture;
         }
@@ -34,9 +33,9 @@ namespace SuperSafeBank.Persistence.Azure.Tests.Integration
         [Fact]
         public async Task AppendAsync_should_store_events()
         {
-            var db = await _fixture.CreateTestDatabaseAsync();
+            var client = await _fixture.CreateTableClientAsync();
 
-            var sut = new EventsRepository<DummyAggregate, Guid>(db, _eventSerializer);
+            var sut = new EventsRepository<DummyAggregate, Guid>(client, _eventSerializer);
 
             var aggregate = new DummyAggregate(Guid.NewGuid());
             aggregate.DoSomething("foo");
@@ -44,17 +43,20 @@ namespace SuperSafeBank.Persistence.Azure.Tests.Integration
 
             await sut.AppendAsync(aggregate);
 
-            var container = db.GetContainer("Events");
-            var response = await container.GetItemLinqQueryable<dynamic>()
-                                          .CountAsync();
-            response.StatusCode.Should().Be(HttpStatusCode.OK);
-            response.Resource.Should().Be(3);
+            var events = client.QueryAsync<EventData<Guid>>(ed => ed.PartitionKey == aggregate.Id.ToString())
+                                .ConfigureAwait(false);
+            int count = 0;
+            await foreach(var evt in events)
+            {
+                count++;
+            }
+            count.Should().Be(3);
         }
 
         [Fact]
         public async Task AppendAsync_should_throw_AggregateException_when_version_mismatch()
         {
-            var db = await _fixture.CreateTestDatabaseAsync();
+            var db = await _fixture.CreateTableClientAsync();
 
             var sut = new EventsRepository<DummyAggregate, Guid>(db, _eventSerializer);
 
@@ -68,13 +70,13 @@ namespace SuperSafeBank.Persistence.Azure.Tests.Integration
                     return sut.AppendAsync(aggregate);
                 }).ToArray();
 
-            await Assert.ThrowsAsync<AggregateException>(async () => await Task.WhenAll(tasks));
+            await Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () => await Task.WhenAll(tasks));
         }
 
         [Fact]
         public async Task RehydrateAsync_should_store_events()
         {
-            var db = await _fixture.CreateTestDatabaseAsync();
+            var db = await _fixture.CreateTableClientAsync();
 
             var sut = new EventsRepository<DummyAggregate, Guid>(db, _eventSerializer);
 
@@ -95,4 +97,3 @@ namespace SuperSafeBank.Persistence.Azure.Tests.Integration
         }
     }
 }
-#endif
