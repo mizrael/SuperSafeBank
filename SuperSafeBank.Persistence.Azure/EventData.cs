@@ -1,8 +1,8 @@
 ﻿using System;
 using Azure;
 using Azure.Data.Tables;
-using SuperSafeBank.Core;
-using SuperSafeBank.Core.Models;
+using SuperSafeBank.Common;
+using SuperSafeBank.Common.Models;
 
 namespace SuperSafeBank.Persistence.Azure
 {
@@ -21,7 +21,7 @@ namespace SuperSafeBank.Persistence.Azure
         /// <summary>
         /// the event type
         /// </summary>
-        public string Type { get; init; }
+        public string EventType { get; init; }
 
         /// <summary>
         /// serialized event data
@@ -52,7 +52,7 @@ namespace SuperSafeBank.Persistence.Azure
                 PartitionKey = @event.AggregateId.ToString(),
                 RowKey = @event.AggregateVersion.ToString(),
                 AggregateVersion = @event.AggregateVersion,
-                Type = eventType.AssemblyQualifiedName,
+                EventType = eventType.AssemblyQualifiedName,
                 Data = data
             };
         }

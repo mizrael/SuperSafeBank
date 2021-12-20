@@ -2,9 +2,9 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using SuperSafeBank.Core;
-using SuperSafeBank.Core.EventBus;
-using SuperSafeBank.Core.Models;
+using SuperSafeBank.Common;
+using SuperSafeBank.Common.EventBus;
+using SuperSafeBank.Common.Models;
 using SuperSafeBank.Domain;
 using System;
 
@@ -21,6 +21,7 @@ namespace SuperSafeBank.Transport.Azure
                 }).AddEventsProducer<Customer, Guid>(config)
                 .AddEventsProducer<Account, Guid>(config);
         }
+
         private static IServiceCollection AddEventsProducer<TA, TK>(this IServiceCollection services, IConfiguration config)
             where TA : class, IAggregateRoot<TK>
         {

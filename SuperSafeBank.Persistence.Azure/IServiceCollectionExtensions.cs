@@ -1,7 +1,7 @@
 ﻿using Azure.Data.Tables;
 using Microsoft.Extensions.DependencyInjection;
-using SuperSafeBank.Core;
-using SuperSafeBank.Core.Models;
+using SuperSafeBank.Common;
+using SuperSafeBank.Common.Models;
 using SuperSafeBank.Domain;
 using System;
 

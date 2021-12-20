@@ -1,11 +1,11 @@
-﻿using System;
+﻿using Azure.Messaging.ServiceBus;
+using Microsoft.Extensions.Logging;
+using SuperSafeBank.Common;
+using SuperSafeBank.Common.EventBus;
+using SuperSafeBank.Common.Models;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
-using SuperSafeBank.Core;
-using SuperSafeBank.Core.EventBus;
-using SuperSafeBank.Core.Models;
-using Azure.Messaging.ServiceBus;
 
 namespace SuperSafeBank.Transport.Azure
 {

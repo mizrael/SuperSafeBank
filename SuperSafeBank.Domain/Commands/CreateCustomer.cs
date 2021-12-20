@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using SuperSafeBank.Core;
+using SuperSafeBank.Common;
 using SuperSafeBank.Domain.Services;
 
 namespace SuperSafeBank.Domain.Commands
@@ -28,7 +28,6 @@ namespace SuperSafeBank.Domain.Commands
         private readonly IEventsService<Customer, Guid> _eventsService;
         private readonly ICustomerEmailsService _customerEmailsRepository;
 
-
         public CreateCustomerHandler(IEventsService<Customer, Guid> eventsService, ICustomerEmailsService customerEmailsRepository)
         {
             _eventsService = eventsService ?? throw new ArgumentNullException(nameof(eventsService));
@@ -38,10 +37,10 @@ namespace SuperSafeBank.Domain.Commands
         public async Task Handle(CreateCustomer command, CancellationToken cancellationToken)
         {
             if(string.IsNullOrWhiteSpace(command.Email))
-                throw new ValidationException("Unable to create Customer", new ValidationError(nameof(CreateCustomer.Email), "email cannot be empty"));
+                throw new ValidationException("Invalid email address", new ValidationError(nameof(CreateCustomer.Email), "email cannot be empty"));
 
             if (await _customerEmailsRepository.ExistsAsync(command.Email))
-                throw new ValidationException("Unable to create Customer", new ValidationError(nameof(CreateCustomer.Email), $"email '{command.Email}' already exists"));
+                throw new ValidationException("Duplicate email address", new ValidationError(nameof(CreateCustomer.Email), $"email '{command.Email}' already exists"));
             
             var email = new Email(command.Email);
 

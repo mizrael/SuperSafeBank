@@ -1,8 +1,8 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using SuperSafeBank.Core;
-using SuperSafeBank.Core.Models;
+using SuperSafeBank.Common;
+using SuperSafeBank.Common.Models;
 using SuperSafeBank.Domain;
 
 namespace SuperSafeBank.Persistence.EventStore

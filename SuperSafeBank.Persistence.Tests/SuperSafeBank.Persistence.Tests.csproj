@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SuperSafeBank.Core\SuperSafeBank.Core.csproj" />
+    <ProjectReference Include="..\SuperSafeBank.Common\SuperSafeBank.Common.csproj" />
   </ItemGroup>
 
 </Project>

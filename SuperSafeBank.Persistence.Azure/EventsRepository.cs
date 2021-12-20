@@ -1,6 +1,6 @@
 ﻿using Azure.Data.Tables;
-using SuperSafeBank.Core;
-using SuperSafeBank.Core.Models;
+using SuperSafeBank.Common;
+using SuperSafeBank.Common.Models;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -75,7 +75,7 @@ namespace SuperSafeBank.Persistence.Azure
             var events = new List<IDomainEvent<TKey>>();
 
             await foreach (var @row in aggregateEvents) {
-                var @event = _eventSerializer.Deserialize<TKey>(@row.Type, @row.Data);
+                var @event = _eventSerializer.Deserialize<TKey>(@row.EventType, @row.Data);
                 events.Add(@event);
             }
 

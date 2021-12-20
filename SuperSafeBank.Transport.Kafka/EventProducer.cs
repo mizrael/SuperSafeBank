@@ -4,8 +4,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Confluent.Kafka;
 using Microsoft.Extensions.Logging;
-using SuperSafeBank.Core.EventBus;
-using SuperSafeBank.Core.Models;
+using SuperSafeBank.Common.EventBus;
+using SuperSafeBank.Common.Models;
 
 namespace SuperSafeBank.Transport.Kafka
 {

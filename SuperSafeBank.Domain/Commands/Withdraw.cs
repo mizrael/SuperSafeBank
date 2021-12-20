@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using SuperSafeBank.Core;
+using SuperSafeBank.Common;
 using SuperSafeBank.Domain.Services;
 
 namespace SuperSafeBank.Domain.Commands

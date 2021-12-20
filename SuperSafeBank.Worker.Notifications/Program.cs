@@ -5,82 +5,68 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Formatting.Compact;
-using SuperSafeBank.Core;
+using SuperSafeBank.Common;
 using SuperSafeBank.Domain;
 using SuperSafeBank.Domain.Events;
 using SuperSafeBank.Worker.Notifications.ApiClients;
 using Serilog.Sinks.Grafana.Loki;
 using SuperSafeBank.Transport.Kafka;
+using SuperSafeBank.Worker.Notifications;
+using SuperSafeBank.Common.EventBus;
 
-
-namespace SuperSafeBank.Worker.Notifications
-{
-    class Program
-    {
-        static void Main(string[] args)
+await Host.CreateDefaultBuilder(args)
+        .ConfigureHostConfiguration(configurationBuilder => {
+            configurationBuilder.AddCommandLine(args);
+        })
+        .ConfigureAppConfiguration((ctx, builder) =>
         {
-            CreateHostBuilder(args).Build().Run();
-        }
+            builder.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{ctx.HostingEnvironment.EnvironmentName}.json", optional: true, reloadOnChange: true)
+                .AddEnvironmentVariables();
+        })
+        .UseSerilog((ctx, cfg) =>
+        {
+            cfg.Enrich.FromLogContext()
+                .Enrich.WithProperty("Application", ctx.HostingEnvironment.ApplicationName)
+                .Enrich.WithProperty("Environment", ctx.HostingEnvironment.EnvironmentName)
+                .WriteTo.Console();
 
-        private static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-                .ConfigureHostConfiguration(configurationBuilder => {
-                    configurationBuilder.AddCommandLine(args);
-                })
-                .ConfigureAppConfiguration((ctx, builder) =>
-                {
-                    builder.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                        .AddJsonFile($"appsettings.{ctx.HostingEnvironment.EnvironmentName}.json", optional: true, reloadOnChange: true)
-                        .AddEnvironmentVariables();
-                })
-                .UseSerilog((ctx, cfg) =>
-                {
-                    cfg.MinimumLevel.Verbose()
-                        .Enrich.FromLogContext()
-                        .Enrich.WithProperty("Application", ctx.HostingEnvironment.ApplicationName)
-                        .Enrich.WithProperty("Environment", ctx.HostingEnvironment.EnvironmentName)
-                        .WriteTo.Console(new RenderedCompactJsonFormatter());
+            var connStr = ctx.Configuration.GetConnectionString("loki");
+            cfg.WriteTo.GrafanaLoki(connStr);
+        })
+        .ConfigureServices((hostContext, services) =>
+        {
+            services.AddHttpClient<ICustomersApiClient, CustomersApiClient>("customersApiClient", (ctx, httpClient) =>
+            {
+                var config = ctx.GetRequiredService<IConfiguration>();
+                var endpoint = config["CustomersApi"];
+                httpClient.BaseAddress = new System.Uri(endpoint);
+            }).AddPolicyHandler(HttpClientPolicies.GetRetryPolicy());
 
-                    var connStr = ctx.Configuration.GetConnectionString("loki");
-                    cfg.WriteTo.GrafanaLoki(connStr);
-                })
-                .ConfigureServices((hostContext, services) =>
-                {
-                    services.AddSingleton<IEventSerializer>(new JsonEventSerializer(new[]
-                    {
-                        typeof(CustomerCreated).Assembly
-                    }));
+            services.AddSingleton<IEventSerializer>(new JsonEventSerializer(new[]
+            {
+                typeof(CustomerCreated).Assembly
+            }))
+            .AddSingleton<INotificationsFactory, NotificationsFactory>()
+            .AddSingleton<INotificationsService, FakeNotificationsService>()
+            .AddSingleton(ctx =>
+            {
+                var kafkaConnStr = hostContext.Configuration.GetConnectionString("kafka");
+                var eventsTopicName = hostContext.Configuration["eventsTopicName"];
+                var groupName = hostContext.Configuration["eventsTopicGroupName"];
+                return new EventsConsumerConfig(kafkaConnStr, eventsTopicName, groupName);
+            })
+            .AddSingleton(typeof(IEventConsumer<,>), typeof(EventConsumer<,>))
+            .AddHostedService(ctx =>
+            {
+                var logger = ctx.GetRequiredService<ILogger<EventConsumer<Account, Guid>>>();
+                var eventsDeserializer = ctx.GetRequiredService<IEventSerializer>();
+                var consumerConfig = ctx.GetRequiredService<EventsConsumerConfig>();
+                var notificationsFactory = ctx.GetRequiredService<INotificationsFactory>();
+                var notificationsService = ctx.GetRequiredService<INotificationsService>();
 
-                    services.AddHttpClient<ICustomersApiClient, CustomersApiClient>("customersApiClient", (ctx, httpClient) =>
-                        {
-                            var config = ctx.GetRequiredService<IConfiguration>();
-                            var endpoint = config["CustomersApi"];
-                            httpClient.BaseAddress = new System.Uri(endpoint);
-                        })
-                        .AddPolicyHandler(HttpClientPolicies.GetRetryPolicy());
+                var consumer = ctx.GetRequiredService<IEventConsumer<Account, Guid>>();
 
-                    services.AddSingleton<INotificationsFactory, NotificationsFactory>();
-                    services.AddSingleton<INotificationsService, FakeNotificationsService>();
-
-                    services.AddSingleton(ctx =>
-                    {
-                        var kafkaConnStr = hostContext.Configuration.GetConnectionString("kafka");
-                        var eventsTopicName = hostContext.Configuration["eventsTopicName"];
-                        var groupName = hostContext.Configuration["eventsTopicGroupName"];
-                        return new EventConsumerConfig(kafkaConnStr, eventsTopicName, groupName);
-                    });
-
-                    services.AddHostedService(ctx =>
-                    {
-                        var logger = ctx.GetRequiredService<ILogger<EventConsumer<Account, Guid>>>();
-                        var eventsDeserializer = ctx.GetRequiredService<IEventSerializer>();
-                        var consumerConfig = ctx.GetRequiredService<EventConsumerConfig>();
-                        var notificationsFactory = ctx.GetRequiredService<INotificationsFactory>();
-                        var notificationsService = ctx.GetRequiredService<INotificationsService>();
-                        var consumer = new EventConsumer<Account, Guid>(eventsDeserializer, consumerConfig, logger);
-
-                        return new AccountEventsWorker(notificationsFactory, notificationsService, consumer, logger);
-                    });
-                });
-    }
-}
+                return new AccountEventsWorker(notificationsFactory, notificationsService, consumer, logger);
+            });
+        }).Build().RunAsync();

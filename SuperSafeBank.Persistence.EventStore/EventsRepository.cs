@@ -5,8 +5,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using EventStore.ClientAPI;
-using SuperSafeBank.Core;
-using SuperSafeBank.Core.Models;
+using SuperSafeBank.Common;
+using SuperSafeBank.Common.Models;
 
 namespace SuperSafeBank.Persistence.EventStore
 {

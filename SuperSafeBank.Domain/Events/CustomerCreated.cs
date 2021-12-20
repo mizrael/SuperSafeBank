@@ -1,5 +1,5 @@
 ﻿using System;
-using SuperSafeBank.Core.Models;
+using SuperSafeBank.Common.Models;
 
 namespace SuperSafeBank.Domain.Events
 {

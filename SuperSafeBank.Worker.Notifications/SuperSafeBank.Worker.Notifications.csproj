@@ -3,12 +3,8 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net6.0</TargetFramework>
-    <Configurations>Debug;Release;DebugOnPremise</Configurations>
+    <Configurations>Debug;Release</Configurations>
   </PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugOnPremise|AnyCPU'">
-		<DefineConstants>TRACE;OnPremise</DefineConstants>
-	</PropertyGroup>
 
   <ItemGroup>
     <None Remove="appsettings.json" />
@@ -33,7 +29,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SuperSafeBank.Core\SuperSafeBank.Core.csproj" />
     <ProjectReference Include="..\SuperSafeBank.Domain\SuperSafeBank.Domain.csproj" />
     <ProjectReference Include="..\SuperSafeBank.Transport.Kafka\SuperSafeBank.Transport.Kafka.csproj" />
   </ItemGroup>

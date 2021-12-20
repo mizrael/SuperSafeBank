@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using SuperSafeBank.Core;
+using SuperSafeBank.Common;
 
 namespace SuperSafeBank.Domain.Commands
 {
@@ -35,7 +35,9 @@ namespace SuperSafeBank.Domain.Commands
             var customer = await _customerEventsService.RehydrateAsync(command.CustomerId);
             if(null == customer)
                 throw new ArgumentOutOfRangeException(nameof(CreateAccount.CustomerId), "invalid customer id");
-          
+
+            
+
             var account = new Account(command.AccountId, customer, command.Currency);
             await _accountEventsService.PersistAsync(account);
         }

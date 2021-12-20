@@ -2,11 +2,11 @@
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-    <Configurations>Debug;Release;DebugOnPremise;DebugAzure</Configurations>
+    <Configurations>Debug;Release</Configurations>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SuperSafeBank.Core\SuperSafeBank.Core.csproj" />
+    <ProjectReference Include="..\SuperSafeBank.Common\SuperSafeBank.Common.csproj" />
   </ItemGroup>
 
 </Project>

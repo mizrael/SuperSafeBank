@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Xunit;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
-using SuperSafeBank.Core;
+using SuperSafeBank.Common;
 
 namespace SuperSafeBank.Persistence.EventStore.Tests.Integration
 {

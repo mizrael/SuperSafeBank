@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 using FluentAssertions;
-using SuperSafeBank.Core.Models;
+using SuperSafeBank.Common.Models;
 using SuperSafeBank.Domain.Events;
 using SuperSafeBank.Domain.Services;
 using Xunit;

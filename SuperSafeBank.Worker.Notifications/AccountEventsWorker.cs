@@ -1,25 +1,25 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Hosting;
+﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using SuperSafeBank.Core.EventBus;
-using SuperSafeBank.Core.Models;
+using SuperSafeBank.Common.EventBus;
+using SuperSafeBank.Common.Models;
 using SuperSafeBank.Domain;
 using SuperSafeBank.Domain.Events;
-using SuperSafeBank.Transport.Kafka;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace SuperSafeBank.Worker.Notifications
 {
     public class AccountEventsWorker : BackgroundService
     {
-        private readonly EventConsumer<Account, Guid> _consumer;
+        private readonly IEventConsumer<Account, Guid> _consumer;
         private readonly ILogger<IEventConsumer> _logger;
         private readonly INotificationsService _notificationsService;
         private readonly INotificationsFactory _notificationsFactory;
 
         public AccountEventsWorker(INotificationsFactory notificationsFactory,
-            INotificationsService notificationsService, EventConsumer<Account, Guid> consumer,
+            INotificationsService notificationsService, 
+            IEventConsumer<Account, Guid> consumer,
             ILogger<IEventConsumer> logger)
         {
             _consumer = consumer ?? throw new ArgumentNullException(nameof(consumer));

@@ -1,14 +1,10 @@
-﻿using System;
-using System.Linq;
+﻿using Confluent.Kafka;
+using Microsoft.Extensions.Logging;
+using SuperSafeBank.Common;
+using SuperSafeBank.Common.EventBus;
+using SuperSafeBank.Common.Models;
 using System.Runtime.Serialization;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using Confluent.Kafka;
-using Microsoft.Extensions.Logging;
-using SuperSafeBank.Core;
-using SuperSafeBank.Core.EventBus;
-using SuperSafeBank.Core.Models;
 
 namespace SuperSafeBank.Transport.Kafka
 {
@@ -18,7 +14,7 @@ namespace SuperSafeBank.Transport.Kafka
         private readonly IEventSerializer _eventDeserializer;
         private readonly ILogger<EventConsumer<TA, TKey>> _logger;
 
-        public EventConsumer(IEventSerializer eventDeserializer, EventConsumerConfig config, ILogger<EventConsumer<TA, TKey>> logger)
+        public EventConsumer(IEventSerializer eventDeserializer, EventsConsumerConfig config, ILogger<EventConsumer<TA, TKey>> logger)
         {
             _eventDeserializer = eventDeserializer;
             _logger = logger;
@@ -88,8 +84,7 @@ namespace SuperSafeBank.Transport.Kafka
             var handler = EventReceived;
             return handler?.Invoke(this, e);
         }
-
-        public delegate void ExceptionThrownHandler(object sender, Exception e);
+                
         public event ExceptionThrownHandler ExceptionThrown;
         protected virtual void OnExceptionThrown(Exception e)
         {
