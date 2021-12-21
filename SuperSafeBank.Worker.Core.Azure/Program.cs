@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using SuperSafeBank.Domain.Services;
 using SuperSafeBank.Persistence.Azure;
 using SuperSafeBank.Service.Core.Azure.Common.Persistence;
 using SuperSafeBank.Service.Core.Common;
@@ -19,6 +20,7 @@ await builder.ConfigureFunctionsWorkerDefaults()
                     scan.FromAssembliesOf(typeof(CustomerDetailsHandler))                       
                         .RegisterHandlers(typeof(INotificationHandler<>));
                 })
+                .AddTransient<ICurrencyConverter, FakeCurrencyConverter>()
                 .AddSingleton<IViewsContext>(provider =>
                 {
                     var connStr = ctx.Configuration["QueryModelsStorage"];

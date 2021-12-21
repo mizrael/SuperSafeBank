@@ -54,10 +54,10 @@ namespace SuperSafeBank.Domain
                     this.OwnerId = c.OwnerId;
                     break;
                 case Withdrawal w:
-                    this.Balance = this.Balance.Subtract(w.Amount.Value);
+                    this.Balance = this.Balance.Subtract(w.Amount);
                     break;
                 case Deposit d:
-                    this.Balance = this.Balance.Add(d.Amount.Value);
+                    this.Balance = this.Balance.Add(d.Amount);
                     break;
             }
         }

@@ -40,21 +40,8 @@ namespace SuperSafeBank.Worker.Core.Azure.EventHandlers
         {
             _logger.LogInformation("creating account details for aggregate {AggregateId} ...", @event.Event.AggregateId);
 
-            var customerId = @event.Event.OwnerId;
-            var customer = await _customersRepo.RehydrateAsync(customerId, cancellationToken);
-
-            if (customer is null)
-            {
-                var msg = $"unable to find customer by id {@event.Event.OwnerId}";
-                _logger.LogWarning(msg);
-                throw new ArgumentOutOfRangeException(nameof(@event.Event.OwnerId), msg);
-            }
-
-            var balance = Money.Zero(@event.Event.Currency);
-            var accountView = new AccountDetails(@event.Event.AggregateId,
-                customer.Id, customer.Firstname, customer.Lastname, customer.Email.Value,
-                balance);
-            await UpsertAccountView(accountView, cancellationToken);
+            var accountView = await BuildAccountViewAsync(@event.Event.AggregateId, cancellationToken);
+            await UpsertAccountViewAsync(accountView, cancellationToken);
 
             _logger.LogInformation("created account {AggregateId}", @event.Event.AggregateId);
         }
@@ -63,14 +50,8 @@ namespace SuperSafeBank.Worker.Core.Azure.EventHandlers
         {
             _logger.LogInformation("processing deposit of {Amount} on account {AggregateId} ...", @event.Event.Amount, @event.Event.AggregateId);
 
-            var account = await _accountsRepo.RehydrateAsync(@event.Event.AggregateId, cancellationToken);
-            var customer = await _customersRepo.RehydrateAsync(account.OwnerId, cancellationToken);
-
-            var accountView = new AccountDetails(account.Id, 
-                account.OwnerId, customer.Firstname, customer.Lastname, customer.Email.Value,
-                account.Balance);
-
-            await UpsertAccountView(accountView, cancellationToken);
+            var accountView = await BuildAccountViewAsync(@event.Event.AggregateId, cancellationToken);
+            await UpsertAccountViewAsync(accountView, cancellationToken);
 
             _logger.LogInformation("deposited {Amount} on account {AggregateId} ...", @event.Event.Amount, @event.Event.AggregateId);
         }
@@ -79,19 +60,24 @@ namespace SuperSafeBank.Worker.Core.Azure.EventHandlers
         {
             _logger.LogInformation("processing withdrawal of {Amount} on account {AggregateId} ...", @event.Event.Amount, @event.Event.AggregateId);
 
-            var account = await _accountsRepo.RehydrateAsync(@event.Event.AggregateId, cancellationToken);
+            var accountView = await BuildAccountViewAsync(@event.Event.AggregateId, cancellationToken);
+            await UpsertAccountViewAsync(accountView, cancellationToken);
+
+            _logger.LogInformation("withdrawn {Amount} from account {AggregateId} ...", @event.Event.Amount, @event.Event.AggregateId);
+        }
+
+        private async Task<AccountDetails> BuildAccountViewAsync(Guid accountId, CancellationToken cancellationToken)
+        {
+            var account = await _accountsRepo.RehydrateAsync(accountId, cancellationToken);
             var customer = await _customersRepo.RehydrateAsync(account.OwnerId, cancellationToken);
 
             var accountView = new AccountDetails(account.Id,
                 account.OwnerId, customer.Firstname, customer.Lastname, customer.Email.Value,
                 account.Balance);
-
-            await UpsertAccountView(accountView, cancellationToken);
-
-            _logger.LogInformation("withdrawn {Amount} from account {AggregateId} ...", @event.Event.Amount, @event.Event.AggregateId);
+            return accountView;
         }
 
-        private async Task UpsertAccountView(AccountDetails account, CancellationToken cancellationToken)
+        private async Task UpsertAccountViewAsync(AccountDetails account, CancellationToken cancellationToken)
         {
             var entity = new ViewTableEntity()
             {

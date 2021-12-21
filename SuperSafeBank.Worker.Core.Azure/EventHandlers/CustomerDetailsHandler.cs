@@ -5,10 +5,11 @@ using SuperSafeBank.Common;
 using SuperSafeBank.Common.EventBus;
 using SuperSafeBank.Domain;
 using SuperSafeBank.Domain.Events;
+using SuperSafeBank.Domain.Services;
 using SuperSafeBank.Service.Core.Azure.Common.Persistence;
 using SuperSafeBank.Service.Core.Common.Queries;
 using System;
-using System.Linq;
+using System.Collections.Generic;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -25,17 +26,20 @@ namespace SuperSafeBank.Worker.Core.Azure.EventHandlers
         private readonly ILogger<CustomerDetailsHandler> _logger;
         private readonly IEventsRepository<Customer, Guid> _customersRepo;
         private readonly IEventsRepository<Account, Guid> _accountsRepo;
+        private readonly ICurrencyConverter _currencyConverter;
 
         public CustomerDetailsHandler(
             IEventsRepository<Customer, Guid> customersRepo,
             IEventsRepository<Account, Guid> accountsRepo,
             IViewsContext dbContext,
+            ICurrencyConverter currencyConverter,
             ILogger<CustomerDetailsHandler> logger)
         {
             _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _customersRepo = customersRepo ?? throw new ArgumentNullException(nameof(customersRepo));
             _accountsRepo = accountsRepo ?? throw new ArgumentNullException(nameof(accountsRepo));
+            _currencyConverter = currencyConverter ?? throw new ArgumentNullException(nameof(currencyConverter));
         }
 
         public async Task Handle(EventReceived<CustomerCreated> @event, CancellationToken cancellationToken)
@@ -54,20 +58,10 @@ namespace SuperSafeBank.Worker.Core.Azure.EventHandlers
 
             _logger.LogInformation("created customer details {AggregateId}", @event.Event.AggregateId);
         }
+
         public async Task Handle(EventReceived<AccountCreated> @event, CancellationToken cancellationToken)
         {
-            var response = await _dbContext.CustomersDetails.GetEntityAsync<ViewTableEntity>(
-                partitionKey: @event.Event.OwnerId.ToString(),
-                rowKey: string.Empty,
-                cancellationToken: cancellationToken);
-            var entity = response.Value;
-
-            var customer = JsonSerializer.Deserialize<CustomerDetails>(entity.Data);
-
-            var accounts = (customer.Accounts ?? Enumerable.Empty<Guid>()).ToList();
-            accounts.Add(@event.Event.AggregateId);
-
-            var customerView = new CustomerDetails(customer.Id, customer.Firstname, customer.Lastname, customer.Email, accounts, customer.TotalBalance );
+            var customerView = await BuildCustomerViewAsync(@event.Event.OwnerId, cancellationToken);
             await SaveCustomerViewAsync(customerView, cancellationToken);
 
             _logger.LogInformation($"updated customer details accounts {@event.Event.AggregateId}");
@@ -76,9 +70,8 @@ namespace SuperSafeBank.Worker.Core.Azure.EventHandlers
         public async Task Handle(EventReceived<Withdrawal> @event, CancellationToken cancellationToken)
         {
             var account = await _accountsRepo.RehydrateAsync(@event.Event.AggregateId, cancellationToken);
-            var customer = await _customersRepo.RehydrateAsync(account.OwnerId, cancellationToken);
-            
-            var customerView = new CustomerDetails(customer.Id, customer.Firstname, customer.Lastname, customer.Email.Value, customer.Accounts, account.Balance);
+
+            var customerView = await BuildCustomerViewAsync(account.OwnerId, cancellationToken);
             await SaveCustomerViewAsync(customerView, cancellationToken);
 
             _logger.LogInformation($"updated customer balance {@event.Event.AggregateId}");
@@ -87,12 +80,29 @@ namespace SuperSafeBank.Worker.Core.Azure.EventHandlers
         public async Task Handle(EventReceived<Deposit> @event, CancellationToken cancellationToken)
         {
             var account = await _accountsRepo.RehydrateAsync(@event.Event.AggregateId, cancellationToken);
-            var customer = await _customersRepo.RehydrateAsync(account.OwnerId, cancellationToken);
-
-            var customerView = new CustomerDetails(customer.Id, customer.Firstname, customer.Lastname, customer.Email.Value, customer.Accounts, account.Balance);
+            
+            var customerView = await BuildCustomerViewAsync(account.OwnerId, cancellationToken);
             await SaveCustomerViewAsync(customerView, cancellationToken);
 
             _logger.LogInformation($"updated customer balance {@event.Event.AggregateId}");
+        }
+
+        private async Task<CustomerDetails> BuildCustomerViewAsync(Guid customerId, CancellationToken cancellationToken)
+        {
+            var customer = await _customersRepo.RehydrateAsync(customerId, cancellationToken);
+            
+            var totalBalance = Money.Zero(Currency.CanadianDollar);
+            var accounts = new List<CustomerAccountDetails>();
+            foreach(var id in customer.Accounts)
+            {
+                var account = await _accountsRepo.RehydrateAsync(id, cancellationToken);
+                accounts.Add(CustomerAccountDetails.Map(account));
+
+                totalBalance = totalBalance.Add(account.Balance, _currencyConverter);
+            }                
+
+            var customerView = new CustomerDetails(customer.Id, customer.Firstname, customer.Lastname, customer.Email.Value, accounts, totalBalance);
+            return customerView;
         }
 
         private async Task SaveCustomerViewAsync(CustomerDetails customerView, CancellationToken cancellationToken)

@@ -7,6 +7,7 @@ using Xunit;
 
 namespace SuperSafeBank.Domain.Tests
 {
+
     public class CustomerTests
     {
         [Fact]

@@ -32,7 +32,7 @@ namespace SuperSafeBank.Service.Core
         {
             services.AddControllers();
 
-            services.AddSingleton<ICurrencyConverter, FakeCurrencyConverter>();
+            services.AddTransient<ICurrencyConverter, FakeCurrencyConverter>();
 
             services.AddSingleton<IEventSerializer>(new JsonEventSerializer(new[]
             {
