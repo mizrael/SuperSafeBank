@@ -79,7 +79,7 @@ namespace SuperSafeBank.Service.Core.Tests.Contract
             response.StatusCode.Should().Be(HttpStatusCode.Created);
             var result = await response.Content.ReadAsAsync<dynamic>();
 
-            Guid customerId = result.id;
+            Guid customerId = result.customerId;
 
             var createAccountPayload = new
             {
@@ -115,7 +115,7 @@ namespace SuperSafeBank.Service.Core.Tests.Contract
             response.StatusCode.Should().Be(HttpStatusCode.Created);
             var result = await response.Content.ReadAsAsync<dynamic>();
 
-            Guid customerId = result.id;
+            Guid customerId = result.customerId;
 
             var createAccountPayload = new
             {
@@ -149,7 +149,7 @@ namespace SuperSafeBank.Service.Core.Tests.Contract
             response.StatusCode.Should().Be(HttpStatusCode.Created);
             var result = await response.Content.ReadAsAsync<dynamic>();
 
-            Guid customerId = result.id;
+            Guid customerId = result.customerId;
 
             var createAccountPayload = new
             {
@@ -183,7 +183,7 @@ namespace SuperSafeBank.Service.Core.Tests.Contract
             response.StatusCode.Should().Be(HttpStatusCode.Created);
             var result = await response.Content.ReadAsAsync<dynamic>();
 
-            Guid customerId = result.id;
+            Guid customerId = result.customerId;
 
             var createAccountPayload = new
             {

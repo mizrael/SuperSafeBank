@@ -38,8 +38,7 @@ namespace SuperSafeBank.Service.Core.Persistence.Mongo
             
             return services.AddSingleton(ctx => new MongoClient(connectionString: configuration.ConnectionString))
                 .AddSingleton(ctx =>
-                {
-                    
+                {                    
                     var client = ctx.GetRequiredService<MongoClient>();
                     var database = client.GetDatabase(configuration.QueryDbName);
                     return database;

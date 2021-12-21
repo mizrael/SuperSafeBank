@@ -93,7 +93,12 @@ namespace SuperSafeBank.Service.Core.Tests.Contract
             var response = await _fixture.HttpClient.PostAsJsonAsync("customers", payload);
             response.IsSuccessStatusCode.Should().BeTrue();
             response.StatusCode.Should().Be(HttpStatusCode.Created);
+
+            var result = await response.Content.ReadAsAsync<dynamic>();
+            Guid customerId = result.customerId;
+
             response.Headers.Location.Should().NotBeNull();
+            response.Headers.Location.ToString().Should().Contain(customerId.ToString());
         }
 
         [Fact]

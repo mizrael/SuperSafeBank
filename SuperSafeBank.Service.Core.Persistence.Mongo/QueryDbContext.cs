@@ -53,6 +53,7 @@ namespace SuperSafeBank.Service.Core.Persistence.Mongo
                     mapper.MapProperty(c => c.OwnerFirstName);
                     mapper.MapProperty(c => c.OwnerId);
                     mapper.MapProperty(c => c.OwnerLastName);
+                    mapper.MapProperty(c => c.OwnerEmail);
                     mapper.MapCreator(c => new AccountDetails(c.Id, c.OwnerId, c.OwnerFirstName, c.OwnerLastName, c.OwnerEmail, c.Balance));
                 });
 
