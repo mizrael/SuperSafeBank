@@ -1,16 +1,15 @@
-using Azure.Data.Tables;
 using Microsoft.Extensions.Configuration;
-using SuperSafeBank.Common.Models;
+using SuperSafeBank.Service.Core.Azure.Common.Persistence;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace SuperSafeBank.Persistence.Azure.Tests.Integration.Fixtures
+namespace SuperSafeBank.Service.Core.Azure.Tests
 {
     public class StorageTableFixutre : Xunit.IAsyncLifetime
     {        
-        private readonly Queue<TableClient> _tableClients = new();
+        private readonly Queue<IViewsContext> _dbContexts = new();
         
         private readonly string _tablePrefix;
         private readonly string _connStr;
@@ -30,22 +29,23 @@ namespace SuperSafeBank.Persistence.Azure.Tests.Integration.Fixtures
             _tablePrefix = configuration["tablePrefix"];
         }
 
-        public async Task<TableClient> CreateTableClientAsync<TA, TKey>() 
-            where TA : IAggregateRoot<TKey>
+        public IViewsContext CreateTableClient() 
         {
-            var client = new TableClient(_connStr, $"{_tablePrefix}{nameof(TA)}{DateTime.UtcNow.Ticks}");
-            await client.CreateIfNotExistsAsync();
-            
-            _tableClients.Enqueue(client);
+           var ctx = new ViewsContext(_connStr, _tablePrefix);
 
-            return client;
+            _dbContexts.Enqueue(ctx);
+
+            return ctx;
         }
 
         public async Task DisposeAsync()
         {
-            while (_tableClients.Any())
+            while (_dbContexts.Any())
             {
-                await _tableClients.Dequeue().DeleteAsync();
+                var ctx = _dbContexts.Dequeue();
+                await ctx.CustomersDetails.DeleteAsync();
+                await ctx.CustomersArchive.DeleteAsync();
+                await ctx.Accounts.DeleteAsync();
             }
         }
 

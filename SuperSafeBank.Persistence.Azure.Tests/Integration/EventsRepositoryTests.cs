@@ -30,7 +30,7 @@ namespace SuperSafeBank.Persistence.Azure.Tests.Integration
         [Fact]
         public async Task AppendAsync_should_store_events()
         {
-            var client = await _fixture.CreateTableClientAsync();
+            var client = await _fixture.CreateTableClientAsync<DummyAggregate, Guid>();
 
             var sut = new EventsRepository<DummyAggregate, Guid>(client, _eventSerializer);
 
@@ -53,7 +53,7 @@ namespace SuperSafeBank.Persistence.Azure.Tests.Integration
         [Fact]
         public async Task AppendAsync_should_throw_AggregateException_when_version_mismatch()
         {
-            var db = await _fixture.CreateTableClientAsync();
+            var db = await _fixture.CreateTableClientAsync<DummyAggregate, Guid>();
 
             var sut = new EventsRepository<DummyAggregate, Guid>(db, _eventSerializer);
 
@@ -73,7 +73,7 @@ namespace SuperSafeBank.Persistence.Azure.Tests.Integration
         [Fact]
         public async Task RehydrateAsync_should_store_events()
         {
-            var db = await _fixture.CreateTableClientAsync();
+            var db = await _fixture.CreateTableClientAsync<DummyAggregate, Guid>();
 
             var sut = new EventsRepository<DummyAggregate, Guid>(db, _eventSerializer);
 

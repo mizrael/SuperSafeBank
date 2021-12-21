@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using MediatR;
+﻿using MediatR;
 using SuperSafeBank.Domain;
+using System;
+using System.Linq;
 
 namespace SuperSafeBank.Service.Core.Common.Queries
 {
@@ -14,7 +13,7 @@ namespace SuperSafeBank.Service.Core.Common.Queries
 
     public record CustomerDetails
     {
-        public CustomerDetails(Guid id, string firstname, string lastname, string email, IEnumerable<CustomerAccountDetails> accounts, Money totalBalance)
+        public CustomerDetails(Guid id, string firstname, string lastname, string email, CustomerAccountDetails[] accounts, Money totalBalance)
         {
             Id = id;
             Firstname = firstname;
@@ -24,12 +23,12 @@ namespace SuperSafeBank.Service.Core.Common.Queries
             TotalBalance = totalBalance;
         }
 
-        public Guid Id { get; }
-        public string Firstname { get; }
-        public string Lastname { get; }
-        public string Email { get; }
-        public CustomerAccountDetails[] Accounts { get; }
-        public Money TotalBalance { get; }
+        public Guid Id { get; init; }
+        public string Firstname { get; init; }
+        public string Lastname { get; init; }
+        public string Email { get; init; }
+        public CustomerAccountDetails[] Accounts { get; init; }
+        public Money TotalBalance { get; init; }
     }
 
     public record CustomerById(Guid CustomerId) : IRequest<CustomerDetails>;

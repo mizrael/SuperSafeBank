@@ -10,4 +10,8 @@
 		<PackageReference Include="Azure.Data.Tables" Version="12.3.0" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <ProjectReference Include="..\SuperSafeBank.Service.Core.Common\SuperSafeBank.Service.Core.Common.csproj" />
+	</ItemGroup>
+
 </Project>

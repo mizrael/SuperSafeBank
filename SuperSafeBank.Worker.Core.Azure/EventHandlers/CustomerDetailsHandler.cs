@@ -107,12 +107,7 @@ namespace SuperSafeBank.Worker.Core.Azure.EventHandlers
 
         private async Task SaveCustomerViewAsync(CustomerDetails customerView, CancellationToken cancellationToken)
         {
-            var entity = new ViewTableEntity()
-            {
-                PartitionKey = customerView.Id.ToString(),
-                RowKey = customerView.Id.ToString(),
-                Data = JsonSerializer.Serialize(customerView),
-            };
+            var entity = ViewTableEntity.Map(customerView);
             var response = await _dbContext.CustomersDetails.UpsertEntityAsync(entity, mode: TableUpdateMode.Replace, cancellationToken: cancellationToken);
             if (response?.Status != 202)
             {
