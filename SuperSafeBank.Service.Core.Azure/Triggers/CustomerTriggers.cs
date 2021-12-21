@@ -39,8 +39,8 @@ namespace SuperSafeBank.Service.Core.Azure.Triggers
             await _mediator.Publish(command, cancellationToken);
 
             var response = req.CreateResponse(System.Net.HttpStatusCode.Created);
-            response.Headers.Add("Location", $"/customers/{command.Id}");
-            await response.WriteAsJsonAsync(new { id = command.Id }, cancellationToken);
+            response.Headers.Add("Location", $"/customers/{command.CustomerId}");
+            await response.WriteAsJsonAsync(new { id = command.CustomerId }, cancellationToken);
 
             return response;
         }

@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace SuperSafeBank.Common.Models
 {
-    public abstract class BaseAggregateRoot<TA, TKey> : BaseEntity<TKey>, IAggregateRoot<TKey>
+    public abstract record BaseAggregateRoot<TA, TKey> : BaseEntity<TKey>, IAggregateRoot<TKey>
         where TA : class, IAggregateRoot<TKey>
     {
         private readonly Queue<IDomainEvent<TKey>> _events = new Queue<IDomainEvent<TKey>>();

@@ -29,17 +29,17 @@ namespace SuperSafeBank.Service.Core.Controllers
             var command = new CreateCustomer(Guid.NewGuid(), dto.FirstName, dto.LastName, dto.Email);
             await _mediator.Publish(command, cancellationToken);
             
-            return CreatedAtAction("GetCustomer", new { id = command.Id }, command);
+            return CreatedAtAction("GetCustomer", new { id = command.CustomerId }, command);
         }
 
-        [HttpPost, Route("{id:guid}/accounts")]
-        public async Task<IActionResult> CreateAccount([FromRoute]Guid id, [FromBody]CreateAccountDto dto, CancellationToken cancellationToken = default)
+        [HttpPost, Route("{customerId:guid}/accounts")]
+        public async Task<IActionResult> CreateAccount([FromRoute]Guid customerId, [FromBody]CreateAccountDto dto, CancellationToken cancellationToken = default)
         {
             if (null == dto)
                 return BadRequest();
 
             var currency = Currency.FromCode(dto.CurrencyCode);
-            var command = new CreateAccount(id, Guid.NewGuid(), currency);
+            var command = new CreateAccount(customerId, Guid.NewGuid(), currency);
             await _mediator.Publish(command, cancellationToken);
             return CreatedAtAction("GetAccount", "Accounts", new {id = command.AccountId}, command);
         }

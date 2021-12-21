@@ -15,8 +15,8 @@ namespace SuperSafeBank.Domain.Tests
         public void Create_should_create_valid_Account_instance()
         {
             var currencyConverter = new FakeCurrencyConverter();
-            var customer = Customer.Create("lorem", "ipsum", "test@test.com");
-            var account = Account.Create(customer, Currency.CanadianDollar);
+            var customer = Customer.Create(Guid.NewGuid(), "lorem", "ipsum", "test@test.com");
+            var account = Account.Create(Guid.NewGuid(), customer, Currency.CanadianDollar);
             account.Deposit(new Money(Currency.CanadianDollar, 10), currencyConverter);
             account.Deposit(new Money(Currency.CanadianDollar, 42), currencyConverter);
             account.Withdraw(new Money(Currency.CanadianDollar, 4), currencyConverter);
@@ -32,10 +32,10 @@ namespace SuperSafeBank.Domain.Tests
         }
 
         [Fact]
-        public void ctor_should_create_valid_instance()
+        public void Create_should_return_valid_instance()
         {
-            var customer = Customer.Create("lorem", "ipsum", "test@test.com");
-            var sut = Account.Create(customer, Currency.CanadianDollar);
+            var customer = Customer.Create(Guid.NewGuid(), "lorem", "ipsum", "test@test.com");
+            var sut = Account.Create(Guid.NewGuid(), customer, Currency.CanadianDollar);
 
             sut.Balance.Should().Be(Money.Zero(Currency.CanadianDollar));
             sut.OwnerId.Should().Be(customer.Id);
@@ -43,9 +43,18 @@ namespace SuperSafeBank.Domain.Tests
         }
 
         [Fact]
+        public void Create_should_add_account_to_customer()
+        {
+            var customer = Customer.Create(Guid.NewGuid(), "lorem", "ipsum", "test@test.com");
+
+            var account = Account.Create(Guid.NewGuid(), customer, Currency.CanadianDollar);
+            customer.Accounts.Should().Contain(account.Id);
+        }
+
+        [Fact]
         public void ctor_should_raise_Created_event()
         {
-            var customer = Customer.Create("lorem", "ipsum", "test@test.com");
+            var customer = Customer.Create(Guid.NewGuid(), "lorem", "ipsum", "test@test.com");
 
             var accountId = Guid.NewGuid();
             var sut = new Account(accountId, customer, Currency.CanadianDollar);
@@ -64,8 +73,8 @@ namespace SuperSafeBank.Domain.Tests
         [Fact]
         public void Deposit_should_add_value()
         {
-            var customer = Customer.Create("lorem", "ipsum", "test@test.com");
-            var sut = Account.Create(customer, Currency.CanadianDollar);
+            var customer = Customer.Create(Guid.NewGuid(), "lorem", "ipsum", "test@test.com");
+            var sut = Account.Create(Guid.NewGuid(), customer, Currency.CanadianDollar);
             var currencyConverter = new FakeCurrencyConverter();
 
             sut.Balance.Should().Be(Money.Zero(Currency.CanadianDollar));
@@ -82,8 +91,8 @@ namespace SuperSafeBank.Domain.Tests
         [Fact]
         public void Withdraw_should_throw_if_current_balance_is_below_amount()
         {
-            var customer = Customer.Create("lorem", "ipsum", "test@test.com");
-            var sut = Account.Create(customer, Currency.CanadianDollar);
+            var customer = Customer.Create(Guid.NewGuid(), "lorem", "ipsum", "test@test.com");
+            var sut = Account.Create(Guid.NewGuid(), customer, Currency.CanadianDollar);
             var currencyConverter = new FakeCurrencyConverter();
 
             sut.Balance.Should().Be(Money.Zero(Currency.CanadianDollar));
@@ -94,8 +103,8 @@ namespace SuperSafeBank.Domain.Tests
         [Fact]
         public void Withdraw_should_remove_value()
         {
-            var customer = Customer.Create("lorem", "ipsum", "test@test.com");
-            var sut = Account.Create(customer, Currency.CanadianDollar);
+            var customer = Customer.Create(Guid.NewGuid(), "lorem", "ipsum", "test@test.com");
+            var sut = Account.Create(Guid.NewGuid(), customer, Currency.CanadianDollar);
             var currencyConverter = new FakeCurrencyConverter();
 
             sut.Deposit(new Money(Currency.CanadianDollar, 10), currencyConverter);

@@ -7,12 +7,12 @@ using SuperSafeBank.Domain.Services;
 
 namespace SuperSafeBank.Domain.Commands
 {
-    public class Deposit : INotification
+    public record Deposit : INotification
     {
         public Deposit(Guid accountId, Money amount)
         {
             AccountId = accountId;
-            Amount = amount;
+            Amount = amount ?? throw new ArgumentNullException(nameof(amount));
         }
 
         public Guid AccountId { get; }

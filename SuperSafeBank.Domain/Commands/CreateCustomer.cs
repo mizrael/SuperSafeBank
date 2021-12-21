@@ -7,17 +7,17 @@ using SuperSafeBank.Domain.Services;
 
 namespace SuperSafeBank.Domain.Commands
 {
-    public class CreateCustomer : INotification
+    public record CreateCustomer : INotification
     {
         public CreateCustomer(Guid id, string firstName, string lastName, string email)
         {
-            this.Id = id;
+            this.CustomerId = id;
             this.FirstName = firstName;
             this.LastName = lastName;
             this.Email = email;
         }
 
-        public Guid Id { get; }
+        public Guid CustomerId {get;}
         public string FirstName { get; }
         public string LastName { get; }
         public string Email { get; }
@@ -42,11 +42,9 @@ namespace SuperSafeBank.Domain.Commands
             if (await _customerEmailsRepository.ExistsAsync(command.Email))
                 throw new ValidationException("Duplicate email address", new ValidationError(nameof(CreateCustomer.Email), $"email '{command.Email}' already exists"));
             
-            var email = new Email(command.Email);
-
-            var customer = new Customer(command.Id, command.FirstName, command.LastName, email);
+            var customer = Customer.Create(command.CustomerId, command.FirstName, command.LastName, command.Email);
             await _eventsService.PersistAsync(customer);
-            await _customerEmailsRepository.CreateAsync(command.Email, command.Id);
+            await _customerEmailsRepository.CreateAsync(command.Email, customer.Id);
         }
     }
 }

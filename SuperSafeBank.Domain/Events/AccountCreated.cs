@@ -10,10 +10,13 @@ namespace SuperSafeBank.Domain.Events
         /// </summary>
         private AccountCreated() { }
 
-        public AccountCreated(Account account) : base(account)
+        public AccountCreated(Account account, Customer owner, Currency currency) : base(account)
         {
-            OwnerId = account.OwnerId;
-            Currency = account.Balance.Currency;
+            if (owner is null)
+                throw new ArgumentNullException(nameof(owner));
+            
+            OwnerId = owner.Id;
+            Currency = currency ?? throw new ArgumentNullException(nameof(currency));
         }
 
         public Guid OwnerId { get; init; }

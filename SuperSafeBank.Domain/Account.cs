@@ -5,7 +5,7 @@ using SuperSafeBank.Domain.Services;
 
 namespace SuperSafeBank.Domain
 {
-    public class Account : BaseAggregateRoot<Account, Guid>
+    public record Account : BaseAggregateRoot<Account, Guid>
     {
         private Account() { }
 
@@ -15,11 +15,8 @@ namespace SuperSafeBank.Domain
                 throw new ArgumentNullException(nameof(owner));
             if (currency == null)
                 throw new ArgumentNullException(nameof(currency));
-
-            this.OwnerId = owner.Id;
-            this.Balance = Money.Zero(currency);
-            
-            this.Append(new AccountCreated(this));
+                        
+            this.Append(new AccountCreated(this, owner, currency));
         }
 
         public Guid OwnerId { get; private set; }
@@ -53,7 +50,7 @@ namespace SuperSafeBank.Domain
             {
                 case AccountCreated c:
                     this.Id = c.AggregateId;
-                    this.Balance = new Money(c.Currency, 0);
+                    this.Balance = Money.Zero(c.Currency);
                     this.OwnerId = c.OwnerId;
                     break;
                 case Withdrawal w:
@@ -65,9 +62,11 @@ namespace SuperSafeBank.Domain
             }
         }
 
-        public static Account Create(Customer owner, Currency currency)
+        public static Account Create(Guid accountId, Customer owner, Currency currency)
         {
-            return new Account(Guid.NewGuid(), owner, currency);
+            var account = new Account(accountId, owner, currency);
+            owner.AddAccount(account);
+            return account;
         }
     }
 }

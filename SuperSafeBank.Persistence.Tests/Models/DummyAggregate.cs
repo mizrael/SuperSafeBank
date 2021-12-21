@@ -5,7 +5,7 @@ using SuperSafeBank.Common.Models;
 
 namespace SuperSafeBank.Persistence.Tests.Models
 {
-    public class DummyAggregate : BaseAggregateRoot<DummyAggregate, Guid>
+    public record DummyAggregate : BaseAggregateRoot<DummyAggregate, Guid>
     {
         private DummyAggregate() { }
         public DummyAggregate(Guid id) : base(id)

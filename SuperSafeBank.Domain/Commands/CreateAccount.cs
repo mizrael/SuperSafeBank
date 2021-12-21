@@ -6,14 +6,15 @@ using SuperSafeBank.Common;
 
 namespace SuperSafeBank.Domain.Commands
 {
-    public class CreateAccount : INotification
+    public record CreateAccount : INotification
     {
         public CreateAccount(Guid customerId, Guid accountId, Currency currency)
         {
             CustomerId = customerId;
             AccountId = accountId;
-            Currency = currency;
+            Currency = currency ?? throw new ArgumentNullException(nameof(currency));
         }
+
         public Guid CustomerId { get; }
         public Guid AccountId { get; }
         public Currency Currency { get; }
@@ -34,9 +35,11 @@ namespace SuperSafeBank.Domain.Commands
         {
             var customer = await _customerEventsService.RehydrateAsync(command.CustomerId);
             if(null == customer)
-                throw new ArgumentOutOfRangeException(nameof(CreateAccount.CustomerId), "invalid customer id");            
+                throw new ArgumentOutOfRangeException(nameof(CreateAccount.CustomerId), "invalid customer id");
 
-            var account = new Account(command.AccountId, customer, command.Currency);
+            var account = Account.Create(command.AccountId, customer, command.Currency);
+
+            await _customerEventsService.PersistAsync(customer);
             await _accountEventsService.PersistAsync(account);
         }
     }

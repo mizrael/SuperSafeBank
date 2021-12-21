@@ -10,11 +10,11 @@ namespace SuperSafeBank.Domain.Events
         /// </summary>
         private CustomerCreated() { }
 
-        public CustomerCreated(Customer customer) : base(customer)
+        public CustomerCreated(Customer customer, string firstname, string lastname, Email email) : base(customer)
         {
-            Firstname = customer.Firstname;
-            Lastname = customer.Lastname;
-            Email = customer.Email;
+            Firstname = firstname;
+            Lastname = lastname;
+            Email = email;
         }
 
         public string Firstname { get; init; }
