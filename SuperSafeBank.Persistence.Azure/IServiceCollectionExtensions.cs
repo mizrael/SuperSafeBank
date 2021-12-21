@@ -7,7 +7,7 @@ using System;
 
 namespace SuperSafeBank.Persistence.Azure
 {
-    public record EventsRepositoryConfig(Uri ConnectionString, string TablePrefix = "");
+    public record EventsRepositoryConfig(string ConnectionString, string TablePrefix = "");
 
     public static class IServiceCollectionExtensions
     {
@@ -26,7 +26,7 @@ namespace SuperSafeBank.Persistence.Azure
             
             return services.AddSingleton<IEventsRepository<TA, TK>>(ctx =>
             {
-                var client = new TableClient(config.ConnectionString);
+                var client = new TableClient(config.ConnectionString, tableName);
                 var eventDeserializer = ctx.GetRequiredService<IEventSerializer>();
                 return new EventsRepository<TA, TK>(client, eventDeserializer);
             });

@@ -43,6 +43,13 @@ await Host.CreateDefaultBuilder(args)
                 httpClient.BaseAddress = new System.Uri(endpoint);
             }).AddPolicyHandler(HttpClientPolicies.GetRetryPolicy());
 
+            services.AddHttpClient<IAccountsApiClient, AccountsApiClient>("accountsApiClient", (ctx, httpClient) =>
+            {
+                var config = ctx.GetRequiredService<IConfiguration>();
+                var endpoint = config["AccountsApi"];
+                httpClient.BaseAddress = new System.Uri(endpoint);
+            }).AddPolicyHandler(HttpClientPolicies.GetRetryPolicy());
+
             services.AddSingleton<IEventSerializer>(new JsonEventSerializer(new[]
             {
                 typeof(CustomerCreated).Assembly

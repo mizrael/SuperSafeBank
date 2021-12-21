@@ -6,12 +6,13 @@ namespace SuperSafeBank.Service.Core.Common.Queries
 {
     public record AccountDetails
     {
-        public AccountDetails(Guid id, Guid ownerId, string ownerFirstName, string ownerLastName, Money balance)
+        public AccountDetails(Guid id, Guid ownerId, string ownerFirstName, string ownerLastName, string ownerEmail, Money balance)
         {
             Id = id;
             OwnerId = ownerId;
             OwnerFirstName = ownerFirstName;
             OwnerLastName = ownerLastName;
+            OwnerEmail = ownerEmail;
             Balance = balance;
         }
 
@@ -19,6 +20,7 @@ namespace SuperSafeBank.Service.Core.Common.Queries
         public Guid OwnerId { get; }
         public string OwnerFirstName { get; }
         public string OwnerLastName { get; }
+        public string OwnerEmail { get; }
         public Money Balance { get; }
     }
 

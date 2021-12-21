@@ -1,13 +1,11 @@
-using System;
-using System.ComponentModel;
-using System.Linq;
-using System.Net;
-using System.Threading.Tasks;
 using FluentAssertions;
-using Microsoft.Azure.Cosmos.Linq;
 using SuperSafeBank.Common;
 using SuperSafeBank.Persistence.Azure.Tests.Integration.Fixtures;
 using SuperSafeBank.Persistence.Tests.Models;
+using System;
+using System.ComponentModel;
+using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace SuperSafeBank.Persistence.Azure.Tests.Integration
@@ -28,7 +26,6 @@ namespace SuperSafeBank.Persistence.Azure.Tests.Integration
         {
             _fixture = fixture;
         }
-
 
         [Fact]
         public async Task AppendAsync_should_store_events()

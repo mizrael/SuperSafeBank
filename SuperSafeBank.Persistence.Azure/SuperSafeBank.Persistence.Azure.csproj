@@ -5,11 +5,7 @@
     <Configurations>Debug;Release;DebugAzure</Configurations>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Content Remove="C:\Users\davidguida\.nuget\packages\microsoft.azure.cosmos\3.23.0\contentFiles\any\netstandard2.0\ThirdPartyNotice.txt" />
-  </ItemGroup>
-
-  <ItemGroup>
+	<ItemGroup>
     <PackageReference Include="Azure.Data.Tables" Version="12.3.0" />
   </ItemGroup>
 

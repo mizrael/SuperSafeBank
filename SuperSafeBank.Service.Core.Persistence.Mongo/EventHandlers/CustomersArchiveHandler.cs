@@ -10,8 +10,7 @@ using SuperSafeBank.Service.Core.Common.Queries;
 namespace SuperSafeBank.Service.Core.Persistence.Mongo.EventHandlers
 {
     public class CustomersArchiveHandler : 
-        INotificationHandler<EventReceived<CustomerCreated>>,
-        INotificationHandler<EventReceived<AccountCreated>>
+        INotificationHandler<EventReceived<CustomerCreated>>
     {
         private readonly IQueryDbContext _db;
         private readonly ILogger<CustomersArchiveHandler> _logger;
@@ -32,8 +31,7 @@ namespace SuperSafeBank.Service.Core.Persistence.Mongo.EventHandlers
             var update = Builders<CustomerArchiveItem>.Update
                 .Set(a => a.Id, @event.Event.AggregateId)
                 .Set(a => a.Firstname, @event.Event.Firstname)
-                .Set(a => a.Lastname, @event.Event.Lastname)                
-                .Set(a => a.Accounts, new System.Guid[] { });
+                .Set(a => a.Lastname, @event.Event.Lastname);
 
             await _db.Customers.UpdateOneAsync(filter,
                 cancellationToken: cancellationToken,
@@ -41,22 +39,6 @@ namespace SuperSafeBank.Service.Core.Persistence.Mongo.EventHandlers
                 options: new UpdateOptions() { IsUpsert = true });
 
             _logger.LogInformation($"created customer archive item {@event.Event.AggregateId}");
-        }
-
-        public async Task Handle(EventReceived<AccountCreated> @event, CancellationToken cancellationToken)
-        {
-            var filter = Builders<CustomerArchiveItem>.Filter
-                .Eq(a => a.Id, @event.Event.OwnerId);
-
-            var update = Builders<CustomerArchiveItem>.Update
-                .AddToSet(a => a.Accounts, @event.Event.AggregateId);
-
-            await _db.Customers.UpdateOneAsync(filter,
-                cancellationToken: cancellationToken,
-                update: update,
-                options: new UpdateOptions() { IsUpsert = true });
-
-            _logger.LogInformation($"updated customer archive item accounts {@event.Event.AggregateId}");
         }
     }
 }

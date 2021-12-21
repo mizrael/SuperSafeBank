@@ -34,7 +34,7 @@ namespace SuperSafeBank.Service.Core.Tests.Contract
         public async Task GetDetails_should_return_account_details()
         {
             var expectedAccount = new Common.Queries.AccountDetails(Guid.NewGuid(), Guid.NewGuid(),
-                "John", "Doe", new Domain.Money(Domain.Currency.CanadianDollar, 42));
+                "John", "Doe", "test@email.com", new Domain.Money(Domain.Currency.CanadianDollar, 42));
 
             await _fixture.QueryModelsSeeder.CreateAccountDetails(expectedAccount);
 

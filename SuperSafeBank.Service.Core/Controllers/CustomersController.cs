@@ -5,8 +5,8 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using SuperSafeBank.Domain;
 using SuperSafeBank.Domain.Commands;
-using SuperSafeBank.Service.Core.DTOs;
 using SuperSafeBank.Service.Core.Common.Queries;
+using SuperSafeBank.Service.Core.DTOs;
 
 namespace SuperSafeBank.Service.Core.Controllers
 {

@@ -53,7 +53,7 @@ namespace SuperSafeBank.Service.Core.Persistence.Mongo
                     mapper.MapProperty(c => c.OwnerFirstName);
                     mapper.MapProperty(c => c.OwnerId);
                     mapper.MapProperty(c => c.OwnerLastName);
-                    mapper.MapCreator(c => new AccountDetails(c.Id, c.OwnerId, c.OwnerFirstName, c.OwnerLastName, c.Balance));
+                    mapper.MapCreator(c => new AccountDetails(c.Id, c.OwnerId, c.OwnerFirstName, c.OwnerLastName, c.OwnerEmail, c.Balance));
                 });
 
             if (!BsonClassMap.IsClassMapRegistered(typeof(CustomerDetails)))
@@ -73,9 +73,8 @@ namespace SuperSafeBank.Service.Core.Persistence.Mongo
                 {
                     mapper.MapIdProperty(c => c.Id).SetSerializer(guidSerializer);
                     mapper.MapProperty(c => c.Firstname);
-                    mapper.MapProperty(c => c.Lastname);
-                    mapper.MapProperty(c => c.Accounts);
-                    mapper.MapCreator(c => new CustomerArchiveItem(c.Id, c.Firstname, c.Lastname, c.Accounts));
+                    mapper.MapProperty(c => c.Lastname);                    
+                    mapper.MapCreator(c => new CustomerArchiveItem(c.Id, c.Firstname, c.Lastname));
                 });
         }
 

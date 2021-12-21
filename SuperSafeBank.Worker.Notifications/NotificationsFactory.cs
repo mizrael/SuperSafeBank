@@ -8,10 +8,12 @@ namespace SuperSafeBank.Worker.Notifications
     public class NotificationsFactory : INotificationsFactory
     {
         private readonly ICustomersApiClient _customersApiClient;
+        private readonly IAccountsApiClient _accountsApiClient;
 
-        public NotificationsFactory(ICustomersApiClient customersApiClient)
+        public NotificationsFactory(ICustomersApiClient customersApiClient, IAccountsApiClient accountsApiClient)
         {
             _customersApiClient = customersApiClient ?? throw new ArgumentNullException(nameof(customersApiClient));
+            _accountsApiClient = accountsApiClient ?? throw new ArgumentNullException(nameof(accountsApiClient));
         }
 
         public async Task<Notification> CreateNewAccountNotificationAsync(Guid customerId, Guid accountId)
@@ -21,18 +23,18 @@ namespace SuperSafeBank.Worker.Notifications
             return new Notification(customer.Email, message);
         }
 
-        public async Task<Notification> CreateDepositNotificationAsync(Guid ownerId, Money amount)
+        public async Task<Notification> CreateDepositNotificationAsync(Guid accountId, Money amount)
         {
-            var customer = await _customersApiClient.GetCustomerAsync(ownerId);
-            var message = $"dear {customer.Firstname}, a deposit of {amount} was done on your account";
-            return new Notification(customer.Email, message);
+            var account = await _accountsApiClient.GetAccountAsync(accountId);
+            var message = $"dear {account.OwnerFirstName}, a deposit of {amount} was done on your account";
+            return new Notification(account.OwnerEmail, message);
         }
 
-        public async Task<Notification> CreateWithdrawalNotificationAsync(Guid ownerId, Money amount)
+        public async Task<Notification> CreateWithdrawalNotificationAsync(Guid accountId, Money amount)
         {
-            var customer = await _customersApiClient.GetCustomerAsync(ownerId);
-            var message = $"dear {customer.Firstname}, a withdrawal of {amount} was done from your account";
-            return new Notification(customer.Email, message);
+            var account = await _accountsApiClient.GetAccountAsync(accountId);
+            var message = $"dear {account.OwnerFirstName}, a withdrawal of {amount} was done from your account";
+            return new Notification(account.OwnerEmail, message);
         }
     }
 }

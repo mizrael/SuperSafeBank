@@ -60,7 +60,7 @@ namespace SuperSafeBank.Service.Core.Tests.Contract
         {
             var customerItem = new Common.Queries.CustomerArchiveItem(
                 Guid.NewGuid(),
-                "test", "customer", null);
+                "test", "customer");
             await _fixture.QueryModelsSeeder.CreateCustomerArchiveItem(customerItem);
 
             var endpoint = $"customers/";
@@ -79,7 +79,6 @@ namespace SuperSafeBank.Service.Core.Tests.Contract
             customer.Id.Should().Be(customerItem.Id);
             customer.Firstname.Should().Be(customerItem.Firstname);
             customer.Lastname.Should().Be(customerItem.Lastname);
-            customer.Accounts.Should().NotBeNull().And.BeEmpty();
         }
 
         [Fact]

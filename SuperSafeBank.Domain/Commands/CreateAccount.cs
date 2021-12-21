@@ -34,9 +34,7 @@ namespace SuperSafeBank.Domain.Commands
         {
             var customer = await _customerEventsService.RehydrateAsync(command.CustomerId);
             if(null == customer)
-                throw new ArgumentOutOfRangeException(nameof(CreateAccount.CustomerId), "invalid customer id");
-
-            
+                throw new ArgumentOutOfRangeException(nameof(CreateAccount.CustomerId), "invalid customer id");            
 
             var account = new Account(command.AccountId, customer, command.Currency);
             await _accountEventsService.PersistAsync(account);

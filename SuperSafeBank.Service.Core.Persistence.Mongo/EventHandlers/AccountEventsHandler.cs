@@ -29,10 +29,10 @@ namespace SuperSafeBank.Service.Core.Persistence.Mongo.EventHandlers
         {
             _logger.LogInformation("creating account details for aggregate {AggregateId} ...", @event.Event.AggregateId);
 
-            var customerFilter = Builders<CustomerArchiveItem>.Filter
+            var customerFilter = Builders<CustomerDetails>.Filter
                 .Eq(a => a.Id, @event.Event.OwnerId);
 
-            var customer = await (await _db.Customers.FindAsync(customerFilter, null, cancellationToken))
+            var customer = await (await _db.CustomersDetails.FindAsync(customerFilter, null, cancellationToken))
                 .FirstOrDefaultAsync(cancellationToken);
             if (null == customer) 
             {
@@ -48,6 +48,7 @@ namespace SuperSafeBank.Service.Core.Persistence.Mongo.EventHandlers
                 .Set(a => a.Id, @event.Event.AggregateId)
                 .Set(a => a.OwnerFirstName, customer.Firstname)
                 .Set(a => a.OwnerLastName, customer.Lastname)
+                .Set(a => a.OwnerEmail, customer.Email)
                 .Set(a => a.OwnerId, @event.Event.OwnerId)
                 .Set(a => a.Balance, new Money(@event.Event.Currency, 0));
 
