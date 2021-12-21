@@ -12,7 +12,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\SuperSafeBank.Core\SuperSafeBank.Core.csproj" />
 		<ProjectReference Include="..\SuperSafeBank.Domain\SuperSafeBank.Domain.csproj" />
 	</ItemGroup>
 </Project>
