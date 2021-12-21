@@ -3,7 +3,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
-using Serilog.Formatting.Compact;
 using Serilog.Sinks.Grafana.Loki;
 using SuperSafeBank.Common;
 using SuperSafeBank.Common.EventBus;
@@ -14,6 +13,8 @@ using SuperSafeBank.Service.Core.Persistence.Mongo;
 using SuperSafeBank.Service.Core.Persistence.Mongo.EventHandlers;
 using SuperSafeBank.Transport.Kafka;
 using SuperSafeBank.Worker.Core;
+using SuperSafeBank.Persistence.EventStore;
+using SuperSafeBank.Domain.Services;
 
 await Host.CreateDefaultBuilder(args)
     .ConfigureHostConfiguration(configurationBuilder =>
@@ -47,11 +48,14 @@ await Host.CreateDefaultBuilder(args)
         var mongoQueryDbName = hostContext.Configuration["queryDbName"];
         var mongoConfig = new MongoConfig(mongoConnStr, mongoQueryDbName);
 
+        var eventstoreConnStr = hostContext.Configuration.GetConnectionString("eventstore");
+
         services.Scan(scan =>
         {
             scan.FromAssembliesOf(typeof(AccountEventsHandler))                
                 .RegisterHandlers(typeof(INotificationHandler<>));
         }).Decorate(typeof(INotificationHandler<>), typeof(RetryDecorator<>))
+            .AddTransient<ICurrencyConverter, FakeCurrencyConverter>()
             .AddScoped<ServiceFactory>(ctx => ctx.GetRequiredService)
             .AddScoped<IMediator, Mediator>()
             .AddSingleton<IEventSerializer>(new JsonEventSerializer(new[]
@@ -68,6 +72,7 @@ await Host.CreateDefaultBuilder(args)
                 return new EventsConsumerConfig(kafkaConnStr, eventsTopicName, groupName);
             })
             .AddMongoDb(mongoConfig)
+            .AddEventStore(eventstoreConnStr)
             .RegisterWorker(hostContext.Configuration);
     })
     .Build()
