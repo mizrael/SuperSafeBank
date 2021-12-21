@@ -40,12 +40,11 @@ jobs:
           name: Build solution
           command: |
             dotnet restore
-            dotnet build --no-restore -c DebugOnPremise 
+            dotnet build --no-restore -c Debug
 
       - azure-cli/install
 
       - run:
           name: Test
-          command: |
-            az login --service-principal --username $AZURE_CLIENT_ID --password $AZURE_CLIENT_SECRET --tenant $AZURE_TENANT_ID
-            dotnet test -c DebugOnPremise 
+          command: |            
+            dotnet test -c Debug 
