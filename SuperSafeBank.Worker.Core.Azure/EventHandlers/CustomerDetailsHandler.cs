@@ -92,11 +92,12 @@ namespace SuperSafeBank.Worker.Core.Azure.EventHandlers
             var customer = await _customersRepo.RehydrateAsync(customerId, cancellationToken);
             
             var totalBalance = Money.Zero(Currency.CanadianDollar);
-            var accounts = new List<CustomerAccountDetails>();
+            var accounts = new CustomerAccountDetails[customer.Accounts.Count];
+            int index = 0;
             foreach(var id in customer.Accounts)
             {
                 var account = await _accountsRepo.RehydrateAsync(id, cancellationToken);
-                accounts.Add(CustomerAccountDetails.Map(account));
+                accounts[index++] = CustomerAccountDetails.Map(account);
 
                 totalBalance = totalBalance.Add(account.Balance, _currencyConverter);
             }                

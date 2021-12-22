@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using Azure;
+using MediatR;
 using SuperSafeBank.Service.Core.Azure.Common.Persistence;
 using SuperSafeBank.Service.Core.Common.Queries;
 using System;
@@ -18,10 +19,20 @@ namespace SuperSafeBank.Service.Core.Azure.QueryHandlers
 
         public async Task<AccountDetails> Handle(AccountById request, CancellationToken cancellationToken)
         {
-            var response = await _dbContext.Accounts.GetEntityAsync<ViewTableEntity>(
-                partitionKey: request.AccountId.ToString(),
-                rowKey: string.Empty,
-                cancellationToken: cancellationToken);
+            Response<ViewTableEntity> response = null;
+            try
+            {
+                var key = request.AccountId.ToString();
+
+                response = await _dbContext.CustomersDetails.GetEntityAsync<ViewTableEntity>(
+                   partitionKey: key,
+                   rowKey: key,
+                   cancellationToken: cancellationToken);
+            }
+            catch (RequestFailedException ex)
+            {
+                return null;
+            }
 
             if (response?.Value is null)
                 return null;
