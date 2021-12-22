@@ -21,7 +21,7 @@ namespace SuperSafeBank.Service.Core.Azure.QueryHandlers
         {
             var results = new List<CustomerArchiveItem>();
 
-            var entities = _dbContext.CustomersDetails.QueryAsync<ViewTableEntity>(cancellationToken: cancellationToken);
+            var entities = _dbContext.CustomersArchive.QueryAsync<ViewTableEntity>(cancellationToken: cancellationToken);
             await foreach(var entity in entities)
             {
                 var model = System.Text.Json.JsonSerializer.Deserialize<CustomerArchiveItem>(entity.Data);

@@ -18,7 +18,7 @@ namespace SuperSafeBank.Service.Core.Azure.QueryHandlers
 
         public async Task<AccountDetails> Handle(AccountById request, CancellationToken cancellationToken)
         {
-            var response = await _dbContext.CustomersDetails.GetEntityAsync<ViewTableEntity>(
+            var response = await _dbContext.Accounts.GetEntityAsync<ViewTableEntity>(
                 partitionKey: request.AccountId.ToString(),
                 rowKey: string.Empty,
                 cancellationToken: cancellationToken);

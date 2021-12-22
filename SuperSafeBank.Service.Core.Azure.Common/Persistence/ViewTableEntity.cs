@@ -20,5 +20,22 @@ namespace SuperSafeBank.Service.Core.Azure.Common.Persistence
                 RowKey = customerView.Id.ToString(),
                 Data = JsonSerializer.Serialize(customerView),
             };
+
+        public static ViewTableEntity Map(CustomerArchiveItem customerView)
+            => new ViewTableEntity()
+            {
+                PartitionKey = customerView.Id.ToString(),
+                RowKey = customerView.Id.ToString(),
+                Data = System.Text.Json.JsonSerializer.Serialize(customerView),
+            };
+
+        public static ViewTableEntity Map(AccountDetails accountView)
+            => new ViewTableEntity()
+            {
+                PartitionKey = accountView.Id.ToString(),
+                RowKey = accountView.Id.ToString(),
+                Data = JsonSerializer.Serialize(accountView)
+            };
+
     }
 }

@@ -77,15 +77,9 @@ namespace SuperSafeBank.Worker.Core.Azure.EventHandlers
             return accountView;
         }
 
-        private async Task UpsertAccountViewAsync(AccountDetails account, CancellationToken cancellationToken)
+        private async Task UpsertAccountViewAsync(AccountDetails accountView, CancellationToken cancellationToken)
         {
-            var entity = new ViewTableEntity()
-            {
-                PartitionKey = account.Id.ToString(),
-                RowKey = account.Id.ToString(),
-                Data = JsonSerializer.Serialize(account)
-            };
-
+            var entity = ViewTableEntity.Map(accountView);
             var response = await _dbContext.Accounts.UpsertEntityAsync(entity, mode: TableUpdateMode.Replace, cancellationToken: cancellationToken);
             if (response?.Status != 202)
             {

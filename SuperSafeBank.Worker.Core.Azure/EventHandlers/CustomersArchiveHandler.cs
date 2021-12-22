@@ -29,12 +29,7 @@ namespace SuperSafeBank.Worker.Core.Azure.EventHandlers
                         
             var customerView = new CustomerArchiveItem(@event.Event.AggregateId, @event.Event.Firstname, @event.Event.Lastname);
 
-            var entity = new ViewTableEntity()
-            {
-                PartitionKey = customerView.Id.ToString(),
-                RowKey = customerView.Id.ToString(),
-                Data = System.Text.Json.JsonSerializer.Serialize(customerView),
-            };
+            var entity = ViewTableEntity.Map(customerView);
             var response = await _dbContext.CustomersArchive.UpsertEntityAsync(entity, mode: TableUpdateMode.Replace, cancellationToken: cancellationToken);
             if (response?.Status != 202)
             {

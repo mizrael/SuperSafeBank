@@ -31,7 +31,7 @@ namespace SuperSafeBank.Service.Core.Azure.Tests
 
         public IViewsContext CreateTableClient() 
         {
-           var ctx = new ViewsContext(_connStr, _tablePrefix);
+           var ctx = new ViewsContext(_connStr, $"{_tablePrefix}{DateTime.UtcNow.Ticks}");
 
             _dbContexts.Enqueue(ctx);
 
