@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace SuperSafeBank.Service.Core.DTOs
 {
@@ -6,5 +7,8 @@ namespace SuperSafeBank.Service.Core.DTOs
     {
         [Required]
         public string CurrencyCode { get; set; }
+
+        [Required]
+        public Guid CustomerId { get; set; } 
     }
 }

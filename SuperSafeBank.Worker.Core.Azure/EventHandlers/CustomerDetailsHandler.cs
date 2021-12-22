@@ -9,8 +9,6 @@ using SuperSafeBank.Domain.Services;
 using SuperSafeBank.Service.Core.Azure.Common.Persistence;
 using SuperSafeBank.Service.Core.Common.Queries;
 using System;
-using System.Collections.Generic;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -46,14 +44,7 @@ namespace SuperSafeBank.Worker.Core.Azure.EventHandlers
         {
             _logger.LogInformation("creating customer details for {AggregateId} ...", @event.Event.AggregateId);
 
-            var customerView = new CustomerDetails(
-                @event.Event.AggregateId,
-                @event.Event.Firstname,
-                @event.Event.Lastname,
-                @event.Event.Email.Value,
-                null,
-                new Money(Currency.CanadianDollar, 0));
-
+            var customerView = await BuildCustomerViewAsync(@event.Event.AggregateId, cancellationToken);
             await SaveCustomerViewAsync(customerView, cancellationToken);
 
             _logger.LogInformation("created customer details {AggregateId}", @event.Event.AggregateId);

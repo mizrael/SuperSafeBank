@@ -31,6 +31,19 @@ namespace SuperSafeBank.Service.Core.Controllers
             return Ok(result);
         }
 
+        [HttpPost]
+        public async Task<IActionResult> CreateAccount([FromBody] CreateAccountDto dto, CancellationToken cancellationToken = default)
+        {
+            if (null == dto)
+                return BadRequest();
+
+            var currency = Currency.FromCode(dto.CurrencyCode);
+            var command = new CreateAccount(dto.CustomerId, Guid.NewGuid(), currency);
+            await _mediator.Publish(command, cancellationToken);
+            return CreatedAtAction("GetAccount", "Accounts", new { id = command.AccountId }, command);
+        }
+
+
         [HttpPut, Route("{id:guid}/deposit")]
         public async Task<IActionResult> Deposit([FromRoute]Guid id, [FromBody]DepositDto dto, CancellationToken cancellationToken = default)
         {

@@ -60,9 +60,10 @@ namespace SuperSafeBank.Service.Core.Tests.Contract
 
             var createAccountPayload = new
             {
-                currencyCode = "cad"
+                currencyCode = "cad",
+                customerId
             };
-            var response = await _fixture.HttpClient.PostAsJsonAsync($"customers/{customerId}/accounts", createAccountPayload);
+            var response = await _fixture.HttpClient.PostAsJsonAsync($"accounts", createAccountPayload);
             response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         }
 
@@ -83,9 +84,10 @@ namespace SuperSafeBank.Service.Core.Tests.Contract
 
             var createAccountPayload = new
             {
-                currencyCode = "cad"
+                currencyCode = "cad",
+                customerId
             };
-            response = await _fixture.HttpClient.PostAsJsonAsync($"customers/{customerId}/accounts", createAccountPayload);
+            response = await _fixture.HttpClient.PostAsJsonAsync($"accounts", createAccountPayload);
             response.StatusCode.Should().Be(HttpStatusCode.Created);
         }
 
@@ -119,9 +121,10 @@ namespace SuperSafeBank.Service.Core.Tests.Contract
 
             var createAccountPayload = new
             {
-                currencyCode = "cad"
+                currencyCode = "cad",
+                customerId
             };
-            response = await _fixture.HttpClient.PostAsJsonAsync($"customers/{customerId}/accounts", createAccountPayload);
+            response = await _fixture.HttpClient.PostAsJsonAsync($"accounts", createAccountPayload);
             var responseBody = await response.Content.ReadAsAsync<dynamic>();
             Guid accountId = responseBody.accountId;
 
@@ -153,9 +156,10 @@ namespace SuperSafeBank.Service.Core.Tests.Contract
 
             var createAccountPayload = new
             {
-                currencyCode = "cad"
+                currencyCode = "cad",
+                customerId
             };
-            response = await _fixture.HttpClient.PostAsJsonAsync($"customers/{customerId}/accounts", createAccountPayload);
+            response = await _fixture.HttpClient.PostAsJsonAsync($"accounts", createAccountPayload);
             var responseBody = await response.Content.ReadAsAsync<dynamic>();
             Guid accountId = responseBody.accountId;
 
@@ -187,9 +191,10 @@ namespace SuperSafeBank.Service.Core.Tests.Contract
 
             var createAccountPayload = new
             {
-                currencyCode = "cad"
+                currencyCode = "cad",
+                customerId
             };
-            response = await _fixture.HttpClient.PostAsJsonAsync($"customers/{customerId}/accounts", createAccountPayload);
+            response = await _fixture.HttpClient.PostAsJsonAsync($"accounts", createAccountPayload);
             var responseBody = await response.Content.ReadAsAsync<dynamic>();
             Guid accountId = responseBody.accountId;
 

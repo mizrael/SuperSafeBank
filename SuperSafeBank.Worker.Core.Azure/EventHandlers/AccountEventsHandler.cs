@@ -8,7 +8,6 @@ using SuperSafeBank.Domain.Events;
 using SuperSafeBank.Service.Core.Azure.Common.Persistence;
 using SuperSafeBank.Service.Core.Common.Queries;
 using System;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 

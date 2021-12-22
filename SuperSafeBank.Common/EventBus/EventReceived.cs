@@ -2,7 +2,7 @@
 
 namespace SuperSafeBank.Common.EventBus
 {
-    public class EventReceived<TE> : INotification
+    public record EventReceived<TE> : INotification
     {
         public EventReceived(TE @event)
         {

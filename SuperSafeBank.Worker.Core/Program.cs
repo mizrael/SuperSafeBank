@@ -63,14 +63,7 @@ await Host.CreateDefaultBuilder(args)
                 typeof(CustomerCreated).Assembly
             }))
             .AddSingleton(consumerConfig)
-            .AddSingleton(typeof(IEventConsumer<,>), typeof(EventConsumer<,>))
-            .AddSingleton(ctx =>
-            {
-                var kafkaConnStr = hostContext.Configuration.GetConnectionString("kafka");
-                var eventsTopicName = hostContext.Configuration["eventsTopicName"];
-                var groupName = hostContext.Configuration["eventsTopicGroupName"];
-                return new EventsConsumerConfig(kafkaConnStr, eventsTopicName, groupName);
-            })
+            .AddSingleton(typeof(IEventConsumer<,>), typeof(EventConsumer<,>))           
             .AddMongoDb(mongoConfig)
             .AddEventStore(eventstoreConnStr)
             .RegisterWorker(hostContext.Configuration);

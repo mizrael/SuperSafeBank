@@ -13,26 +13,22 @@ namespace SuperSafeBank.Worker.Notifications
     public class AccountEventsWorker : BackgroundService
     {
         private readonly IEventConsumer<Account, Guid> _consumer;
-        private readonly ILogger<IEventConsumer> _logger;
+        private readonly ILogger<AccountEventsWorker> _logger;
         private readonly INotificationsService _notificationsService;
         private readonly INotificationsFactory _notificationsFactory;
 
         public AccountEventsWorker(INotificationsFactory notificationsFactory,
             INotificationsService notificationsService, 
             IEventConsumer<Account, Guid> consumer,
-            ILogger<IEventConsumer> logger)
+            ILogger<AccountEventsWorker> logger)
         {
             _consumer = consumer ?? throw new ArgumentNullException(nameof(consumer));
-            _logger = logger;
+            this._logger = logger;
             _notificationsService = notificationsService;
             _notificationsFactory = notificationsFactory;
 
             consumer.EventReceived += OnEventReceived;
-
-            consumer.ExceptionThrown += (sender, exception) =>
-            {
-                logger.LogError(exception, $"an exception has occurred while consuming a message: {exception.Message}");
-            };
+            consumer.ExceptionThrown += OnExceptionThrown;
         }
 
         private async Task OnEventReceived(object s, IDomainEvent<Guid> @event)
@@ -49,9 +45,22 @@ namespace SuperSafeBank.Worker.Notifications
                 await _notificationsService.DispatchAsync(notification);
         }
 
+        private void OnExceptionThrown(object s, Exception ex)
+        {
+            _logger.LogError(ex, $"an exception has occurred while consuming a message: {ex.Message}");
+        }
+
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             await _consumer.ConsumeAsync(stoppingToken);
+        }
+
+        public override Task StopAsync(CancellationToken cancellationToken)
+        {
+            _consumer.EventReceived -= OnEventReceived;
+            _consumer.ExceptionThrown -= OnExceptionThrown;
+
+            return base.StopAsync(cancellationToken);
         }
     }
 }
