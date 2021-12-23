@@ -42,14 +42,15 @@ namespace SuperSafeBank.Domain.Tests
         [Fact]
         public void ctor_should_raise_Created_event()
         {
-            var sut = Customer.Create(Guid.NewGuid(), "lorem", "ipsum", "test@test.com");
+            var expectedId = Guid.NewGuid();
+            var sut = Customer.Create(expectedId, "lorem", "ipsum", "test@test.com");
 
             sut.Events.Count.Should().Be(1);
 
             var createdEvent = sut.Events.First() as CustomerCreated;
             createdEvent.Should().NotBeNull()
                 .And.BeOfType<CustomerCreated>();
-            createdEvent.AggregateId.Should().Be(sut.Id);
+            createdEvent.AggregateId.Should().Be(expectedId);
             createdEvent.AggregateVersion.Should().Be(0);
             createdEvent.Firstname.Should().Be(sut.Firstname);
             createdEvent.Lastname.Should().Be(sut.Lastname);

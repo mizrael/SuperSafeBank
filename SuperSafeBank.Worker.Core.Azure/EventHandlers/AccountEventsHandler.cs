@@ -80,7 +80,7 @@ namespace SuperSafeBank.Worker.Core.Azure.EventHandlers
         {
             var entity = ViewTableEntity.Map(accountView);
             var response = await _dbContext.Accounts.UpsertEntityAsync(entity, mode: TableUpdateMode.Replace, cancellationToken: cancellationToken);
-            if (response?.Status != 202)
+            if (response?.Status != 204)
             {
                 var msg = $"an error has occurred while processing an event: {response.ReasonPhrase}";
                 throw new Exception(msg);
