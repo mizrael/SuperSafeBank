@@ -66,7 +66,7 @@ await Host.CreateDefaultBuilder(args)
             .AddSingleton(typeof(IEventConsumer<,>), typeof(EventConsumer<,>))           
             .AddMongoDb(mongoConfig)
             .AddEventStore(eventstoreConnStr)
-            .RegisterWorker(hostContext.Configuration);
+            .RegisterWorker();
     })
     .Build()
     .RunAsync();

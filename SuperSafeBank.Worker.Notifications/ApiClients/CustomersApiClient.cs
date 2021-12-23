@@ -19,7 +19,10 @@ namespace SuperSafeBank.Worker.Notifications.ApiClients
         public async Task<CustomerDetails> GetCustomerAsync(Guid customerId, CancellationToken cancellationToken = default)
         {            
             using var response = await _client.GetStreamAsync($"customers/{customerId}");
-            var result = await JsonSerializer.DeserializeAsync<CustomerDetails>(response);
+            var result = await JsonSerializer.DeserializeAsync<CustomerDetails>(response, new JsonSerializerOptions()
+            {
+                PropertyNameCaseInsensitive = true,
+            }, cancellationToken: cancellationToken);
             return result;
         } 
     }

@@ -66,7 +66,7 @@ await Host.CreateDefaultBuilder(args)
             .AddSingleton(typeof(IEventConsumer<,>), typeof(EventConsumer<,>))
             .AddHostedService(ctx =>
             {
-                var logger = ctx.GetRequiredService<ILogger<EventConsumer<Account, Guid>>>();
+                var logger = ctx.GetRequiredService<ILogger<AccountEventsWorker>>();
                 var eventsDeserializer = ctx.GetRequiredService<IEventSerializer>();
                 var consumerConfig = ctx.GetRequiredService<EventsConsumerConfig>();
                 var notificationsFactory = ctx.GetRequiredService<INotificationsFactory>();
