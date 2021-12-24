@@ -44,20 +44,6 @@ namespace SuperSafeBank.Service.Core.Registries
                 var client = ctx.GetRequiredService<MongoClient>();
                 var database = client.GetDatabase(dbName);
                 return new CustomerEmailsService(database);
-            })
-            .AddEventsService<Customer, Guid>()
-            .AddEventsService<Account, Guid>();
-        }
-
-        private static IServiceCollection AddEventsService<TA, TK>(this IServiceCollection services)
-            where TA : class, IAggregateRoot<TK>
-        {
-            return services.AddSingleton<IEventsService<TA, TK>>(ctx =>
-            {
-                var eventsProducer = ctx.GetRequiredService<IEventProducer<TA, TK>>();
-                var eventsRepo = ctx.GetRequiredService<IEventsRepository<TA, TK>>();
-
-                return new EventsService<TA, TK>(eventsRepo, eventsProducer);
             });
         }
     }

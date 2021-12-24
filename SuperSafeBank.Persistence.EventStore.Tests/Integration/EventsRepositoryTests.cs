@@ -27,17 +27,39 @@ namespace SuperSafeBank.Persistence.EventStore.Tests.Integration
 
             var serializer = NSubstitute.Substitute.For<IEventSerializer>();
 
-            var sut = new EventsRepository<DummyAggregate, Guid>(conn, serializer);
+            var sut = new AggregateRepository<DummyAggregate, Guid>(conn, serializer);
 
             var aggregate = new DummyAggregate(Guid.NewGuid());
             aggregate.DoSomething("foo");
             aggregate.DoSomething("bar");
 
-            await sut.AppendAsync(aggregate);
+            await sut.PersistAsync(aggregate);
 
             var rehydrated = await sut.RehydrateAsync(aggregate.Id);
             rehydrated.Should().NotBeNull();
             rehydrated.Version.Should().Be(3);
+        }
+
+        [Fact]
+        public async Task AppendAsync_should_clear_Aggregate_events()
+        {
+            var connStr = new Uri(_fixture.ConnectionString);
+            var logger = NSubstitute.Substitute.For<ILogger<EventStoreConnectionWrapper>>();
+            using var conn = new EventStoreConnectionWrapper(connStr, logger);
+
+            var serializer = NSubstitute.Substitute.For<IEventSerializer>();
+
+            var sut = new AggregateRepository<DummyAggregate, Guid>(conn, serializer);
+
+            var aggregate = new DummyAggregate(Guid.NewGuid());
+            aggregate.DoSomething("foo");
+            aggregate.DoSomething("bar");
+
+            aggregate.Events.Should().NotBeEmpty();
+
+            await sut.PersistAsync(aggregate);
+
+            aggregate.Events.Should().BeEmpty();
         }
 
         [Fact]
@@ -49,7 +71,7 @@ namespace SuperSafeBank.Persistence.EventStore.Tests.Integration
 
             var serializer = NSubstitute.Substitute.For<IEventSerializer>();
 
-            var sut = new EventsRepository<DummyAggregate, Guid>(conn, serializer);
+            var sut = new AggregateRepository<DummyAggregate, Guid>(conn, serializer);
 
             var rehydrated = await sut.RehydrateAsync(Guid.NewGuid());
             rehydrated.Should().BeNull();

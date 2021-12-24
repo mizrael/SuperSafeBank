@@ -1,70 +1,54 @@
 ﻿using Azure.Messaging.ServiceBus;
 using Microsoft.Extensions.Logging;
-using SuperSafeBank.Common;
 using SuperSafeBank.Common.EventBus;
-using SuperSafeBank.Common.Models;
 using System;
-using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace SuperSafeBank.Transport.Azure
 {
-    public class EventProducer<TA, TKey> : IEventProducer<TA, TKey>, IAsyncDisposable
-        where TA : IAggregateRoot<TKey>
+    public class EventProducer : IEventProducer, IAsyncDisposable        
     {
-        private readonly ILogger<EventProducer<TA, TKey>> _logger;
+        private readonly ILogger<EventProducer> _logger;
 
         private ServiceBusSender _sender;
-        
-        private readonly IEventSerializer _eventSerializer;
-
+                
         public EventProducer(ServiceBusClient senderFactory, 
-                            string topicBaseName, 
-                            IEventSerializer eventSerializer, 
-                            ILogger<EventProducer<TA, TKey>> logger)
+                            string topicName, 
+                            ILogger<EventProducer> logger)
         {
             if (senderFactory == null) 
                 throw new ArgumentNullException(nameof(senderFactory));
-            if (string.IsNullOrWhiteSpace(topicBaseName))
-                throw new ArgumentException("Value cannot be null or whitespace.", nameof(topicBaseName));
+            if (string.IsNullOrWhiteSpace(topicName))
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(topicName));
 
-            _logger = logger;
-            _eventSerializer = eventSerializer;
-            var aggregateType = typeof(TA);
-
-            this.TopicName = $"{topicBaseName}-{aggregateType.Name}";
-            _sender = senderFactory.CreateSender(this.TopicName);
+            _logger = logger;            
+            _sender = senderFactory.CreateSender(topicName);
         }
-        
-        public async Task DispatchAsync(TA aggregateRoot)
+
+        public async Task DispatchAsync(IIntegrationEvent @event, CancellationToken cancellationToken = default)
         {
-            if (null == aggregateRoot)
-                throw new ArgumentNullException(nameof(aggregateRoot));
+            if (null == @event)
+                throw new ArgumentNullException(nameof(@event));
 
-            if (!aggregateRoot.Events.Any())
-                return;
-
-            _logger.LogInformation("publishing " + aggregateRoot.Events.Count + " events for {AggregateId} ...", aggregateRoot.Id);
+            _logger.LogInformation("publishing event {EventId} ...", @event.Id);
 
             using ServiceBusMessageBatch messageBatch = await _sender.CreateMessageBatchAsync();
 
-            foreach(var @event in aggregateRoot.Events)
+            var eventType = @event.GetType();
+
+            var serialized = System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(@event);
+
+            var message = new ServiceBusMessage(serialized)
             {
-                var eventType = @event.GetType();
-
-                var serialized = _eventSerializer.Serialize(@event);
-
-                var message = new ServiceBusMessage(serialized)
+                CorrelationId = @event.Id.ToString(),
+                ApplicationProperties =
                 {
-                    CorrelationId = aggregateRoot.Id.ToString(),
-                    ApplicationProperties =
-                    {
-                        {"aggregate", aggregateRoot.Id.ToString()},
-                        {"type", eventType.AssemblyQualifiedName}
-                    }
-                };
-                messageBatch.TryAddMessage(message);
-            }
+                    {"aggregate", @event.Id.ToString()},
+                    {"type", eventType.AssemblyQualifiedName}
+                }
+            };
+            messageBatch.TryAddMessage(message);
 
             await _sender.SendMessagesAsync(messageBatch);
         }
@@ -75,7 +59,5 @@ namespace SuperSafeBank.Transport.Azure
                 await _sender.DisposeAsync();
             _sender = null;
         }
-
-        public string TopicName { get; }
     }
 }

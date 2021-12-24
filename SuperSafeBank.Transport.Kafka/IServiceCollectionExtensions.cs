@@ -10,10 +10,10 @@ namespace SuperSafeBank.Transport.Kafka
         public static IServiceCollection AddKafkaEventProducer<TA, TK>(this IServiceCollection services, EventsProducerConfig configuration)
             where TA : class, IAggregateRoot<TK>
         {
-            return services.AddSingleton<IEventProducer<TA, TK>>(ctx =>
+            return services.AddSingleton<IEventProducer>(ctx =>
             {
-                var logger = ctx.GetRequiredService<ILogger<EventProducer<TA, TK>>>();
-                return new EventProducer<TA, TK>(configuration.TopicBaseName, configuration.KafkaConnectionString, logger);
+                var logger = ctx.GetRequiredService<ILogger<EventProducer>>();
+                return new EventProducer(configuration.TopicName, configuration.KafkaConnectionString, logger);
             });
         }
     }

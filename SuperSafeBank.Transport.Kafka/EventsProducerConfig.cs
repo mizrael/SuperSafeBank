@@ -10,10 +10,10 @@
                 throw new ArgumentException("Value cannot be null or whitespace.", nameof(topicBaseName));
 
             KafkaConnectionString = kafkaConnectionString;
-            TopicBaseName = topicBaseName;
+            TopicName = topicBaseName;
         }
 
         public string KafkaConnectionString { get; }
-        public string TopicBaseName { get; }
+        public string TopicName { get; }
     }
 }

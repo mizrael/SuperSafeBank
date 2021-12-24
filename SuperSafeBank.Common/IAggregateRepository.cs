@@ -4,10 +4,10 @@ using SuperSafeBank.Common.Models;
 
 namespace SuperSafeBank.Common
 {
-    public interface IEventsRepository<TA, TKey>
+    public interface IAggregateRepository<TA, TKey>
         where TA : class, IAggregateRoot<TKey>
     {
-        Task AppendAsync(TA aggregateRoot, CancellationToken cancellationToken = default);
+        Task PersistAsync(TA aggregateRoot, CancellationToken cancellationToken = default);
         Task<TA> RehydrateAsync(TKey key, CancellationToken cancellationToken = default);
     }
 }

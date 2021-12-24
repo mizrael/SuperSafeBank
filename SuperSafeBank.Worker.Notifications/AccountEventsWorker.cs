@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 using SuperSafeBank.Common.EventBus;
 using SuperSafeBank.Common.Models;
 using SuperSafeBank.Domain;
-using SuperSafeBank.Domain.Events;
+using SuperSafeBank.Domain.DomainEvents;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,14 +12,14 @@ namespace SuperSafeBank.Worker.Notifications
 {
     public class AccountEventsWorker : BackgroundService
     {
-        private readonly IEventConsumer<Account, Guid> _consumer;
+        private readonly IEventConsumer _consumer;
         private readonly ILogger<AccountEventsWorker> _logger;
         private readonly INotificationsService _notificationsService;
         private readonly INotificationsFactory _notificationsFactory;
 
         public AccountEventsWorker(INotificationsFactory notificationsFactory,
             INotificationsService notificationsService, 
-            IEventConsumer<Account, Guid> consumer,
+            IEventConsumer consumer,
             ILogger<AccountEventsWorker> logger)
         {
             _consumer = consumer ?? throw new ArgumentNullException(nameof(consumer));
@@ -31,14 +31,14 @@ namespace SuperSafeBank.Worker.Notifications
             consumer.ExceptionThrown += OnExceptionThrown;
         }
 
-        private async Task OnEventReceived(object s, IDomainEvent<Guid> @event)
+        private async Task OnEventReceived(object s, IIntegrationEvent @event)
         {
             var notification = @event switch
             {
-                AccountCreated newAccount => await _notificationsFactory.CreateNewAccountNotificationAsync(newAccount.OwnerId, newAccount.AggregateId),
-                Deposit deposit => await _notificationsFactory.CreateDepositNotificationAsync(deposit.AggregateId, deposit.Amount),
-                Withdrawal withdrawal => await _notificationsFactory.CreateWithdrawalNotificationAsync(withdrawal.AggregateId, withdrawal.Amount),
-                _ => null
+                //AccountEvents.AccountCreated newAccount => await _notificationsFactory.CreateNewAccountNotificationAsync(newAccount.OwnerId, newAccount.AggregateId),
+                //AccountEvents.Deposit deposit => await _notificationsFactory.CreateDepositNotificationAsync(deposit.AggregateId, deposit.Amount),
+                //AccountEvents.Withdrawal withdrawal => await _notificationsFactory.CreateWithdrawalNotificationAsync(withdrawal.AggregateId, withdrawal.Amount),
+                _ => (Notification)null
             };
 
             if (null != notification)
@@ -52,7 +52,7 @@ namespace SuperSafeBank.Worker.Notifications
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            await _consumer.ConsumeAsync(stoppingToken);
+            await _consumer.StartConsumeAsync(stoppingToken);
         }
 
         public override Task StopAsync(CancellationToken cancellationToken)

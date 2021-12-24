@@ -24,11 +24,11 @@ namespace SuperSafeBank.Persistence.Azure
             var aggregateType = typeof(TA);
             var tableName = $"{config.TablePrefix}{aggregateType.Name}Events";
             
-            return services.AddSingleton<IEventsRepository<TA, TK>>(ctx =>
+            return services.AddSingleton<IAggregateRepository<TA, TK>>(ctx =>
             {
                 var client = new TableClient(config.ConnectionString, tableName);
                 var eventDeserializer = ctx.GetRequiredService<IEventSerializer>();
-                return new EventsRepository<TA, TK>(client, eventDeserializer);
+                return new AggregateRepository<TA, TK>(client, eventDeserializer);
             });
         }
     }

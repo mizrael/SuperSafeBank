@@ -1,18 +1,15 @@
-﻿using System;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Serilog;
-using Serilog.Formatting.Compact;
-using SuperSafeBank.Common;
-using SuperSafeBank.Domain;
-using SuperSafeBank.Domain.Events;
-using SuperSafeBank.Worker.Notifications.ApiClients;
 using Serilog.Sinks.Grafana.Loki;
+using SuperSafeBank.Common;
+using SuperSafeBank.Common.EventBus;
+using SuperSafeBank.Domain.DomainEvents;
 using SuperSafeBank.Transport.Kafka;
 using SuperSafeBank.Worker.Notifications;
-using SuperSafeBank.Common.EventBus;
+using SuperSafeBank.Worker.Notifications.ApiClients;
 
 await Host.CreateDefaultBuilder(args)
         .ConfigureHostConfiguration(configurationBuilder => {
@@ -52,7 +49,7 @@ await Host.CreateDefaultBuilder(args)
 
             services.AddSingleton<IEventSerializer>(new JsonEventSerializer(new[]
             {
-                typeof(CustomerCreated).Assembly
+                typeof(CustomerEvents.CustomerCreated).Assembly
             }))
             .AddSingleton<INotificationsFactory, NotificationsFactory>()
             .AddSingleton<INotificationsService, FakeNotificationsService>()
@@ -63,7 +60,7 @@ await Host.CreateDefaultBuilder(args)
                 var groupName = hostContext.Configuration["eventsTopicGroupName"];
                 return new EventsConsumerConfig(kafkaConnStr, eventsTopicName, groupName);
             })
-            .AddSingleton(typeof(IEventConsumer<,>), typeof(EventConsumer<,>))
+            .AddSingleton(typeof(IEventConsumer), typeof(EventConsumer))
             .AddHostedService(ctx =>
             {
                 var logger = ctx.GetRequiredService<ILogger<AccountEventsWorker>>();
@@ -72,7 +69,7 @@ await Host.CreateDefaultBuilder(args)
                 var notificationsFactory = ctx.GetRequiredService<INotificationsFactory>();
                 var notificationsService = ctx.GetRequiredService<INotificationsService>();
 
-                var consumer = ctx.GetRequiredService<IEventConsumer<Account, Guid>>();
+                var consumer = ctx.GetRequiredService<IEventConsumer>();
 
                 return new AccountEventsWorker(notificationsFactory, notificationsService, consumer, logger);
             });

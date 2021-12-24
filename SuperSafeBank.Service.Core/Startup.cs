@@ -9,7 +9,7 @@ using Serilog;
 using SuperSafeBank.Common;
 using SuperSafeBank.Domain;
 using SuperSafeBank.Domain.Commands;
-using SuperSafeBank.Domain.Events;
+using SuperSafeBank.Domain.DomainEvents;
 using SuperSafeBank.Domain.Services;
 using SuperSafeBank.Service.Core.Common;
 using SuperSafeBank.Service.Core.Registries;
@@ -36,7 +36,7 @@ namespace SuperSafeBank.Service.Core
 
             services.AddSingleton<IEventSerializer>(new JsonEventSerializer(new[]
             {
-                typeof(CustomerCreated).Assembly
+                typeof(CustomerEvents.CustomerCreated).Assembly
             })).AddInfrastructure(this.Configuration);
 
             services.AddScoped<ServiceFactory>(ctx => ctx.GetRequiredService);

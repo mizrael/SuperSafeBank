@@ -12,12 +12,12 @@
                 throw new ArgumentException("Value cannot be null or whitespace.", nameof(consumerGroup));
           
             KafkaConnectionString = kafkaConnectionString;
-            TopicBaseName = topicBaseName;
+            TopicName = topicBaseName;
             ConsumerGroup = consumerGroup;
         }
 
         public string KafkaConnectionString { get; }
-        public string TopicBaseName { get; }
+        public string TopicName { get; }
         public string ConsumerGroup { get; }
     }
 }

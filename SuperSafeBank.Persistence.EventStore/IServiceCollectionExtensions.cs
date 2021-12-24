@@ -22,11 +22,11 @@ namespace SuperSafeBank.Persistence.EventStore
         private static IServiceCollection AddEventsRepository<TA, TK>(this IServiceCollection services)
             where TA : class, IAggregateRoot<TK>
         {
-            return services.AddSingleton<IEventsRepository<TA, TK>>(ctx =>
+            return services.AddSingleton<IAggregateRepository<TA, TK>>(ctx =>
             {
                 var connectionWrapper = ctx.GetRequiredService<IEventStoreConnectionWrapper>();
                 var eventDeserializer = ctx.GetRequiredService<IEventSerializer>();
-                return new EventsRepository<TA, TK>(connectionWrapper, eventDeserializer);
+                return new AggregateRepository<TA, TK>(connectionWrapper, eventDeserializer);
             });
         }
     }

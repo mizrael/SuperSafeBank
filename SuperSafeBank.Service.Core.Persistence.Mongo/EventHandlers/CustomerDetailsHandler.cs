@@ -1,35 +1,32 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using MediatR;
+﻿using MediatR;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using SuperSafeBank.Common;
-using SuperSafeBank.Common.EventBus;
 using SuperSafeBank.Domain;
-using SuperSafeBank.Domain.Events;
+using SuperSafeBank.Domain.IntegrationEvents;
 using SuperSafeBank.Domain.Services;
 using SuperSafeBank.Service.Core.Common.Queries;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace SuperSafeBank.Service.Core.Persistence.Mongo.EventHandlers
 {
     public class CustomerDetailsHandler :
-        INotificationHandler<EventReceived<CustomerCreated>>,
-        INotificationHandler<EventReceived<AccountCreated>>,
-        INotificationHandler<EventReceived<Deposit>>,
-        INotificationHandler<EventReceived<Withdrawal>>
+        INotificationHandler<CustomerCreated>,
+        INotificationHandler<AccountCreated>,
+        INotificationHandler<TransactionHappened>
     {
         private readonly IQueryDbContext _db;
-        private readonly IEventsRepository<Customer, Guid> _customersRepo;
-        private readonly IEventsRepository<Account, Guid> _accountsRepo;
+        private readonly IAggregateRepository<Customer, Guid> _customersRepo;
+        private readonly IAggregateRepository<Account, Guid> _accountsRepo;
         private readonly ICurrencyConverter _currencyConverter;
         private readonly ILogger<CustomerDetailsHandler> _logger;
 
         public CustomerDetailsHandler(
             IQueryDbContext db,
-            IEventsRepository<Customer, Guid> customersRepo,
-            IEventsRepository<Account, Guid> accountsRepo,
+            IAggregateRepository<Customer, Guid> customersRepo,
+            IAggregateRepository<Account, Guid> accountsRepo,
             ICurrencyConverter currencyConverter,
             ILogger<CustomerDetailsHandler> logger)
         {
@@ -40,37 +37,25 @@ namespace SuperSafeBank.Service.Core.Persistence.Mongo.EventHandlers
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async Task Handle(EventReceived<CustomerCreated> @event, CancellationToken cancellationToken)
+        public async Task Handle(CustomerCreated @event, CancellationToken cancellationToken)
         {
-            _logger.LogInformation("creating customer details for {AggregateId} ...", @event.Event.AggregateId);
+            _logger.LogInformation("creating customer details for customer {CustomerId} ...", @event.CustomerId);
 
-            var customerView = await BuildCustomerViewAsync(@event.Event.AggregateId, cancellationToken);
+            var customerView = await BuildCustomerViewAsync(@event.CustomerId, cancellationToken);
             await SaveCustomerViewAsync(customerView, cancellationToken);
-
-            _logger.LogInformation("created customer details {AggregateId}", @event.Event.AggregateId);
         }
 
-        public async Task Handle(EventReceived<AccountCreated> @event, CancellationToken cancellationToken)
+        public async Task Handle(AccountCreated @event, CancellationToken cancellationToken)
         {
-            var account = await _accountsRepo.RehydrateAsync(@event.Event.AggregateId, cancellationToken);
-
-            var customerView = await BuildCustomerViewAsync(account.OwnerId, cancellationToken);
-            await SaveCustomerViewAsync(customerView, cancellationToken);
-
-            _logger.LogInformation($"updated customer details accounts {@event.Event.AggregateId}");
-        }
-
-        public async Task Handle(EventReceived<Withdrawal> @event, CancellationToken cancellationToken)
-        {
-            var account = await _accountsRepo.RehydrateAsync(@event.Event.AggregateId, cancellationToken);
+            var account = await _accountsRepo.RehydrateAsync(@event.AccountId, cancellationToken);
 
             var customerView = await BuildCustomerViewAsync(account.OwnerId, cancellationToken);
             await SaveCustomerViewAsync(customerView, cancellationToken);
         }
 
-        public async Task Handle(EventReceived<Deposit> @event, CancellationToken cancellationToken)
+        public async Task Handle(TransactionHappened @event, CancellationToken cancellationToken)
         {
-            var account = await _accountsRepo.RehydrateAsync(@event.Event.AggregateId, cancellationToken);
+            var account = await _accountsRepo.RehydrateAsync(@event.AccountId, cancellationToken);
 
             var customerView = await BuildCustomerViewAsync(account.OwnerId, cancellationToken);
             await SaveCustomerViewAsync(customerView, cancellationToken);
@@ -112,7 +97,8 @@ namespace SuperSafeBank.Service.Core.Persistence.Mongo.EventHandlers
                 cancellationToken: cancellationToken,
                 update: update,
                 options: new UpdateOptions() { IsUpsert = true });
-        }
 
+            _logger.LogInformation($"updated customer details for customer {customerView.Id}");
+        }
     }
 }

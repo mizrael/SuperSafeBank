@@ -6,7 +6,7 @@ using Serilog;
 using Serilog.Sinks.Grafana.Loki;
 using SuperSafeBank.Common;
 using SuperSafeBank.Common.EventBus;
-using SuperSafeBank.Domain.Events;
+using SuperSafeBank.Domain.DomainEvents;
 using SuperSafeBank.Service.Core.Common;
 using SuperSafeBank.Service.Core.Common.EventHandlers;
 using SuperSafeBank.Service.Core.Persistence.Mongo;
@@ -60,10 +60,10 @@ await Host.CreateDefaultBuilder(args)
             .AddScoped<IMediator, Mediator>()
             .AddSingleton<IEventSerializer>(new JsonEventSerializer(new[]
             {
-                typeof(CustomerCreated).Assembly
+                typeof(CustomerEvents.CustomerCreated).Assembly
             }))
             .AddSingleton(consumerConfig)
-            .AddSingleton(typeof(IEventConsumer<,>), typeof(EventConsumer<,>))           
+            .AddSingleton(typeof(IEventConsumer), typeof(EventConsumer))           
             .AddMongoDb(mongoConfig)
             .AddEventStore(eventstoreConnStr)
             .RegisterWorker();

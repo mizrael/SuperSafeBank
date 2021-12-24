@@ -1,25 +1,19 @@
 ﻿using Confluent.Kafka;
 using Microsoft.Extensions.Logging;
-using SuperSafeBank.Common;
 using SuperSafeBank.Common.EventBus;
-using SuperSafeBank.Common.Models;
 using System.Runtime.Serialization;
 using System.Text;
 
 namespace SuperSafeBank.Transport.Kafka
 {
-    public class EventConsumer<TA, TKey> : IDisposable, IEventConsumer<TA, TKey> where TA : IAggregateRoot<TKey>
+    public class EventConsumer : IDisposable, IEventConsumer
     {
-        private IConsumer<TKey, string> _consumer;
-        private readonly IEventSerializer _eventDeserializer;
-        private readonly ILogger<EventConsumer<TA, TKey>> _logger;
+        private IConsumer<Guid, string> _consumer;
+        private readonly ILogger<EventConsumer> _logger;
 
-        public EventConsumer(IEventSerializer eventDeserializer, EventsConsumerConfig config, ILogger<EventConsumer<TA, TKey>> logger)
+        public EventConsumer(EventsConsumerConfig config, ILogger<EventConsumer> logger)
         {
-            _eventDeserializer = eventDeserializer;
             _logger = logger;
-
-            var aggregateType = typeof(TA);
 
             var consumerConfig = new ConsumerConfig
             {
@@ -29,37 +23,36 @@ namespace SuperSafeBank.Transport.Kafka
                 EnablePartitionEof = true
             };
 
-            var consumerBuilder = new ConsumerBuilder<TKey, string>(consumerConfig);
+            var consumerBuilder = new ConsumerBuilder<Guid, string>(consumerConfig);
             var keyDeserializerFactory = new KeyDeserializerFactory();
-            consumerBuilder.SetKeyDeserializer(keyDeserializerFactory.Create<TKey>());
+            consumerBuilder.SetKeyDeserializer(keyDeserializerFactory.Create<Guid>());
 
             _consumer = consumerBuilder.Build();
             
-            var topicName = $"{config.TopicBaseName}-{aggregateType.Name}";
-            _consumer.Subscribe(topicName);
+            _consumer.Subscribe(config.TopicName);
         }
 
-        public Task ConsumeAsync(CancellationToken stoppingToken)
+        public Task StartConsumeAsync(CancellationToken cancellationToken = default)
         {
             return Task.Run(async () =>
             {
                 var topics = string.Join(",", _consumer.Subscription);
                 _logger.LogInformation("started Kafka consumer {ConsumerName} on {ConsumerTopic}", _consumer.Name, topics);
 
-                while (!stoppingToken.IsCancellationRequested)
+                while (!cancellationToken.IsCancellationRequested)
                 {
                     try
                     {
-                        var cr = _consumer.Consume(stoppingToken);
+                        var cr = _consumer.Consume(cancellationToken);
                         if (cr.IsPartitionEOF)
                             continue;
                         
                         var messageTypeHeader = cr.Message.Headers.First(h => h.Key == "type");
-                        var eventType = Encoding.UTF8.GetString(messageTypeHeader.GetValueBytes());
-                        
-                        var @event = _eventDeserializer.Deserialize<TKey>(eventType, cr.Message.Value);
+                        var eventTypeName = Encoding.UTF8.GetString(messageTypeHeader.GetValueBytes());
+                        var eventType = Type.GetType(eventTypeName);
+                        var @event = System.Text.Json.JsonSerializer.Deserialize(cr.Message.Value, eventType) as IIntegrationEvent;
                         if(null == @event)
-                            throw new SerializationException($"unable to deserialize event {eventType} : {cr.Message.Value}");
+                            throw new SerializationException($"unable to deserialize event {eventTypeName} : {cr.Message.Value}");
 
                         await OnEventReceived(@event);
                     }
@@ -74,15 +67,15 @@ namespace SuperSafeBank.Transport.Kafka
                         OnExceptionThrown(ex);
                     }
                 }
-            }, stoppingToken);
+            }, cancellationToken);
         }
 
-        public event EventReceivedHandler<TKey> EventReceived;
+        public event EventReceivedHandler EventReceived;
 
-        protected virtual Task OnEventReceived(IDomainEvent<TKey> e)
+        protected virtual Task OnEventReceived(IIntegrationEvent @event)
         {
             var handler = EventReceived;
-            return handler?.Invoke(this, e);
+            return handler?.Invoke(this, @event);
         }
                 
         public event ExceptionThrownHandler ExceptionThrown;

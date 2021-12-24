@@ -1,11 +1,10 @@
-﻿using System.Threading.Tasks;
-using SuperSafeBank.Common.Models;
+﻿using System.Threading;
+using System.Threading.Tasks;
 
 namespace SuperSafeBank.Common.EventBus
 {
-    public interface IEventProducer<in TA, in TKey>
-        where TA : IAggregateRoot<TKey>
+    public interface IEventProducer
     {
-        Task DispatchAsync(TA aggregateRoot);
+        Task DispatchAsync(IIntegrationEvent @event, CancellationToken cancellationToken = default);
     }
 }

@@ -3,6 +3,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using SuperSafeBank.Common;
+using SuperSafeBank.Common.EventBus;
+using SuperSafeBank.Domain.IntegrationEvents;
 using SuperSafeBank.Domain.Services;
 
 namespace SuperSafeBank.Domain.Commands
@@ -25,13 +27,18 @@ namespace SuperSafeBank.Domain.Commands
 
     public class CreateCustomerHandler : INotificationHandler<CreateCustomer>
     {
-        private readonly IEventsService<Customer, Guid> _eventsService;
+        private readonly IAggregateRepository<Customer, Guid> _eventsService;
         private readonly ICustomerEmailsService _customerEmailsRepository;
+        private readonly IEventProducer _eventProducer;
 
-        public CreateCustomerHandler(IEventsService<Customer, Guid> eventsService, ICustomerEmailsService customerEmailsRepository)
+        public CreateCustomerHandler(
+            IAggregateRepository<Customer, Guid> eventsService, 
+            ICustomerEmailsService customerEmailsRepository, 
+            IEventProducer eventProducer)
         {
             _eventsService = eventsService ?? throw new ArgumentNullException(nameof(eventsService));
             _customerEmailsRepository = customerEmailsRepository ?? throw new ArgumentNullException(nameof(customerEmailsRepository));
+            _eventProducer = eventProducer ?? throw new ArgumentNullException(nameof(eventProducer));
         }
 
         public async Task Handle(CreateCustomer command, CancellationToken cancellationToken)
@@ -45,6 +52,9 @@ namespace SuperSafeBank.Domain.Commands
             var customer = Customer.Create(command.CustomerId, command.FirstName, command.LastName, command.Email);
             await _eventsService.PersistAsync(customer);
             await _customerEmailsRepository.CreateAsync(command.Email, customer.Id);
+
+            var @event = new CustomerCreated(Guid.NewGuid(), command.CustomerId);
+            await _eventProducer.DispatchAsync(@event, cancellationToken);
         }
     }
 }

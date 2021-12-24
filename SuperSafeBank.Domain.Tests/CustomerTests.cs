@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using FluentAssertions;
 using SuperSafeBank.Common.Models;
-using SuperSafeBank.Domain.Events;
+using SuperSafeBank.Domain.DomainEvents;
 using Xunit;
 
 namespace SuperSafeBank.Domain.Tests
@@ -47,9 +47,9 @@ namespace SuperSafeBank.Domain.Tests
 
             sut.Events.Count.Should().Be(1);
 
-            var createdEvent = sut.Events.First() as CustomerCreated;
+            var createdEvent = sut.Events.First() as CustomerEvents.CustomerCreated;
             createdEvent.Should().NotBeNull()
-                .And.BeOfType<CustomerCreated>();
+                .And.BeOfType<CustomerEvents.CustomerCreated>();
             createdEvent.AggregateId.Should().Be(expectedId);
             createdEvent.AggregateVersion.Should().Be(0);
             createdEvent.Firstname.Should().Be(sut.Firstname);

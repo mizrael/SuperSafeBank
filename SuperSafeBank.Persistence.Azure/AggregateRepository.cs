@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace SuperSafeBank.Persistence.Azure
 {
-    public class EventsRepository<TA, TKey> : IEventsRepository<TA, TKey>
+    public class AggregateRepository<TA, TKey> : IAggregateRepository<TA, TKey>
         where TA : class, IAggregateRoot<TKey>
     {
         private readonly TableClient _client;
@@ -19,13 +19,13 @@ namespace SuperSafeBank.Persistence.Azure
 
         private static readonly ConcurrentDictionary<TKey, SemaphoreSlim> _locks = new ConcurrentDictionary<TKey, SemaphoreSlim>();
 
-        public EventsRepository(TableClient tableClient, IEventSerializer eventDeserializer)
+        public AggregateRepository(TableClient tableClient, IEventSerializer eventDeserializer)
         {
             _client = tableClient ?? throw new ArgumentNullException(nameof(tableClient));
             _eventSerializer = eventDeserializer ?? throw new ArgumentNullException(nameof(eventDeserializer));         
         }
 
-        public async Task AppendAsync(TA aggregateRoot, CancellationToken cancellationToken = default)
+        public async Task PersistAsync(TA aggregateRoot, CancellationToken cancellationToken = default)
         {
             if (aggregateRoot == null)
                 throw new ArgumentNullException(nameof(aggregateRoot));
@@ -63,6 +63,8 @@ namespace SuperSafeBank.Persistence.Azure
             {
                 aggregateLock.Release();
             }
+
+            aggregateRoot.ClearEvents();
 
             _locks.Remove(aggregateRoot.Id, out _);
         }

@@ -32,13 +32,13 @@ namespace SuperSafeBank.Persistence.Azure.Tests.Integration
         {
             var client = await _fixture.CreateTableClientAsync<DummyAggregate, Guid>();
 
-            var sut = new EventsRepository<DummyAggregate, Guid>(client, _eventSerializer);
+            var sut = new AggregateRepository<DummyAggregate, Guid>(client, _eventSerializer);
 
             var aggregate = new DummyAggregate(Guid.NewGuid());
             aggregate.DoSomething("foo");
             aggregate.DoSomething("bar");
 
-            await sut.AppendAsync(aggregate);
+            await sut.PersistAsync(aggregate);
 
             var events = client.QueryAsync<EventData<Guid>>(ed => ed.PartitionKey == aggregate.Id.ToString())
                                 .ConfigureAwait(false);
@@ -51,11 +51,29 @@ namespace SuperSafeBank.Persistence.Azure.Tests.Integration
         }
 
         [Fact]
+        public async Task AppendAsync_should_clear_Aggregate_events()
+        {
+            var client = await _fixture.CreateTableClientAsync<DummyAggregate, Guid>();
+
+            var sut = new AggregateRepository<DummyAggregate, Guid>(client, _eventSerializer);
+
+            var aggregate = new DummyAggregate(Guid.NewGuid());
+            aggregate.DoSomething("foo");
+            aggregate.DoSomething("bar");
+
+            aggregate.Events.Should().NotBeEmpty();
+
+            await sut.PersistAsync(aggregate);
+
+            aggregate.Events.Should().BeEmpty();
+        }
+
+        [Fact]
         public async Task AppendAsync_should_throw_AggregateException_when_version_mismatch()
         {
             var db = await _fixture.CreateTableClientAsync<DummyAggregate, Guid>();
 
-            var sut = new EventsRepository<DummyAggregate, Guid>(db, _eventSerializer);
+            var sut = new AggregateRepository<DummyAggregate, Guid>(db, _eventSerializer);
 
             var aggregateId = Guid.NewGuid();
 
@@ -64,7 +82,7 @@ namespace SuperSafeBank.Persistence.Azure.Tests.Integration
                 {
                     var aggregate = new DummyAggregate(aggregateId);
                     aggregate.DoSomething($"foo|{i}");
-                    return sut.AppendAsync(aggregate);
+                    return sut.PersistAsync(aggregate);
                 }).ToArray();
 
             await Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () => await Task.WhenAll(tasks));
@@ -75,13 +93,13 @@ namespace SuperSafeBank.Persistence.Azure.Tests.Integration
         {
             var db = await _fixture.CreateTableClientAsync<DummyAggregate, Guid>();
 
-            var sut = new EventsRepository<DummyAggregate, Guid>(db, _eventSerializer);
+            var sut = new AggregateRepository<DummyAggregate, Guid>(db, _eventSerializer);
 
             var aggregate = new DummyAggregate(Guid.NewGuid());
             aggregate.DoSomething("lorem");
             aggregate.DoSomething("ipsum");
 
-            await sut.AppendAsync(aggregate);
+            await sut.PersistAsync(aggregate);
 
             var rehydrated = await sut.RehydrateAsync(aggregate.Id);
             rehydrated.Should().NotBeNull();

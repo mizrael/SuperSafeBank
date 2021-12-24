@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using SuperSafeBank.Common.Models;
-using SuperSafeBank.Domain.Events;
+using SuperSafeBank.Domain.DomainEvents;
 
 namespace SuperSafeBank.Domain
 {
@@ -20,7 +20,7 @@ namespace SuperSafeBank.Domain
             if (email is null)            
                 throw new ArgumentNullException(nameof(email));
             
-            this.Append(new CustomerCreated(this, firstname, lastname, email));
+            this.Append(new CustomerEvents.CustomerCreated(this, firstname, lastname, email));
         }
 
         public void AddAccount(Account account)
@@ -31,7 +31,7 @@ namespace SuperSafeBank.Domain
             if (_accounts.Contains(account.Id))
                 return;
 
-            this.Append(new AccountAdded(this, account.Id));
+            this.Append(new CustomerEvents.AccountAdded(this, account.Id));
         }
 
         public string Firstname { get; private set; }
@@ -43,13 +43,13 @@ namespace SuperSafeBank.Domain
         {
             switch (@event)
             {
-                case CustomerCreated c:
+                case CustomerEvents.CustomerCreated c:
                     this.Id = c.AggregateId;
                     this.Firstname = c.Firstname;
                     this.Lastname = c.Lastname;
                     this.Email = c.Email;
                     break;
-                case AccountAdded aa:
+                case CustomerEvents.AccountAdded aa:
                     _accounts.Add(aa.AccountId);
                     break;
             }

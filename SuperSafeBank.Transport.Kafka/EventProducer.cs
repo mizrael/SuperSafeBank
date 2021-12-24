@@ -1,66 +1,57 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Confluent.Kafka;
+﻿using Confluent.Kafka;
 using Microsoft.Extensions.Logging;
 using SuperSafeBank.Common.EventBus;
-using SuperSafeBank.Common.Models;
+using System.Text;
 
 namespace SuperSafeBank.Transport.Kafka
 {
-    public class EventProducer<TA, TKey> : IDisposable, IEventProducer<TA, TKey>
-        where TA : IAggregateRoot<TKey>
+    public class EventProducer : IDisposable, IEventProducer
     {
-        private IProducer<TKey, string> _producer;
+        private IProducer<Guid, string> _producer;
         private readonly string _topicName;
-        private readonly ILogger<EventProducer<TA, TKey>> _logger;
+        private readonly ILogger<EventProducer> _logger;
 
-        public EventProducer(string topicBaseName, string kafkaConnString, ILogger<EventProducer<TA, TKey>> logger)
+        public EventProducer(string topicName, string kafkaConnString, ILogger<EventProducer> logger)
         {
+            if (string.IsNullOrWhiteSpace(topicName))            
+                throw new ArgumentException($"'{nameof(topicName)}' cannot be null or whitespace.", nameof(topicName));
+            
+            if (string.IsNullOrWhiteSpace(kafkaConnString))            
+                throw new ArgumentException($"'{nameof(kafkaConnString)}' cannot be null or whitespace.", nameof(kafkaConnString));
+            
             _logger = logger;
-
-            var aggregateType = typeof(TA);
-
-            _topicName = $"{topicBaseName}-{aggregateType.Name}";
+            _topicName = topicName;
 
             var producerConfig = new ProducerConfig { BootstrapServers = kafkaConnString };
-            var producerBuilder = new ProducerBuilder<TKey, string>(producerConfig);
-            producerBuilder.SetKeySerializer(new KeySerializer<TKey>());
+            var producerBuilder = new ProducerBuilder<Guid, string>(producerConfig);
+            producerBuilder.SetKeySerializer(new KeySerializer<Guid>());
             _producer = producerBuilder.Build();
         }
 
-        public async Task DispatchAsync(TA aggregateRoot)
+        public async Task DispatchAsync(IIntegrationEvent @event, CancellationToken cancellationToken = default)
         {
-            if(null == aggregateRoot)
-                throw new ArgumentNullException(nameof(aggregateRoot));
+            if (null == @event)
+                throw new ArgumentNullException(nameof(@event));
 
-            if (!aggregateRoot.Events.Any())
-                return;
+            _logger.LogInformation("publishing event {EventId} ...", @event.Id);
+            var eventType = @event.GetType();
 
-            _logger.LogInformation("publishing " + aggregateRoot.Events.Count + " events for {AggregateId} ...", aggregateRoot.Id); 
+            var serialized = System.Text.Json.JsonSerializer.Serialize(@event, eventType);
 
-            foreach (var @event in aggregateRoot.Events)
+            var headers = new Headers
             {
-                var eventType = @event.GetType(); 
-                
-                var serialized = System.Text.Json.JsonSerializer.Serialize(@event, eventType);
-                
-                var headers = new Headers
-                {
-                    {"aggregate", Encoding.UTF8.GetBytes(@event.AggregateId.ToString())},
-                    {"type", Encoding.UTF8.GetBytes(eventType.AssemblyQualifiedName)}
-                };
+                {"id", Encoding.UTF8.GetBytes(@event.Id.ToString())},
+                {"type", Encoding.UTF8.GetBytes(eventType.AssemblyQualifiedName)}
+            };
 
-                var message = new Message<TKey, string>()
-                {
-                    Key = @event.AggregateId,
-                    Value = serialized, 
-                    Headers = headers
-                };
-                
-                await _producer.ProduceAsync(_topicName, message);
-            }
+            var message = new Message<Guid, string>()
+            {
+                Key = @event.Id,
+                Value = serialized,
+                Headers = headers
+            };
+
+            await _producer.ProduceAsync(_topicName, message);
         }
 
         public void Dispose()

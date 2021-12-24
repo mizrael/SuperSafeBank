@@ -3,6 +3,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using SuperSafeBank.Common;
+using SuperSafeBank.Common.EventBus;
+using SuperSafeBank.Domain.IntegrationEvents;
 using SuperSafeBank.Domain.Services;
 
 namespace SuperSafeBank.Domain.Commands
@@ -22,13 +24,15 @@ namespace SuperSafeBank.Domain.Commands
 
     public class WithdrawHandler : INotificationHandler<Withdraw>
     {
-        private readonly IEventsService<Account, Guid> _accountEventsService;
+        private readonly IAggregateRepository<Account, Guid> _accountEventsService;
         private readonly ICurrencyConverter _currencyConverter;
+        private readonly IEventProducer _eventProducer;
 
-        public WithdrawHandler(IEventsService<Account, Guid> accountEventsService, ICurrencyConverter currencyConverter)
+        public WithdrawHandler(IAggregateRepository<Account, Guid> accountEventsService, ICurrencyConverter currencyConverter, IEventProducer eventProducer)
         {
             _accountEventsService = accountEventsService;
             _currencyConverter = currencyConverter;
+            _eventProducer = eventProducer;
         }
 
         public async Task Handle(Withdraw command, CancellationToken cancellationToken)
@@ -40,6 +44,9 @@ namespace SuperSafeBank.Domain.Commands
             account.Withdraw(command.Amount, _currencyConverter);
 
             await _accountEventsService.PersistAsync(account);
+
+            var @event = new TransactionHappened(Guid.NewGuid(), account.Id);
+            await _eventProducer.DispatchAsync(@event, cancellationToken);
         }
     }
 }

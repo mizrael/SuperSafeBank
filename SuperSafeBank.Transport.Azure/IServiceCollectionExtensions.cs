@@ -2,11 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using SuperSafeBank.Common;
 using SuperSafeBank.Common.EventBus;
-using SuperSafeBank.Common.Models;
-using SuperSafeBank.Domain;
-using System;
 
 namespace SuperSafeBank.Transport.Azure
 {
@@ -14,25 +10,18 @@ namespace SuperSafeBank.Transport.Azure
     {
         public static IServiceCollection AddAzureTransport(this IServiceCollection services, IConfiguration config)
         {
-            return services.AddSingleton(ctx =>
-                {
-                    var connectionString = config.GetConnectionString("producer");
-                    return new ServiceBusClient(connectionString);
-                }).AddEventsProducer<Customer, Guid>(config)
-                .AddEventsProducer<Account, Guid>(config);
-        }
+            var topicName = config["topicsBaseName"];
+            var connectionString = config.GetConnectionString("producer");
 
-        private static IServiceCollection AddEventsProducer<TA, TK>(this IServiceCollection services, IConfiguration config)
-            where TA : class, IAggregateRoot<TK>
-        {
-            var topicsBaseName = config["topicsBaseName"];
-            return services.AddSingleton<IEventProducer<TA, TK>>(ctx =>
-            {
-                var clientFactory = ctx.GetRequiredService<ServiceBusClient>();
-                var eventDeserializer = ctx.GetRequiredService<IEventSerializer>();
-                var logger = ctx.GetRequiredService<ILogger<EventProducer<TA, TK>>>();
-                return new EventProducer<TA, TK>(clientFactory, topicsBaseName, eventDeserializer, logger);
-            });
+            return services.AddSingleton(ctx =>
+                {                    
+                    return new ServiceBusClient(connectionString);
+                }).AddSingleton<IEventProducer>(ctx =>
+                {
+                    var clientFactory = ctx.GetRequiredService<ServiceBusClient>();
+                    var logger = ctx.GetRequiredService<ILogger<EventProducer>>();
+                    return new EventProducer(clientFactory, topicName, logger);
+                });
         }
     }
 }

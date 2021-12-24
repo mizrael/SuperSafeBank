@@ -1,6 +1,6 @@
 ﻿using System;
 using SuperSafeBank.Common.Models;
-using SuperSafeBank.Domain.Events;
+using SuperSafeBank.Domain.DomainEvents;
 using SuperSafeBank.Domain.Services;
 
 namespace SuperSafeBank.Domain
@@ -16,7 +16,7 @@ namespace SuperSafeBank.Domain
             if (currency == null)
                 throw new ArgumentNullException(nameof(currency));
                         
-            this.Append(new AccountCreated(this, owner, currency));
+            this.Append(new AccountEvents.AccountCreated(this, owner, currency));
         }
 
         public Guid OwnerId { get; private set; }
@@ -31,7 +31,7 @@ namespace SuperSafeBank.Domain
             if (normalizedAmount.Value > this.Balance.Value)
                 throw new AccountTransactionException($"unable to withdrawn {normalizedAmount} from account {this.Id}", this);
 
-            this.Append(new Withdrawal(this, amount));
+            this.Append(new AccountEvents.Withdrawal(this, amount));
         }
 
         public void Deposit(Money amount, ICurrencyConverter currencyConverter)
@@ -41,22 +41,22 @@ namespace SuperSafeBank.Domain
             
             var normalizedAmount = currencyConverter.Convert(amount, this.Balance.Currency);
             
-            this.Append(new Deposit(this, normalizedAmount));
+            this.Append(new AccountEvents.Deposit(this, normalizedAmount));
         }
 
         protected override void When(IDomainEvent<Guid> @event)
         {
             switch (@event)
             {
-                case AccountCreated c:
+                case AccountEvents.AccountCreated c:
                     this.Id = c.AggregateId;
                     this.Balance = Money.Zero(c.Currency);
                     this.OwnerId = c.OwnerId;
                     break;
-                case Withdrawal w:
+                case AccountEvents.Withdrawal w:
                     this.Balance = this.Balance.Subtract(w.Amount);
                     break;
-                case Deposit d:
+                case AccountEvents.Deposit d:
                     this.Balance = this.Balance.Add(d.Amount);
                     break;
             }
