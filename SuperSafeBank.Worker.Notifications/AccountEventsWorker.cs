@@ -1,9 +1,7 @@
 ﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using SuperSafeBank.Common.EventBus;
-using SuperSafeBank.Common.Models;
-using SuperSafeBank.Domain;
-using SuperSafeBank.Domain.DomainEvents;
+using SuperSafeBank.Domain.IntegrationEvents;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,22 +20,21 @@ namespace SuperSafeBank.Worker.Notifications
             IEventConsumer consumer,
             ILogger<AccountEventsWorker> logger)
         {
-            _consumer = consumer ?? throw new ArgumentNullException(nameof(consumer));
-            this._logger = logger;
-            _notificationsService = notificationsService;
-            _notificationsFactory = notificationsFactory;
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _notificationsService = notificationsService ?? throw new ArgumentNullException(nameof(notificationsService));
+            _notificationsFactory = notificationsFactory ?? throw new ArgumentNullException(nameof(notificationsFactory));
 
-            consumer.EventReceived += OnEventReceived;
-            consumer.ExceptionThrown += OnExceptionThrown;
+            _consumer = consumer ?? throw new ArgumentNullException(nameof(consumer));
+            _consumer.EventReceived += OnEventReceived;
+            _consumer.ExceptionThrown += OnExceptionThrown;
         }
 
         private async Task OnEventReceived(object s, IIntegrationEvent @event)
         {
             var notification = @event switch
             {
-                //AccountEvents.AccountCreated newAccount => await _notificationsFactory.CreateNewAccountNotificationAsync(newAccount.OwnerId, newAccount.AggregateId),
-                //AccountEvents.Deposit deposit => await _notificationsFactory.CreateDepositNotificationAsync(deposit.AggregateId, deposit.Amount),
-                //AccountEvents.Withdrawal withdrawal => await _notificationsFactory.CreateWithdrawalNotificationAsync(withdrawal.AggregateId, withdrawal.Amount),
+                AccountCreated newAccount => await _notificationsFactory.CreateNewAccountNotificationAsync(newAccount.AccountId),
+                TransactionHappened transaction => await _notificationsFactory.CreateTransactionNotificationAsync(transaction.AccountId),
                 _ => (Notification)null
             };
 

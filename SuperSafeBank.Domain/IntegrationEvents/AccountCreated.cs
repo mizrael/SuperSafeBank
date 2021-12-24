@@ -4,15 +4,15 @@ using System;
 
 namespace SuperSafeBank.Domain.IntegrationEvents
 {
-    public record CustomerCreated : IIntegrationEvent, INotification
+    public record AccountCreated : IIntegrationEvent, INotification
     {
-        public CustomerCreated(Guid id, Guid customerId)
+        public AccountCreated(Guid id, Guid accountId)
         {
             this.Id = id;
-            this.CustomerId = customerId;
+            this.AccountId = accountId;
         }
 
+        public Guid AccountId { get; init; }
         public Guid Id { get; }
-        public Guid CustomerId { get; }
     }
 }
