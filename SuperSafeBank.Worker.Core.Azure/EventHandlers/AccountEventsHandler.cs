@@ -2,9 +2,8 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
 using SuperSafeBank.Common;
-using SuperSafeBank.Common.EventBus;
 using SuperSafeBank.Domain;
-using SuperSafeBank.Domain.Events;
+using SuperSafeBank.Domain.IntegrationEvents;
 using SuperSafeBank.Service.Core.Azure.Common.Persistence;
 using SuperSafeBank.Service.Core.Common.Queries;
 using System;
@@ -14,18 +13,17 @@ using System.Threading.Tasks;
 namespace SuperSafeBank.Worker.Core.Azure.EventHandlers
 {
     public class AccountEventsHandler :
-        INotificationHandler<EventReceived<AccountCreated>>,
-        INotificationHandler<EventReceived<Deposit>>,
-        INotificationHandler<EventReceived<Withdrawal>>
+        INotificationHandler<AccountCreated>,
+        INotificationHandler<TransactionHappened>
     {
-        private readonly IEventsRepository<Customer, Guid> _customersRepo;
-        private readonly IEventsRepository<Account, Guid> _accountsRepo;
+        private readonly IAggregateRepository<Customer, Guid> _customersRepo;
+        private readonly IAggregateRepository<Account, Guid> _accountsRepo;
         private readonly IViewsContext _dbContext;
         private readonly ILogger<AccountEventsHandler> _logger;
 
         public AccountEventsHandler(
-            IEventsRepository<Customer, Guid> customersRepo, 
-            IEventsRepository<Account, Guid> accountsRepo, 
+            IAggregateRepository<Customer, Guid> customersRepo,
+            IAggregateRepository<Account, Guid> accountsRepo, 
             IViewsContext dbContext, 
             ILogger<AccountEventsHandler> logger)
         {
@@ -35,34 +33,20 @@ namespace SuperSafeBank.Worker.Core.Azure.EventHandlers
             _accountsRepo = accountsRepo ?? throw new ArgumentNullException(nameof(accountsRepo));
         }
 
-        public async Task Handle(EventReceived<AccountCreated> @event, CancellationToken cancellationToken)
+        public async Task Handle(AccountCreated @event, CancellationToken cancellationToken)
         {
-            _logger.LogInformation("creating account details for aggregate {AggregateId} ...", @event.Event.AggregateId);
+            _logger.LogInformation("updating details for account {AccountId} ...", @event.AccountId);
 
-            var accountView = await BuildAccountViewAsync(@event.Event.AggregateId, cancellationToken);
+            var accountView = await BuildAccountViewAsync(@event.AccountId, cancellationToken);
             await UpsertAccountViewAsync(accountView, cancellationToken);
-
-            _logger.LogInformation("created account {AggregateId}", @event.Event.AggregateId);
         }
 
-        public async Task Handle(EventReceived<Deposit> @event, CancellationToken cancellationToken)
+        public async Task Handle(TransactionHappened @event, CancellationToken cancellationToken)
         {
-            _logger.LogInformation("processing deposit of {Amount} on account {AggregateId} ...", @event.Event.Amount, @event.Event.AggregateId);
+            _logger.LogInformation("processing transaction on account {AccountId} ...", @event.AccountId);
 
-            var accountView = await BuildAccountViewAsync(@event.Event.AggregateId, cancellationToken);
+            var accountView = await BuildAccountViewAsync(@event.AccountId, cancellationToken);
             await UpsertAccountViewAsync(accountView, cancellationToken);
-
-            _logger.LogInformation("deposited {Amount} on account {AggregateId} ...", @event.Event.Amount, @event.Event.AggregateId);
-        }
-
-        public async Task Handle(EventReceived<Withdrawal> @event, CancellationToken cancellationToken)
-        {
-            _logger.LogInformation("processing withdrawal of {Amount} on account {AggregateId} ...", @event.Event.Amount, @event.Event.AggregateId);
-
-            var accountView = await BuildAccountViewAsync(@event.Event.AggregateId, cancellationToken);
-            await UpsertAccountViewAsync(accountView, cancellationToken);
-
-            _logger.LogInformation("withdrawn {Amount} from account {AggregateId} ...", @event.Event.Amount, @event.Event.AggregateId);
         }
 
         private async Task<AccountDetails> BuildAccountViewAsync(Guid accountId, CancellationToken cancellationToken)
@@ -85,6 +69,10 @@ namespace SuperSafeBank.Worker.Core.Azure.EventHandlers
                 var msg = $"an error has occurred while processing an event: {response.ReasonPhrase}";
                 throw new Exception(msg);
             }
+
+
+
+            _logger.LogInformation("updated details for account {AccountId}", accountView.Id);
         }
     }
 }

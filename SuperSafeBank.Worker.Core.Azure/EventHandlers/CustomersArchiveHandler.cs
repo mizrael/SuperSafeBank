@@ -1,8 +1,9 @@
 ﻿using Azure.Data.Tables;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using SuperSafeBank.Common.EventBus;
-using SuperSafeBank.Domain.Events;
+using SuperSafeBank.Common;
+using SuperSafeBank.Domain;
+using SuperSafeBank.Domain.IntegrationEvents;
 using SuperSafeBank.Service.Core.Azure.Common.Persistence;
 using SuperSafeBank.Service.Core.Common.Queries;
 using System;
@@ -12,22 +13,26 @@ using System.Threading.Tasks;
 namespace SuperSafeBank.Worker.Core.Azure.EventHandlers
 {
     public class CustomersArchiveHandler : 
-        INotificationHandler<EventReceived<CustomerCreated>>
+        INotificationHandler<CustomerCreated>
     {
         private readonly ILogger<CustomersArchiveHandler> _logger;
         private readonly IViewsContext _dbContext;
+        private readonly IAggregateRepository<Customer, Guid> _customersRepo;
 
-        public CustomersArchiveHandler(IViewsContext dbContext, ILogger<CustomersArchiveHandler> logger)
+        public CustomersArchiveHandler(IViewsContext dbContext, IAggregateRepository<Customer, Guid> customersRepo, ILogger<CustomersArchiveHandler> logger)
         {
             _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _customersRepo = customersRepo ?? throw new ArgumentNullException(nameof(customersRepo));
         }
 
-        public async Task Handle(EventReceived<CustomerCreated> @event, CancellationToken cancellationToken)
+        public async Task Handle(CustomerCreated @event, CancellationToken cancellationToken)
         {
-            _logger.LogInformation("creating customer archive item for aggregate {AggregateId} ...", @event.Event.AggregateId);
-                        
-            var customerView = new CustomerArchiveItem(@event.Event.AggregateId, @event.Event.Firstname, @event.Event.Lastname);
+            _logger.LogInformation("creating customer archive item for aggregate {AggregateId} ...", @event.CustomerId);
+
+            var customer = await _customersRepo.RehydrateAsync(@event.CustomerId, cancellationToken);
+
+            var customerView = new CustomerArchiveItem(customer.Id, customer.Firstname, customer.Lastname);
 
             var entity = ViewTableEntity.Map(customerView);
             var response = await _dbContext.CustomersArchive.UpsertEntityAsync(entity, mode: TableUpdateMode.Replace, cancellationToken: cancellationToken);
@@ -37,7 +42,7 @@ namespace SuperSafeBank.Worker.Core.Azure.EventHandlers
                 throw new Exception(msg);
             }
 
-            _logger.LogInformation($"created customer archive item {@event.Event.AggregateId}");
+            _logger.LogInformation($"created customer archive item {@event.CustomerId}");
         }
     }
 }

@@ -1,15 +1,13 @@
 ﻿using FluentAssertions;
 using Microsoft.Extensions.Logging;
-using SuperSafeBank.Common.EventBus;
 using SuperSafeBank.Domain;
-using SuperSafeBank.Domain.Events;
+using SuperSafeBank.Domain.IntegrationEvents;
 using SuperSafeBank.Service.Core.Azure.Common.Persistence;
 using SuperSafeBank.Service.Core.Azure.Tests;
 using SuperSafeBank.Service.Core.Common.Queries;
 using SuperSafeBank.Worker.Core.Azure.EventHandlers;
 using System;
 using System.ComponentModel;
-using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -30,15 +28,18 @@ namespace SuperSafeBank.Worker.Core.Azure.Tests.Integration.EventHandlers
 
         [Fact]
         public async Task Handle_CustomerCreated_should_create_view()
-        {
-            var customer = Customer.Create(Guid.NewGuid(), "lorem", "ipsum", "test@email.com");
-            var customerCreated = customer.Events.First(evt => evt is CustomerCreated) as CustomerCreated;
-            var evt = new EventReceived<CustomerCreated>(customerCreated); 
-            
+        {   
             var dbContext = _fixture.CreateTableClient();
+            var repo = _fixture.CreateRepository<Customer, Guid>();
+
+            var customer = Customer.Create(Guid.NewGuid(), "lorem", "ipsum", "test@email.com");
+            await repo.PersistAsync(customer);
+
+            var @event = new CustomerCreated(Guid.NewGuid(), customer.Id);
+
             var logger = NSubstitute.Substitute.For<ILogger<CustomersArchiveHandler>>();
-            var sut = new CustomersArchiveHandler(dbContext, logger);
-            await sut.Handle(evt, CancellationToken.None);
+            var sut = new CustomersArchiveHandler(dbContext, repo, logger);
+            await sut.Handle(@event, CancellationToken.None);
 
             var key = customer.Id.ToString();
             var response = await dbContext.CustomersArchive.GetEntityAsync<ViewTableEntity>(key, key);
