@@ -1,0 +1,7 @@
+{
+  "profiles": {
+    "SuperSafeBank.Service.Core.Azure": {
+      "commandName": "Project"
+    }
+  }
+}

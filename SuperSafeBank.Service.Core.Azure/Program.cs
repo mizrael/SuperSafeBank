@@ -1,4 +1,5 @@
 using MediatR;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using SuperSafeBank.Domain.Services;
@@ -7,12 +8,19 @@ using SuperSafeBank.Service.Core.Azure.Common.Persistence;
 using SuperSafeBank.Service.Core.Azure.QueryHandlers;
 using SuperSafeBank.Service.Core.Azure.Services;
 using SuperSafeBank.Service.Core.Common;
+using SuperSafeBank.Transport.Azure;
 
 var builder = new HostBuilder();
+
 await builder.ConfigureFunctionsWorkerDefaults()
+        .ConfigureHostConfiguration(builder =>
+        {
+            builder.AddUserSecrets<Program>();
+        })
         .ConfigureServices((ctx, services) =>
         {
             var eventsRepositoryConfig = new EventsRepositoryConfig(ctx.Configuration["EventsStorage"], ctx.Configuration["EventTablesPrefix"]);
+            var eventProducerConfig = new EventProducerConfig(ctx.Configuration["EventsBus"], ctx.Configuration["TopicName"]);
 
             services.AddScoped<ServiceFactory>(ctx => ctx.GetRequiredService)
                 .AddScoped<IMediator, Mediator>()
@@ -23,13 +31,14 @@ await builder.ConfigureFunctionsWorkerDefaults()
                         .RegisterHandlers(typeof(IRequestHandler<,>))
                         .RegisterHandlers(typeof(INotificationHandler<>));
                 })
-                .AddTransient<ICustomerEmailsService, CustomerEmailsService>()
-                .AddSingleton<IViewsContext>(provider =>
-                {
-                    var connStr = ctx.Configuration["QueryModelsStorage"];
-                    var tablesPrefix = ctx.Configuration["QueryModelsTablePrefix"];
-                    return new ViewsContext(connStr, tablesPrefix);
-                }).AddAzurePersistence(eventsRepositoryConfig);
+            .AddTransient<ICustomerEmailsService, CustomerEmailsService>()
+            .AddSingleton<IViewsContext>(provider =>
+            {
+                var connStr = ctx.Configuration["QueryModelsStorage"];
+                var tablesPrefix = ctx.Configuration["QueryModelsTablePrefix"];
+                return new ViewsContext(connStr, tablesPrefix);
+            }).AddAzurePersistence(eventsRepositoryConfig)
+              .AddAzureTransport(eventProducerConfig);
         })
         .Build()
         .RunAsync();

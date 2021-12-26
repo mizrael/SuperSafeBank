@@ -3,17 +3,20 @@
     <TargetFramework>net6.0</TargetFramework>
     <AzureFunctionsVersion>v4</AzureFunctionsVersion>
     <OutputType>Exe</OutputType>
+    <UserSecretsId>6184d0f2-405c-4fd3-a499-bcd96a4bdb7d</UserSecretsId>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http" Version="3.0.13" />
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Sdk" Version="1.3.0" OutputItemType="Analyzer" />
     <PackageReference Include="Microsoft.Azure.Functions.Worker" Version="1.6.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SuperSafeBank.Domain\SuperSafeBank.Domain.csproj" />
     <ProjectReference Include="..\SuperSafeBank.Persistence.Azure\SuperSafeBank.Persistence.Azure.csproj" />
     <ProjectReference Include="..\SuperSafeBank.Service.Core.Azure.Common\SuperSafeBank.Service.Core.Azure.Common.csproj" />
     <ProjectReference Include="..\SuperSafeBank.Service.Core.Common\SuperSafeBank.Service.Core.Common.csproj" />
+    <ProjectReference Include="..\SuperSafeBank.Transport.Azure\SuperSafeBank.Transport.Azure.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Update="host.json">
