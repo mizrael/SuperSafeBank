@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "SuperSafeBank.Worker.Core.Azure": {
+      "commandName": "Project",
+      "commandLineArgs": "host start --port 8071"
+    }
+  }
+}

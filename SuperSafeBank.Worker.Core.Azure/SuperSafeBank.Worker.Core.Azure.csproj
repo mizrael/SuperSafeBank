@@ -1,12 +1,16 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <AzureFunctionsVersion>v4</AzureFunctionsVersion>
     <OutputType>Exe</OutputType>
+    <UserSecretsId>99685c81-4f68-4327-bb12-98f3adbe825c</UserSecretsId>
   </PropertyGroup>
-	<ItemGroup>
+	<ItemGroup>		
+		<PackageReference Include="Azure.Messaging.ServiceBus" Version="7.5.1" />		
+		<PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.ServiceBus" Version="4.2.1" />
 		<PackageReference Include="Microsoft.Azure.Functions.Worker.Sdk" Version="1.3.0" OutputItemType="Analyzer" />
 		<PackageReference Include="Microsoft.Azure.Functions.Worker" Version="1.6.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.0" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\SuperSafeBank.Domain\SuperSafeBank.Domain.csproj" />

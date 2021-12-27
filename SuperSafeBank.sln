@@ -55,13 +55,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SuperSafeBank.Service.Core.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SuperSafeBank.Service.Core.Azure", "SuperSafeBank.Service.Core.Azure\SuperSafeBank.Service.Core.Azure.csproj", "{1DA26567-BDD2-4D97-A372-BFB9F9355F50}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SuperSafeBank.Worker.Core.Azure", "SuperSafeBank.Worker.Core.Azure\SuperSafeBank.Worker.Core.Azure.csproj", "{632B5AFA-5BC6-4FF3-AA5A-DF78D3AA441D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SuperSafeBank.Worker.Core.Azure", "SuperSafeBank.Worker.Core.Azure\SuperSafeBank.Worker.Core.Azure.csproj", "{632B5AFA-5BC6-4FF3-AA5A-DF78D3AA441D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SuperSafeBank.Service.Core.Azure.Common", "SuperSafeBank.Service.Core.Azure.Common\SuperSafeBank.Service.Core.Azure.Common.csproj", "{B03F72A4-C8BC-4CB6-9BC9-65C42C72FBAB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SuperSafeBank.Service.Core.Azure.Common", "SuperSafeBank.Service.Core.Azure.Common\SuperSafeBank.Service.Core.Azure.Common.csproj", "{B03F72A4-C8BC-4CB6-9BC9-65C42C72FBAB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SuperSafeBank.Service.Core.Azure.Tests", "SuperSafeBank.Service.Core.Azure.Tests\SuperSafeBank.Service.Core.Azure.Tests.csproj", "{0873B56E-FC07-4353-B721-437092AABA9D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SuperSafeBank.Service.Core.Azure.Tests", "SuperSafeBank.Service.Core.Azure.Tests\SuperSafeBank.Service.Core.Azure.Tests.csproj", "{0873B56E-FC07-4353-B721-437092AABA9D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SuperSafeBank.Worker.Core.Azure.Tests", "SuperSafeBank.Worker.Core.Azure.Tests\SuperSafeBank.Worker.Core.Azure.Tests.csproj", "{39DFF24B-C558-4CD6-AC97-B180418650A2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SuperSafeBank.Worker.Core.Azure.Tests", "SuperSafeBank.Worker.Core.Azure.Tests\SuperSafeBank.Worker.Core.Azure.Tests.csproj", "{39DFF24B-C558-4CD6-AC97-B180418650A2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

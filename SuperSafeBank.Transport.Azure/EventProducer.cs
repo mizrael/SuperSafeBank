@@ -26,31 +26,27 @@ namespace SuperSafeBank.Transport.Azure
             _sender = senderFactory.CreateSender(topicName);
         }
 
-        public async Task DispatchAsync(IIntegrationEvent @event, CancellationToken cancellationToken = default)
+        public async Task DispatchAsync(IIntegrationEvent @event, CancellationToken cancellationToken = default)            
         {
             if (null == @event)
                 throw new ArgumentNullException(nameof(@event));
 
             _logger.LogInformation("publishing event {EventId} ...", @event.Id);
 
-            using ServiceBusMessageBatch messageBatch = await _sender.CreateMessageBatchAsync();
-
             var eventType = @event.GetType();
 
-            var serialized = System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(@event);
+            var serialized = System.Text.Json.JsonSerializer.Serialize(@event, eventType);
 
             var message = new ServiceBusMessage(serialized)
             {
-                CorrelationId = @event.Id.ToString(),
+                MessageId = @event.Id.ToString(),
                 ApplicationProperties =
                 {
-                    {"aggregate", @event.Id.ToString()},
                     {"type", eventType.AssemblyQualifiedName}
                 }
             };
-            messageBatch.TryAddMessage(message);
-
-            await _sender.SendMessagesAsync(messageBatch);
+            
+            await _sender.SendMessageAsync(message);
         }
 
         public async ValueTask DisposeAsync()

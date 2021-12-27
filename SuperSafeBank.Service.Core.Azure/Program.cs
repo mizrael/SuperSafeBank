@@ -11,14 +11,14 @@ using SuperSafeBank.Service.Core.Azure.QueryHandlers;
 using SuperSafeBank.Service.Core.Azure.Services;
 using SuperSafeBank.Service.Core.Common;
 using SuperSafeBank.Transport.Azure;
-using System.Text.Json;
+using System.Reflection;
 
 var builder = new HostBuilder();
 
 await builder.ConfigureFunctionsWorkerDefaults()
         .ConfigureHostConfiguration(builder =>
         {
-            builder.AddUserSecrets<Program>();            
+            builder.AddUserSecrets(Assembly.GetExecutingAssembly(), true);
         })
         .ConfigureServices((ctx, services) =>
         {
