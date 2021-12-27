@@ -24,7 +24,7 @@ namespace SuperSafeBank.Service.Core.Azure.QueryHandlers
             {
                 var key = request.AccountId.ToString();
 
-                response = await _dbContext.CustomersDetails.GetEntityAsync<ViewTableEntity>(
+                response = await _dbContext.Accounts.GetEntityAsync<ViewTableEntity>(
                    partitionKey: key,
                    rowKey: key,
                    cancellationToken: cancellationToken);

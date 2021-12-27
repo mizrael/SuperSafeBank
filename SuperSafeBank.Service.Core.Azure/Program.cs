@@ -41,6 +41,7 @@ await builder.ConfigureFunctionsWorkerDefaults()
                 client.CreateIfNotExists();
                 return new CustomerEmailsService(client);
             })
+            .AddTransient<ICurrencyConverter, FakeCurrencyConverter>()
             .AddSingleton<IViewsContext>(provider =>
             {
                 var connStr = ctx.Configuration["QueryModelsStorage"];
