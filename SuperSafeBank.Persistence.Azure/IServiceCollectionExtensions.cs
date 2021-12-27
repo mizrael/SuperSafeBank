@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using SuperSafeBank.Common;
 using SuperSafeBank.Common.Models;
 using SuperSafeBank.Domain;
+using SuperSafeBank.Domain.DomainEvents;
 using System;
 
 namespace SuperSafeBank.Persistence.Azure
@@ -14,6 +15,10 @@ namespace SuperSafeBank.Persistence.Azure
         public static IServiceCollection AddAzurePersistence(this IServiceCollection services, EventsRepositoryConfig config)
         {
             return services
+                .AddSingleton<IEventSerializer>(new JsonEventSerializer(new[]
+                {
+                    typeof(CustomerEvents.CustomerCreated).Assembly
+                }))
                 .AddEventsRepository<Customer, Guid>(config)
                 .AddEventsRepository<Account, Guid>(config);
         }
@@ -27,6 +32,8 @@ namespace SuperSafeBank.Persistence.Azure
             return services.AddSingleton<IAggregateRepository<TA, TK>>(ctx =>
             {
                 var client = new TableClient(config.ConnectionString, tableName);
+                client.CreateIfNotExists();
+
                 var eventDeserializer = ctx.GetRequiredService<IEventSerializer>();
                 return new AggregateRepository<TA, TK>(client, eventDeserializer);
             });

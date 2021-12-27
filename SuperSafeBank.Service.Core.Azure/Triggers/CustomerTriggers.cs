@@ -1,10 +1,12 @@
 using MediatR;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
+using SuperSafeBank.Common;
 using SuperSafeBank.Domain.Commands;
 using SuperSafeBank.Service.Core.Azure.DTOs;
 using SuperSafeBank.Service.Core.Common.Queries;
 using System;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace SuperSafeBank.Service.Core.Azure.Triggers
@@ -31,7 +33,7 @@ namespace SuperSafeBank.Service.Core.Azure.Triggers
         [Function(nameof(CreateCustomer))]
         public async Task<HttpResponseData> CreateCustomer([HttpTrigger(AuthorizationLevel.Function, "post", Route = "customers")] HttpRequestData req)
         {
-            var dto = await System.Text.Json.JsonSerializer.DeserializeAsync<CreateCustomerDto>(req.Body);
+            var dto = await JsonSerializer.DeserializeAsync<CreateCustomerDto>(req.Body, JsonSerializerDefaultOptions.Defaults);
             var command = new CreateCustomer(Guid.NewGuid(), dto.FirstName, dto.LastName, dto.Email);
             await _mediator.Publish(command);
 
