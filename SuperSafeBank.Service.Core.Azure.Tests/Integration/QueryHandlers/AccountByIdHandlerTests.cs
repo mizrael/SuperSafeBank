@@ -40,7 +40,7 @@ namespace SuperSafeBank.Service.Core.Azure.Tests.Integration.QueryHandlers
             var entity = ViewTableEntity.Map(account);
 
             var dbContext = _fixture.CreateTableClient();
-            await dbContext.CustomersDetails.UpsertEntityAsync(entity);
+            await dbContext.Accounts.UpsertEntityAsync(entity);
 
             var query = new AccountById(account.Id);
             
