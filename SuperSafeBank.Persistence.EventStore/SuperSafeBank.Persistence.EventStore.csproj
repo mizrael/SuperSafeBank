@@ -1,13 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <Configurations>Debug;Release</Configurations>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="EventStore.Client" Version="21.2.1" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.0" />
+    <PackageReference Include="EventStore.Client" Version="22.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.0" />
   </ItemGroup>
 
   <ItemGroup>
