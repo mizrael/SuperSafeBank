@@ -4,7 +4,7 @@
 
 This repository shows how to implement Event Sourcing, CQRS and DDD in .NET Core, using a Bank as example.
 
-The code has been used as example accompaining a few series of articles on [my personal blog](https://www.davideguida.com): 
+The code has been used as example accompaining a few series of articles on [my personal blog](https://www.davidguida.net): 
 - https://www.davidguida.net/event-sourcing-in-net-core-part-1-a-gentle-introduction/
 - https://www.davidguida.net/event-sourcing-on-azure-part-1-architecture-plan/
 
