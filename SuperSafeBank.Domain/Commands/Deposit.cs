@@ -9,7 +9,7 @@ using SuperSafeBank.Domain.Services;
 
 namespace SuperSafeBank.Domain.Commands
 {
-    public record Deposit : INotification
+    public record Deposit : IRequest
     {
         public Deposit(Guid accountId, Money amount)
         {
@@ -21,7 +21,7 @@ namespace SuperSafeBank.Domain.Commands
         public Money Amount { get; }
     }
 
-    public class DepositHandler : INotificationHandler<Deposit>
+    public class DepositHandler : IRequestHandler<Deposit>
     {
         private readonly IAggregateRepository<Account, Guid> _accountEventsService;
         private readonly ICurrencyConverter _currencyConverter;
@@ -34,7 +34,7 @@ namespace SuperSafeBank.Domain.Commands
             _eventProducer = eventProducer;
         }
 
-        public async Task Handle(Deposit command, CancellationToken cancellationToken)
+        public async Task<Unit> Handle(Deposit command, CancellationToken cancellationToken)
         {
             var account = await _accountEventsService.RehydrateAsync(command.AccountId);
             if(null == account)
@@ -46,6 +46,8 @@ namespace SuperSafeBank.Domain.Commands
 
             var @event = new TransactionHappened(Guid.NewGuid(), account.Id);
             await _eventProducer.DispatchAsync(@event, cancellationToken);
+
+            return Unit.Value;
         }
     }
 

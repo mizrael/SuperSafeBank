@@ -8,7 +8,7 @@ using SuperSafeBank.Domain.IntegrationEvents;
 
 namespace SuperSafeBank.Domain.Commands
 {
-    public record CreateAccount : INotification
+    public record CreateAccount : IRequest
     {
         public CreateAccount(Guid customerId, Guid accountId, Currency currency)
         {
@@ -22,7 +22,7 @@ namespace SuperSafeBank.Domain.Commands
         public Currency Currency { get; }
     }
 
-    public class CreateAccountHandler : INotificationHandler<CreateAccount>
+    public class CreateAccountHandler : IRequestHandler<CreateAccount>
     {
         private readonly IAggregateRepository<Customer, Guid> _customerEventsService;
         private readonly IAggregateRepository<Account, Guid> _accountEventsService;
@@ -35,7 +35,7 @@ namespace SuperSafeBank.Domain.Commands
             _eventProducer = eventProducer;
         }
 
-        public async Task Handle(CreateAccount command, CancellationToken cancellationToken)
+        public async Task<Unit> Handle(CreateAccount command, CancellationToken cancellationToken)
         {
             var customer = await _customerEventsService.RehydrateAsync(command.CustomerId);
             if(null == customer)
@@ -48,6 +48,8 @@ namespace SuperSafeBank.Domain.Commands
 
             var @event = new AccountCreated(Guid.NewGuid(), account.Id);
             await _eventProducer.DispatchAsync(@event, cancellationToken);
+
+            return Unit.Value;
         }
     }
 }
