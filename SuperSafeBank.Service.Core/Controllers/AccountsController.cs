@@ -39,7 +39,7 @@ namespace SuperSafeBank.Service.Core.Controllers
 
             var currency = Currency.FromCode(dto.CurrencyCode);
             var command = new CreateAccount(dto.CustomerId, Guid.NewGuid(), currency);
-            await _mediator.Publish(command, cancellationToken);
+            await _mediator.Send(command, cancellationToken);
             return CreatedAtAction("GetAccount", "Accounts", new { id = command.AccountId }, command);
         }
 
@@ -53,7 +53,7 @@ namespace SuperSafeBank.Service.Core.Controllers
             var currency = Currency.FromCode(dto.CurrencyCode);
             var amount = new Money(currency, dto.Amount);
             var command = new Deposit(id, amount);
-            await _mediator.Publish(command, cancellationToken);
+            await _mediator.Send(command, cancellationToken);
             return Ok();
         }
 
@@ -66,7 +66,7 @@ namespace SuperSafeBank.Service.Core.Controllers
             var currency = Currency.FromCode(dto.CurrencyCode);
             var amount = new Money(currency, dto.Amount);
             var command = new Withdraw(id, amount);
-            await _mediator.Publish(command, cancellationToken);
+            await _mediator.Send(command, cancellationToken);
             return Ok();
         }
     }

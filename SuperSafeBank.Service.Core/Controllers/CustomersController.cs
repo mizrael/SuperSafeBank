@@ -27,7 +27,7 @@ namespace SuperSafeBank.Service.Core.Controllers
             if (null == dto)
                 return BadRequest();
             var command = new CreateCustomer(Guid.NewGuid(), dto.FirstName, dto.LastName, dto.Email);
-            await _mediator.Publish(command, cancellationToken);
+            await _mediator.Send(command, cancellationToken);
             
             return CreatedAtAction("GetCustomer", new { id = command.CustomerId }, command);
         }

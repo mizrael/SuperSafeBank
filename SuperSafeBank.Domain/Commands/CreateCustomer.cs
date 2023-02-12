@@ -9,7 +9,7 @@ using SuperSafeBank.Domain.Services;
 
 namespace SuperSafeBank.Domain.Commands
 {
-    public record CreateCustomer : INotification
+    public record CreateCustomer : IRequest
     {
         public CreateCustomer(Guid id, string firstName, string lastName, string email)
         {
@@ -25,7 +25,7 @@ namespace SuperSafeBank.Domain.Commands
         public string Email { get; }
     }
 
-    public class CreateCustomerHandler : INotificationHandler<CreateCustomer>
+    public class CreateCustomerHandler : IRequestHandler<CreateCustomer>
     {
         private readonly IAggregateRepository<Customer, Guid> _eventsService;
         private readonly ICustomerEmailsService _customerEmailsRepository;
@@ -41,7 +41,7 @@ namespace SuperSafeBank.Domain.Commands
             _eventProducer = eventProducer ?? throw new ArgumentNullException(nameof(eventProducer));
         }
 
-        public async Task Handle(CreateCustomer command, CancellationToken cancellationToken)
+        public async Task<Unit> Handle(CreateCustomer command, CancellationToken cancellationToken)
         {
             if(string.IsNullOrWhiteSpace(command.Email))
                 throw new ValidationException("Invalid email address", new ValidationError(nameof(CreateCustomer.Email), "email cannot be empty"));
@@ -55,6 +55,8 @@ namespace SuperSafeBank.Domain.Commands
 
             var @event = new CustomerCreated(Guid.NewGuid(), command.CustomerId);
             await _eventProducer.DispatchAsync(@event, cancellationToken);
+
+            return Unit.Value;
         }
     }
 }

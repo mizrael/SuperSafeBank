@@ -38,7 +38,7 @@ namespace SuperSafeBank.Service.Core.Azure.Triggers
         {
             var dto = await JsonSerializer.DeserializeAsync<CreateAccountDto>(req.Body, JsonSerializerDefaultOptions.Defaults);
             var command = new CreateAccount(customerId: dto.CustomerId, accountId: Guid.NewGuid(), currency: Domain.Currency.FromCode(dto.CurrencyCode));
-            await _mediator.Publish(command);
+            await _mediator.Send(command);
 
             var response = req.CreateResponse(System.Net.HttpStatusCode.Created);
             response.Headers.Add("Location", $"/accounts/{command.AccountId}");
@@ -56,7 +56,7 @@ namespace SuperSafeBank.Service.Core.Azure.Triggers
             var amount = new Domain.Money(currency, dto.Amount);
             var command = new Deposit(accountId, amount);
 
-            await _mediator.Publish(command);
+            await _mediator.Send(command);
 
             var response = req.CreateResponse(System.Net.HttpStatusCode.OK);
             return response;
@@ -71,7 +71,7 @@ namespace SuperSafeBank.Service.Core.Azure.Triggers
             var amount = new Domain.Money(currency, dto.Amount);
             var command = new Withdraw(accountId, amount);
 
-            await _mediator.Publish(command);
+            await _mediator.Send(command);
 
             var response = req.CreateResponse(System.Net.HttpStatusCode.OK);
             return response;

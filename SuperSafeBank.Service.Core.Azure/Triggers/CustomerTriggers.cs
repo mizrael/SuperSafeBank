@@ -35,7 +35,7 @@ namespace SuperSafeBank.Service.Core.Azure.Triggers
         {
             var dto = await JsonSerializer.DeserializeAsync<CreateCustomerDto>(req.Body, JsonSerializerDefaultOptions.Defaults);
             var command = new CreateCustomer(Guid.NewGuid(), dto.FirstName, dto.LastName, dto.Email);
-            await _mediator.Publish(command);
+            await _mediator.Send(command);
 
             var response = req.CreateResponse(System.Net.HttpStatusCode.Created);
             response.Headers.Add("Location", $"/customers/{command.CustomerId}");
