@@ -17,7 +17,7 @@ namespace SuperSafeBank.Persistence.Azure
                 
         private readonly IEventSerializer _eventSerializer;
 
-        private static readonly ConcurrentDictionary<TKey, SemaphoreSlim> _locks = new ConcurrentDictionary<TKey, SemaphoreSlim>();
+        private static readonly ConcurrentDictionary<TKey, SemaphoreSlim> _locks = new();
 
         public AggregateRepository(TableClient tableClient, IEventSerializer eventDeserializer)
         {
@@ -37,12 +37,14 @@ namespace SuperSafeBank.Persistence.Azure
             var expectedVersion = firstEvent.AggregateVersion;
 
             var aggregateLock = _locks.GetOrAdd(aggregateRoot.Id, (k) => new SemaphoreSlim(1, 1));
-            await aggregateLock.WaitAsync();
+            await aggregateLock.WaitAsync(cancellationToken)
+                                .ConfigureAwait(false);
 
             try
             {
                 var prevAggregateEvents = _client.QueryAsync<EventData<TKey>>(ed => ed.PartitionKey == aggregateRoot.Id.ToString() &&
-                                                                                    ed.AggregateVersion >= expectedVersion)
+                                                                                    ed.AggregateVersion >= expectedVersion, 
+                                                                              cancellationToken: cancellationToken)
                                                 .ConfigureAwait(false);
 
                 await foreach (var @event in prevAggregateEvents)
@@ -57,16 +59,16 @@ namespace SuperSafeBank.Persistence.Azure
                     return new TableTransactionAction(TableTransactionActionType.Add, eventData);
                 }).ToArray();
 
-                await _client.SubmitTransactionAsync(newEvents);
+                await _client.SubmitTransactionAsync(newEvents, cancellationToken)
+                            .ConfigureAwait(false);
+
+                aggregateRoot.ClearEvents();
             }
             finally
             {
                 aggregateLock.Release();
-            }
-
-            aggregateRoot.ClearEvents();
-
-            _locks.Remove(aggregateRoot.Id, out _);
+                _locks.Remove(aggregateRoot.Id, out _);
+            }            
         }
 
         public async Task<TA> RehydrateAsync(TKey key, CancellationToken cancellationToken = default)
