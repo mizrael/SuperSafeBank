@@ -1,8 +1,8 @@
-﻿using Azure.Data.Tables;
+﻿using AsyncKeyedLock;
+using Azure.Data.Tables;
 using SuperSafeBank.Common;
 using SuperSafeBank.Common.Models;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -17,7 +17,11 @@ namespace SuperSafeBank.Persistence.Azure
                 
         private readonly IEventSerializer _eventSerializer;
 
-        private static readonly ConcurrentDictionary<TKey, SemaphoreSlim> _locks = new ConcurrentDictionary<TKey, SemaphoreSlim>();
+        private static readonly AsyncKeyedLocker<TKey> _locks = new(o =>
+        {
+            o.PoolSize = 20;
+            o.PoolInitialFill = 1;
+        });
 
         public AggregateRepository(TableClient tableClient, IEventSerializer eventDeserializer)
         {
@@ -36,10 +40,7 @@ namespace SuperSafeBank.Persistence.Azure
             var firstEvent = aggregateRoot.Events.First();
             var expectedVersion = firstEvent.AggregateVersion;
 
-            var aggregateLock = _locks.GetOrAdd(aggregateRoot.Id, (k) => new SemaphoreSlim(1, 1));
-            await aggregateLock.WaitAsync();
-
-            try
+            using (await _locks.LockAsync(aggregateRoot.Id, cancellationToken).ConfigureAwait(false))
             {
                 var prevAggregateEvents = _client.QueryAsync<EventData<TKey>>(ed => ed.PartitionKey == aggregateRoot.Id.ToString() &&
                                                                                     ed.AggregateVersion >= expectedVersion)
@@ -58,15 +59,9 @@ namespace SuperSafeBank.Persistence.Azure
                 }).ToArray();
 
                 await _client.SubmitTransactionAsync(newEvents);
-            }
-            finally
-            {
-                aggregateLock.Release();
-            }
 
-            aggregateRoot.ClearEvents();
-
-            _locks.Remove(aggregateRoot.Id, out _);
+                aggregateRoot.ClearEvents();
+            }
         }
 
         public async Task<TA> RehydrateAsync(TKey key, CancellationToken cancellationToken = default)

@@ -6,6 +6,7 @@
   </PropertyGroup>
 
 	<ItemGroup>
+    <PackageReference Include="AsyncKeyedLock" Version="6.2.0" />
     <PackageReference Include="Azure.Data.Tables" Version="12.8.0" />
   </ItemGroup>
 
