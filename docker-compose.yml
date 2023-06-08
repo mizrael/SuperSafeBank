@@ -2,7 +2,7 @@ version: '3.4'
 
 services:
   eventstore_db:
-    image: eventstore/eventstore:20.10.2-buster-slim
+    image: eventstore/eventstore:22.10.2-buster-slim
     environment:
       - EVENTSTORE_CLUSTER_SIZE=1
       - EVENTSTORE_RUN_PROJECTIONS=All
@@ -25,12 +25,13 @@ services:
       - 'zookeeper_data:/bitnami'
     environment:
       - ALLOW_ANONYMOUS_LOGIN=yes
-    tmpfs: "/datalog"
+    tmpfs: "/datalog"    
 
   kafka:
-    image: 'bitnami/kafka:2'
+    image: 'bitnami/kafka:2'    
     ports:
       - '9092:9092'
+      - '29092:29092'
     volumes:
       - 'kafka_data:/bitnami'
     environment: # https://rmoff.net/2018/08/02/kafka-listeners-explained/

@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "SuperSafeBank.Worker.Notifications": {
+      "commandName": "Project",
+      "commandLineArgs": "--environment Development"
+    }
+  }
+}
