@@ -34,7 +34,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SuperSafeBank.Persistence.EventStore\SuperSafeBank.Persistence.EventStore.csproj" />
+    <ProjectReference Include="..\..\src\SuperSafeBank.Persistence.EventStore\SuperSafeBank.Persistence.EventStore.csproj" />
     <ProjectReference Include="..\SuperSafeBank.Persistence.Tests\SuperSafeBank.Persistence.Tests.csproj" />
   </ItemGroup>
 

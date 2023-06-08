@@ -36,7 +36,7 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\SuperSafeBank.Service.Core.Azure.Tests\SuperSafeBank.Service.Core.Azure.Tests.csproj" />
-	  <ProjectReference Include="..\SuperSafeBank.Worker.Core.Azure\SuperSafeBank.Worker.Core.Azure.csproj" />
+	  <ProjectReference Include="..\..\src\SuperSafeBank.Worker.Core.Azure\SuperSafeBank.Worker.Core.Azure.csproj" />
 	</ItemGroup>
 
 </Project>
