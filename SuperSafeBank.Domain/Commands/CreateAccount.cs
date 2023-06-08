@@ -35,7 +35,7 @@ namespace SuperSafeBank.Domain.Commands
             _eventProducer = eventProducer;
         }
 
-        public async Task<Unit> Handle(CreateAccount command, CancellationToken cancellationToken)
+        public async Task Handle(CreateAccount command, CancellationToken cancellationToken)
         {
             var customer = await _customerEventsService.RehydrateAsync(command.CustomerId);
             if(null == customer)
@@ -48,8 +48,6 @@ namespace SuperSafeBank.Domain.Commands
 
             var @event = new AccountCreated(Guid.NewGuid(), account.Id);
             await _eventProducer.DispatchAsync(@event, cancellationToken);
-
-            return Unit.Value;
         }
     }
 }

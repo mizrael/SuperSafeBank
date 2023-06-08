@@ -39,7 +39,6 @@ namespace SuperSafeBank.Service.Core
                 typeof(CustomerEvents.CustomerCreated).Assembly
             })).AddInfrastructure(this.Configuration);
 
-            services.AddScoped<ServiceFactory>(ctx => ctx.GetRequiredService);
             services.AddScoped<IMediator, Mediator>();
 
             services.Scan(scan =>

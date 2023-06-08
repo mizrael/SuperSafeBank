@@ -35,6 +35,8 @@ await Host.CreateDefaultBuilder(args)
             .WriteTo.Console();
 
         var connStr = ctx.Configuration.GetConnectionString("loki");
+        if(string.IsNullOrWhiteSpace(connStr))
+            throw new ArgumentNullException("loki connection string is not set");
         cfg.WriteTo.GrafanaLoki(connStr);
     })
     .ConfigureServices((hostContext, services) =>
@@ -55,8 +57,7 @@ await Host.CreateDefaultBuilder(args)
             scan.FromAssembliesOf(typeof(AccountEventsHandler))                
                 .RegisterHandlers(typeof(INotificationHandler<>));
         }).Decorate(typeof(INotificationHandler<>), typeof(RetryDecorator<>))
-            .AddTransient<ICurrencyConverter, FakeCurrencyConverter>()
-            .AddScoped<ServiceFactory>(ctx => ctx.GetRequiredService)
+            .AddTransient<ICurrencyConverter, FakeCurrencyConverter>()            
             .AddScoped<IMediator, Mediator>()
             .AddSingleton<IEventSerializer>(new JsonEventSerializer(new[]
             {

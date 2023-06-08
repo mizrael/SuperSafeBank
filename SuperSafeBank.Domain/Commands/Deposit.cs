@@ -34,7 +34,7 @@ namespace SuperSafeBank.Domain.Commands
             _eventProducer = eventProducer;
         }
 
-        public async Task<Unit> Handle(Deposit command, CancellationToken cancellationToken)
+        public async Task Handle(Deposit command, CancellationToken cancellationToken)
         {
             var account = await _accountEventsService.RehydrateAsync(command.AccountId);
             if(null == account)
@@ -46,8 +46,6 @@ namespace SuperSafeBank.Domain.Commands
 
             var @event = new TransactionHappened(Guid.NewGuid(), account.Id);
             await _eventProducer.DispatchAsync(@event, cancellationToken);
-
-            return Unit.Value;
         }
     }
 

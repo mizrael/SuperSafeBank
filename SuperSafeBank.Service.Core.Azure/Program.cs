@@ -25,8 +25,7 @@ await builder.ConfigureFunctionsWorkerDefaults()
             var eventsRepositoryConfig = new EventsRepositoryConfig(ctx.Configuration["EventsStorage"], ctx.Configuration["EventTablesPrefix"]);
             var eventProducerConfig = new EventProducerConfig(ctx.Configuration["EventsBus"], ctx.Configuration["TopicName"]);
             
-            services.AddScoped<ServiceFactory>(ctx => ctx.GetRequiredService)
-                .AddScoped<IMediator, Mediator>()
+            services.AddScoped<IMediator, Mediator>()
                 .Scan(scan =>
                 {
                     scan.FromAssembliesOf(typeof(CustomerByIdHandler), typeof(CreateCustomerHandler))

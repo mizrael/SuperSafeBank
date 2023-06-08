@@ -6,10 +6,10 @@
     <UserSecretsId>99685c81-4f68-4327-bb12-98f3adbe825c</UserSecretsId>
   </PropertyGroup>
 	<ItemGroup>		
-		<PackageReference Include="Azure.Messaging.ServiceBus" Version="7.12.0" />		
+		<PackageReference Include="Azure.Messaging.ServiceBus" Version="7.15.0" />		
 		<PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.ServiceBus" Version="5.7.0" />
-		<PackageReference Include="Microsoft.Azure.Functions.Worker.Sdk" Version="1.7.0" OutputItemType="Analyzer" />
-		<PackageReference Include="Microsoft.Azure.Functions.Worker" Version="1.10.0" />
+		<PackageReference Include="Microsoft.Azure.Functions.Worker.Sdk" Version="1.10.0" OutputItemType="Analyzer" />
+		<PackageReference Include="Microsoft.Azure.Functions.Worker" Version="1.14.1" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="7.0.0" />
 	</ItemGroup>
 	<ItemGroup>

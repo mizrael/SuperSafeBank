@@ -8,7 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="Hellang.Middleware.ProblemDetails" Version="6.5.1" />    
-    <PackageReference Include="Serilog.AspNetCore" Version="6.1.0" />        
+    <PackageReference Include="Serilog.AspNetCore" Version="7.0.0" />        
     <PackageReference Include="Serilog.Sinks.Grafana.Loki" Version="8.1.0" />
   </ItemGroup>
 

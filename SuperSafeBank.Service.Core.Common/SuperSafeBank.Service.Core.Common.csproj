@@ -7,7 +7,7 @@
 
 <ItemGroup>
 	<PackageReference Include="Polly" Version="7.2.3" />
-	<PackageReference Include="scrutor" Version="4.2.1" />
+	<PackageReference Include="scrutor" Version="4.2.2" />
 </ItemGroup>
 
 <ItemGroup>
