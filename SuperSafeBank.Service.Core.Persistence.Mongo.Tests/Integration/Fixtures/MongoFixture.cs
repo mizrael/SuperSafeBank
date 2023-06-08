@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
-using System;
 
 namespace SuperSafeBank.Persistence.Mongo.Tests.Integration.Fixtures
 {

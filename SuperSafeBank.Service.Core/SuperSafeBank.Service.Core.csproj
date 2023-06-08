@@ -14,7 +14,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SuperSafeBank.Domain\SuperSafeBank.Domain.csproj" />
-    <ProjectReference Include="..\SuperSafeBank.Persistence.Mongo\SuperSafeBank.Persistence.Mongo.csproj" />
 	<ProjectReference Include="..\SuperSafeBank.Persistence.EventStore\SuperSafeBank.Persistence.EventStore.csproj" />
 	<ProjectReference Include="..\SuperSafeBank.Service.Core.Common\SuperSafeBank.Service.Core.Common.csproj" />
 	<ProjectReference Include="..\SuperSafeBank.Service.Core.Persistence.EventStore\SuperSafeBank.Service.Core.Persistence.EventStore.csproj" />

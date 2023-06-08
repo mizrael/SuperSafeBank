@@ -4,13 +4,13 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace SuperSafeBank.Persistence.Mongo
+namespace SuperSafeBank.Service.Core.Persistence.Mongo
 {
     public class CustomerEmailsService : ICustomerEmailsService
     {
         private readonly IMongoDatabase _db;
         private readonly IMongoCollection<CustomerEmail> _coll;
-        
+
         public CustomerEmailsService(IMongoDatabase db)
         {
             _db = db ?? throw new ArgumentNullException(nameof(db));
