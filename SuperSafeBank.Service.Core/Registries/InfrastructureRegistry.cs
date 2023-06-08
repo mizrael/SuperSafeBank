@@ -1,12 +1,11 @@
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using MongoDB.Driver;
-using SuperSafeBank.Domain;
+using SuperSafeBank.Common;
 using SuperSafeBank.Domain.Services;
 using SuperSafeBank.Persistence.EventStore;
-using SuperSafeBank.Persistence.Mongo;
 using SuperSafeBank.Service.Core.Common;
+using SuperSafeBank.Service.Core.Persistence.EventStore;
 using SuperSafeBank.Service.Core.Persistence.Mongo;
 using SuperSafeBank.Service.Core.Persistence.Mongo.EventHandlers;
 using SuperSafeBank.Transport.Kafka;
@@ -14,34 +13,64 @@ using System;
 
 namespace SuperSafeBank.Service.Core.Registries
 {
+    public record Infrastructure(string EventBus, string AggregateStore, string QueryDb);
+
     public static class InfrastructureRegistry
     {
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration config)
         {
-            var eventstoreConnStr = config.GetConnectionString("eventstore");
-            var producerConfig = new EventsProducerConfig(config.GetConnectionString("kafka"), config["eventsTopicName"]);
+            var infraConfig = config.GetSection("infrastructure").Get<Infrastructure>();
 
-            var mongoConnStr = config.GetConnectionString("mongo");
-            var mongoQueryDbName = config["queryDbName"];
-            var mongoConfig = new MongoConfig(mongoConnStr, mongoQueryDbName);
+            return services.RegisterQueryDb(config, infraConfig)
+                    .RegisterEventBus(config, infraConfig)
+                    .RegisterAggregateStore(config, infraConfig)
+                    .Scan(scan =>
+                    {
+                        scan.FromAssembliesOf(typeof(CustomerDetailsHandler))
+                            .RegisterHandlers(typeof(IRequestHandler<>))
+                            .RegisterHandlers(typeof(IRequestHandler<,>))
+                            .RegisterHandlers(typeof(INotificationHandler<>));
+                    });
+        }
 
-            return services.Scan(scan =>
+        private static IServiceCollection RegisterAggregateStore(this IServiceCollection services, IConfiguration config, Infrastructure infraConfig)
+        {
+            if (infraConfig.AggregateStore == "EventStore")
             {
-                scan.FromAssembliesOf(typeof(CustomerDetailsHandler))
-                    .RegisterHandlers(typeof(IRequestHandler<>))
-                    .RegisterHandlers(typeof(IRequestHandler<,>))
-                    .RegisterHandlers(typeof(INotificationHandler<>));
-            }).AddMongoDb(mongoConfig)
-            .AddKafkaEventProducer<Customer, Guid>(producerConfig)
-            .AddKafkaEventProducer<Account, Guid>(producerConfig)
-            .AddEventStore(eventstoreConnStr)
-            .AddSingleton<ICustomerEmailsService>(ctx =>
+                var eventstoreConnStr = config.GetConnectionString("eventstore");
+                services.AddEventStore(eventstoreConnStr)
+                    .AddSingleton<IAggregateRepository<CustomerEmail, string>, AggregateRepository<CustomerEmail, string>>()
+                    .AddTransient<ICustomerEmailsService, Persistence.EventStore.CustomerEmailsService>();
+            }
+            else throw new ArgumentOutOfRangeException($"invalid aggregate store type: {infraConfig.AggregateStore}");
+
+            return services;
+        }
+
+        private static IServiceCollection RegisterEventBus(this IServiceCollection services, IConfiguration config, Infrastructure infraConfig)
+        {
+            if (infraConfig.EventBus == "Kafka")
             {
-                var dbName = config["commandsDbName"];
-                var client = ctx.GetRequiredService<MongoClient>();
-                var database = client.GetDatabase(dbName);
-                return new CustomerEmailsService(database);
-            });
+                var producerConfig = new KafkaProducerConfig(config.GetConnectionString("kafka"), config["eventsTopicName"]);
+                services.AddKafkaTransport(producerConfig);
+            }
+            else throw new ArgumentOutOfRangeException($"invalid event bus type: {infraConfig.EventBus}");
+
+            return services;
+        }
+
+        private static IServiceCollection RegisterQueryDb(this IServiceCollection services, IConfiguration config, Infrastructure infraConfig)
+        {
+            if (infraConfig.QueryDb == "MongoDb")
+            {
+                var mongoConnStr = config.GetConnectionString("mongo");
+                var mongoQueryDbName = config["queryDbName"];
+                var mongoConfig = new MongoConfig(mongoConnStr, mongoQueryDbName);
+                services.AddMongoDb(mongoConfig);
+            }
+            else throw new ArgumentOutOfRangeException($"invalid read db type: {infraConfig.QueryDb}");
+            
+            return services;
         }
     }
 }

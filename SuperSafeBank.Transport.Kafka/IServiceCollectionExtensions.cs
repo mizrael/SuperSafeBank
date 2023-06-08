@@ -7,14 +7,10 @@ namespace SuperSafeBank.Transport.Kafka
 {
     public static class IServiceCollectionExtensions
     {
-        public static IServiceCollection AddKafkaEventProducer<TA, TK>(this IServiceCollection services, EventsProducerConfig configuration)
-            where TA : class, IAggregateRoot<TK>
+        public static IServiceCollection AddKafkaTransport(this IServiceCollection services, KafkaProducerConfig configuration)            
         {
-            return services.AddSingleton<IEventProducer>(ctx =>
-            {
-                var logger = ctx.GetRequiredService<ILogger<EventProducer>>();
-                return new EventProducer(configuration.TopicName, configuration.KafkaConnectionString, logger);
-            });
+            return services.AddSingleton(configuration)
+                .AddSingleton<IEventProducer, EventProducer>();
         }
     }
 }

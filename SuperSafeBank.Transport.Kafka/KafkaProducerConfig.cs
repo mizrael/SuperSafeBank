@@ -1,8 +1,8 @@
 ﻿namespace SuperSafeBank.Transport.Kafka
 {
-    public record EventsProducerConfig
+    public record KafkaProducerConfig
     {
-        public EventsProducerConfig(string kafkaConnectionString, string topicBaseName)
+        public KafkaProducerConfig(string kafkaConnectionString, string topicBaseName)
         {
             if (string.IsNullOrWhiteSpace(kafkaConnectionString))
                 throw new ArgumentException("Value cannot be null or whitespace.", nameof(kafkaConnectionString));

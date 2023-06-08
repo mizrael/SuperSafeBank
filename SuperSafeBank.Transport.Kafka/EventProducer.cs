@@ -8,21 +8,15 @@ namespace SuperSafeBank.Transport.Kafka
     public class EventProducer : IDisposable, IEventProducer
     {
         private IProducer<Guid, string> _producer;
-        private readonly string _topicName;
+        private readonly KafkaProducerConfig _config;
         private readonly ILogger<EventProducer> _logger;
 
-        public EventProducer(string topicName, string kafkaConnString, ILogger<EventProducer> logger)
+        public EventProducer(KafkaProducerConfig config, ILogger<EventProducer> logger)
         {
-            if (string.IsNullOrWhiteSpace(topicName))            
-                throw new ArgumentException($"'{nameof(topicName)}' cannot be null or whitespace.", nameof(topicName));
-            
-            if (string.IsNullOrWhiteSpace(kafkaConnString))            
-                throw new ArgumentException($"'{nameof(kafkaConnString)}' cannot be null or whitespace.", nameof(kafkaConnString));
-            
-            _logger = logger;
-            _topicName = topicName;
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _config = config ?? throw new ArgumentNullException(nameof(config));
 
-            var producerConfig = new ProducerConfig { BootstrapServers = kafkaConnString };
+            var producerConfig = new ProducerConfig { BootstrapServers = config.KafkaConnectionString };
             var producerBuilder = new ProducerBuilder<Guid, string>(producerConfig);
             producerBuilder.SetKeySerializer(new KeySerializer<Guid>());
             _producer = producerBuilder.Build();
@@ -51,7 +45,7 @@ namespace SuperSafeBank.Transport.Kafka
                 Headers = headers
             };
 
-            await _producer.ProduceAsync(_topicName, message);
+            await _producer.ProduceAsync(_config.TopicName, message);
         }
 
         public void Dispose()

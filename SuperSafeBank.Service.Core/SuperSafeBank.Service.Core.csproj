@@ -17,6 +17,7 @@
     <ProjectReference Include="..\SuperSafeBank.Persistence.Mongo\SuperSafeBank.Persistence.Mongo.csproj" />
 	<ProjectReference Include="..\SuperSafeBank.Persistence.EventStore\SuperSafeBank.Persistence.EventStore.csproj" />
 	<ProjectReference Include="..\SuperSafeBank.Service.Core.Common\SuperSafeBank.Service.Core.Common.csproj" />
+	<ProjectReference Include="..\SuperSafeBank.Service.Core.Persistence.EventStore\SuperSafeBank.Service.Core.Persistence.EventStore.csproj" />
 	<ProjectReference Include="..\SuperSafeBank.Service.Core.Persistence.Mongo\SuperSafeBank.Service.Core.Persistence.Mongo.csproj" />
 	<ProjectReference Include="..\SuperSafeBank.Transport.Kafka\SuperSafeBank.Transport.Kafka.csproj" />
   </ItemGroup>
