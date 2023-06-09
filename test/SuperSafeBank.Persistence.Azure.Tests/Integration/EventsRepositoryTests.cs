@@ -40,7 +40,7 @@ namespace SuperSafeBank.Persistence.Azure.Tests.Integration
 
             await sut.PersistAsync(aggregate);
 
-            var events = client.QueryAsync<EventData<Guid>>(ed => ed.PartitionKey == aggregate.Id.ToString())
+            var events = client.QueryAsync<EventData>(ed => ed.PartitionKey == aggregate.Id.ToString())
                                 .ConfigureAwait(false);
             int count = 0;
             await foreach(var evt in events)

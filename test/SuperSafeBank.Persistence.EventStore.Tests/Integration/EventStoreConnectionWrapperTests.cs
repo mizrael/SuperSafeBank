@@ -10,11 +10,11 @@ namespace SuperSafeBank.Persistence.EventStore.Tests.Integration
 
     [Trait("Category", "Integration")]
     [Category("Integration")]
-    public class EventStoreConnectionWrapperTests : IClassFixture<Fixtures.EventStoreFixture>
+    public class EventStoreConnectionWrapperTests : IClassFixture<EventStoreFixture>
     {
-        private readonly Fixtures.EventStoreFixture _fixture;
+        private readonly EventStoreFixture _fixture;
 
-        public EventStoreConnectionWrapperTests(Fixtures.EventStoreFixture fixture)
+        public EventStoreConnectionWrapperTests(EventStoreFixture fixture)
         {
             _fixture = fixture;
         }

@@ -1,6 +1,15 @@
 version: '3.4'
 
 services:
+  sqlServer:
+    image: "mcr.microsoft.com/mssql/server:latest"
+    container_name: sqlServer
+    environment:
+        SA_PASSWORD: "Sup3r_Lam3_P4ss"
+        ACCEPT_EULA: "Y"
+    ports:
+      - "1433:1433"
+
   eventstore_db:
     image: eventstore/eventstore:22.10.2-buster-slim
     environment:

@@ -42,7 +42,7 @@ namespace SuperSafeBank.Persistence.Azure
 
             try
             {
-                var prevAggregateEvents = _client.QueryAsync<EventData<TKey>>(ed => ed.PartitionKey == aggregateRoot.Id.ToString() &&
+                var prevAggregateEvents = _client.QueryAsync<EventData>(ed => ed.PartitionKey == aggregateRoot.Id.ToString() &&
                                                                                     ed.AggregateVersion >= expectedVersion, 
                                                                               cancellationToken: cancellationToken)
                                                 .ConfigureAwait(false);
@@ -55,7 +55,7 @@ namespace SuperSafeBank.Persistence.Azure
 
                 var newEvents = aggregateRoot.Events.Select(evt =>
                 {
-                    var eventData = EventData<TKey>.Create(evt, _eventSerializer);
+                    var eventData = EventData.Create(evt, _eventSerializer);
                     return new TableTransactionAction(TableTransactionActionType.Add, eventData);
                 }).ToArray();
 
@@ -73,7 +73,7 @@ namespace SuperSafeBank.Persistence.Azure
 
         public async Task<TA> RehydrateAsync(TKey key, CancellationToken cancellationToken = default)
         {
-            var aggregateEvents = _client.QueryAsync<EventData<TKey>>(ed => ed.PartitionKey == key.ToString())
+            var aggregateEvents = _client.QueryAsync<EventData>(ed => ed.PartitionKey == key.ToString())
                                          .ConfigureAwait(false);
 
             var events = new List<IDomainEvent<TKey>>();

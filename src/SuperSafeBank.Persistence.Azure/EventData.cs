@@ -6,7 +6,7 @@ using SuperSafeBank.Common.Models;
 
 namespace SuperSafeBank.Persistence.Azure
 {
-    public record EventData<TKey> : ITableEntity
+    public record EventData : ITableEntity
     {
         /// <summary>
         /// this is the Aggregate id        
@@ -36,7 +36,7 @@ namespace SuperSafeBank.Persistence.Azure
         public DateTimeOffset? Timestamp { get; set; }
         public ETag ETag { get; set; }
 
-        public static EventData<TKey> Create(IDomainEvent<TKey> @event, IEventSerializer eventSerializer)
+        public static EventData Create<TKey>(IDomainEvent<TKey> @event, IEventSerializer eventSerializer)
         {
             if (@event is null)
                 throw new ArgumentNullException(nameof(@event));
@@ -47,7 +47,7 @@ namespace SuperSafeBank.Persistence.Azure
             var data = eventSerializer.Serialize(@event);
             var eventType = @event.GetType();
 
-            return new EventData<TKey>()
+            return new EventData()
             {                
                 PartitionKey = @event.AggregateId.ToString(),
                 RowKey = @event.AggregateVersion.ToString(),

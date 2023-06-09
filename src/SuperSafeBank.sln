@@ -59,9 +59,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SuperSafeBank.Worker.Core.A
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SuperSafeBank.Service.Core.Persistence.EventStore", "SuperSafeBank.Service.Core.Persistence.EventStore\SuperSafeBank.Service.Core.Persistence.EventStore.csproj", "{C3AB9A2F-F9AB-42D8-9B74-88F7E3824A63}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SuperSafeBank.Service.Core.Persistence.Mongo.Tests", "..\test\SuperSafeBank.Service.Core.Persistence.Mongo.Tests\SuperSafeBank.Service.Core.Persistence.Mongo.Tests.csproj", "{A73C683F-5291-4274-A455-545662C67004}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SuperSafeBank.Service.Core.Persistence.Mongo.Tests", "..\test\SuperSafeBank.Service.Core.Persistence.Mongo.Tests\SuperSafeBank.Service.Core.Persistence.Mongo.Tests.csproj", "{A73C683F-5291-4274-A455-545662C67004}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SuperSafeBank.Domain.Tests", "..\test\SuperSafeBank.Domain.Tests\SuperSafeBank.Domain.Tests.csproj", "{E1991EB5-AA50-463C-AB56-AEBA929739AA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SuperSafeBank.Persistence.SQLServer", "SuperSafeBank.Persistence.SQLServer\SuperSafeBank.Persistence.SQLServer.csproj", "{065B3A6E-8193-4E05-8D79-C6816BDBD1D9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SuperSafeBank.Persistence.SQLServer.Tests", "..\test\SuperSafeBank.Persistence.SQLServer.Tests\SuperSafeBank.Persistence.SQLServer.Tests.csproj", "{7739073A-8556-486A-837D-D52D7FC07FAA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -254,6 +258,22 @@ Global
 		{E1991EB5-AA50-463C-AB56-AEBA929739AA}.DebugOnPremise|Any CPU.Build.0 = Debug|Any CPU
 		{E1991EB5-AA50-463C-AB56-AEBA929739AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E1991EB5-AA50-463C-AB56-AEBA929739AA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{065B3A6E-8193-4E05-8D79-C6816BDBD1D9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{065B3A6E-8193-4E05-8D79-C6816BDBD1D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{065B3A6E-8193-4E05-8D79-C6816BDBD1D9}.DebugAzure|Any CPU.ActiveCfg = Debug|Any CPU
+		{065B3A6E-8193-4E05-8D79-C6816BDBD1D9}.DebugAzure|Any CPU.Build.0 = Debug|Any CPU
+		{065B3A6E-8193-4E05-8D79-C6816BDBD1D9}.DebugOnPremise|Any CPU.ActiveCfg = Debug|Any CPU
+		{065B3A6E-8193-4E05-8D79-C6816BDBD1D9}.DebugOnPremise|Any CPU.Build.0 = Debug|Any CPU
+		{065B3A6E-8193-4E05-8D79-C6816BDBD1D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{065B3A6E-8193-4E05-8D79-C6816BDBD1D9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7739073A-8556-486A-837D-D52D7FC07FAA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7739073A-8556-486A-837D-D52D7FC07FAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7739073A-8556-486A-837D-D52D7FC07FAA}.DebugAzure|Any CPU.ActiveCfg = Debug|Any CPU
+		{7739073A-8556-486A-837D-D52D7FC07FAA}.DebugAzure|Any CPU.Build.0 = Debug|Any CPU
+		{7739073A-8556-486A-837D-D52D7FC07FAA}.DebugOnPremise|Any CPU.ActiveCfg = Debug|Any CPU
+		{7739073A-8556-486A-837D-D52D7FC07FAA}.DebugOnPremise|Any CPU.Build.0 = Debug|Any CPU
+		{7739073A-8556-486A-837D-D52D7FC07FAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7739073A-8556-486A-837D-D52D7FC07FAA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -286,6 +306,8 @@ Global
 		{C3AB9A2F-F9AB-42D8-9B74-88F7E3824A63} = {4C341047-25AD-420A-9F26-18769413856F}
 		{A73C683F-5291-4274-A455-545662C67004} = {4C341047-25AD-420A-9F26-18769413856F}
 		{E1991EB5-AA50-463C-AB56-AEBA929739AA} = {EC65D781-714C-4F07-AE6E-BD387D276238}
+		{065B3A6E-8193-4E05-8D79-C6816BDBD1D9} = {BB8CDDBD-7E93-4F38-908C-093908EFAB9B}
+		{7739073A-8556-486A-837D-D52D7FC07FAA} = {BB8CDDBD-7E93-4F38-908C-093908EFAB9B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E0B66EEF-193F-4DB1-84E7-43CABFF3C91D}
