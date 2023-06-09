@@ -74,6 +74,29 @@ namespace SuperSafeBank.Persistence.SQLServer.Tests.Integration
         }
 
         [Fact]
+        public async Task PersistAsync_should_save_multiple_aggregates_concurrently()
+        {
+            var aggregates = Enumerable.Repeat(1, 10)
+                                        .Select(i => new DummyAggregate(Guid.NewGuid()))
+                                        .ToArray();
+
+            var sut = await CreateSut();
+
+            var tasks = aggregates
+                .Select(a => sut.PersistAsync(a))
+                .ToArray();
+
+            await Task.WhenAll(tasks);
+
+            foreach (var aggregate in aggregates)
+            {
+                var rehydrated = await sut.RehydrateAsync(aggregate.Id);
+                rehydrated.Should().NotBeNull();
+                rehydrated.Version.Should().Be(1);
+            }
+        }
+
+        [Fact]
         public async Task RehydrateAsync_should_return_null_when_id_invalid()
         {
             var sut = await CreateSut();

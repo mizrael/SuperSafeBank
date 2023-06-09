@@ -40,11 +40,11 @@ namespace SuperSafeBank.Persistence.SQLServer
             using var dbConn = new SqlConnection(_dbConnString);
             await dbConn.OpenAsync().ConfigureAwait(false);
 
-            using var transaction = dbConn.BeginTransaction(IsolationLevel.Serializable);
+            using var transaction = dbConn.BeginTransaction();
             
             try
             {
-                var lastVersion = await this.GetLastAggregateVersionAsync(dbConn, transaction)
+                var lastVersion = await this.GetLastAggregateVersionAsync(aggregateRoot, dbConn, transaction)
                                   .ConfigureAwait(false);
                 if (lastVersion >= aggregateRoot.Version)
                     throw new ArgumentOutOfRangeException(nameof(aggregateRoot), $"aggregate version mismatch, expected {aggregateRoot.Version}, got {lastVersion}");
@@ -98,11 +98,14 @@ namespace SuperSafeBank.Persistence.SQLServer
             return result;
         }
 
-        private async Task<long?> GetLastAggregateVersionAsync(SqlConnection dbConn, IDbTransaction transaction)
+        private async Task<long?> GetLastAggregateVersionAsync(TA aggregateRoot, SqlConnection dbConn, IDbTransaction transaction)
         {
             var tableName = _tableCreator.GetTableName<TA, TKey>();
-            var sql = $"SELECT TOP 1 aggregateVersion FROM {tableName} ORDER BY aggregateVersion DESC";
-            var result = await dbConn.QueryFirstOrDefaultAsync<long?>(sql, transaction: transaction)
+            var sql = @$"SELECT TOP 1 aggregateVersion
+                         FROM {tableName} 
+                         WHERE aggregateId = @aggregateId
+                         ORDER BY aggregateVersion DESC";
+            var result = await dbConn.QueryFirstOrDefaultAsync<long?>(sql, param: new { aggregateId = aggregateRoot.Id }, transaction: transaction)
                                       .ConfigureAwait(false);
             return result;
         }

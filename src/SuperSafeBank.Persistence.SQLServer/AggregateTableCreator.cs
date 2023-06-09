@@ -48,8 +48,6 @@ namespace SuperSafeBank.Persistence.SQLServer
                             timestamp datetimeoffset NULL,
                             CONSTRAINT pk_{Guid.NewGuid().ToString("N")} PRIMARY KEY (aggregateId, aggregateVersion)
                         );
-
-                        CREATE INDEX ix_{Guid.NewGuid().ToString("N")}_aggregateId ON {tableName} (aggregateId);
                     END";
 
                 using var _dbConn = new SqlConnection(_dbConnString);
