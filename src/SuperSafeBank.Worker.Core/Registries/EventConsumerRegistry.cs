@@ -1,10 +1,6 @@
-using MediatR;
 using Microsoft.Extensions.DependencyInjection;
-using SuperSafeBank.Common.EventBus;
-using SuperSafeBank.Common.Models;
-using SuperSafeBank.Domain;
 
-namespace SuperSafeBank.Worker.Core
+namespace SuperSafeBank.Worker.Core.Registries
 {
     public static class EventConsumerRegistry
     {

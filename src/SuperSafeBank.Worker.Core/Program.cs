@@ -5,16 +5,12 @@ using Microsoft.Extensions.Hosting;
 using Serilog;
 using Serilog.Sinks.Grafana.Loki;
 using SuperSafeBank.Common;
-using SuperSafeBank.Common.EventBus;
 using SuperSafeBank.Domain.DomainEvents;
+using SuperSafeBank.Domain.Services;
 using SuperSafeBank.Service.Core.Common;
 using SuperSafeBank.Service.Core.Common.EventHandlers;
-using SuperSafeBank.Service.Core.Persistence.Mongo;
 using SuperSafeBank.Service.Core.Persistence.Mongo.EventHandlers;
-using SuperSafeBank.Transport.Kafka;
-using SuperSafeBank.Worker.Core;
-using SuperSafeBank.Persistence.EventStore;
-using SuperSafeBank.Domain.Services;
+using SuperSafeBank.Worker.Core.Registries;
 
 await Host.CreateDefaultBuilder(args)
     .ConfigureHostConfiguration(configurationBuilder =>
@@ -40,18 +36,7 @@ await Host.CreateDefaultBuilder(args)
         cfg.WriteTo.GrafanaLoki(connStr);
     })
     .ConfigureServices((hostContext, services) =>
-    {
-        var kafkaConnStr = hostContext.Configuration.GetConnectionString("kafka");
-        var eventsTopicName = hostContext.Configuration["eventsTopicName"];
-        var groupName = hostContext.Configuration["eventsTopicGroupName"];
-        var consumerConfig = new EventsConsumerConfig(kafkaConnStr, eventsTopicName, groupName);
-
-        var mongoConnStr = hostContext.Configuration.GetConnectionString("mongo");
-        var mongoQueryDbName = hostContext.Configuration["queryDbName"];
-        var mongoConfig = new MongoConfig(mongoConnStr, mongoQueryDbName);
-
-        var eventstoreConnStr = hostContext.Configuration.GetConnectionString("eventstore");
-
+    {       
         services.Scan(scan =>
         {
             scan.FromAssembliesOf(typeof(AccountEventsHandler))                
@@ -63,12 +48,9 @@ await Host.CreateDefaultBuilder(args)
             {
                 typeof(CustomerEvents.CustomerCreated).Assembly
             }))
-            .AddSingleton(consumerConfig)
-            .AddSingleton(typeof(IEventConsumer), typeof(EventConsumer))           
-            .AddMongoDb(mongoConfig)
-            .AddEventStore(eventstoreConnStr)
+            .RegisterInfrastructure(hostContext.Configuration)
             .RegisterWorker();
     })
     .Build()
     .RunAsync();
-    
+

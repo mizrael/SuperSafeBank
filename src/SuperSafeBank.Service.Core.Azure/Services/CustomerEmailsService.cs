@@ -2,6 +2,7 @@
 using Azure.Data.Tables;
 using SuperSafeBank.Domain.Services;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace SuperSafeBank.Service.Core.Azure.Services
@@ -15,12 +16,12 @@ namespace SuperSafeBank.Service.Core.Azure.Services
             _client = client;
         }
 
-        public async Task<bool> ExistsAsync(string email)
+        public async Task<bool> ExistsAsync(string email, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(email))
                 throw new ArgumentException("Value cannot be null or whitespace.", nameof(email));
 
-            var results = _client.QueryAsync<CustomerEmail>(ce => ce.PartitionKey == email).ConfigureAwait(false);
+            var results = _client.QueryAsync<CustomerEmail>(ce => ce.PartitionKey == email, cancellationToken: cancellationToken).ConfigureAwait(false);
 
             await foreach(var result in results)
             {
@@ -30,13 +31,13 @@ namespace SuperSafeBank.Service.Core.Azure.Services
             return false;
         }
 
-        public async Task CreateAsync(string email, Guid customerId)
+        public async Task CreateAsync(string email, Guid customerId, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(email))
                 throw new ArgumentException("Value cannot be null or whitespace.", nameof(email));
 
             var item = CustomerEmail.Create(email, customerId);
-            await _client.AddEntityAsync(item);
+            await _client.AddEntityAsync(item, cancellationToken);
         }
     }
 

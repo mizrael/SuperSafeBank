@@ -6,12 +6,12 @@ using System.Text;
 
 namespace SuperSafeBank.Transport.Kafka
 {
-    public class EventConsumer : IDisposable, IEventConsumer
+    public class KafkaEventConsumer : IDisposable, IEventConsumer
     {
         private IConsumer<Guid, string> _consumer;
-        private readonly ILogger<EventConsumer> _logger;
+        private readonly ILogger<KafkaEventConsumer> _logger;
 
-        public EventConsumer(EventsConsumerConfig config, ILogger<EventConsumer> logger)
+        public KafkaEventConsumer(EventsConsumerConfig config, ILogger<KafkaEventConsumer> logger)
         {
             _logger = logger;
 

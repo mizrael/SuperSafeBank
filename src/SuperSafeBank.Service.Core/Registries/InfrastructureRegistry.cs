@@ -11,6 +11,8 @@ using SuperSafeBank.Service.Core.Persistence.Mongo.EventHandlers;
 using SuperSafeBank.Transport.Kafka;
 using System;
 using SuperSafeBank.Persistence.SQLServer;
+using SuperSafeBank.Service.Core.Persistence.SQLServer;
+using Microsoft.EntityFrameworkCore;
 
 namespace SuperSafeBank.Service.Core.Registries
 {
@@ -39,16 +41,20 @@ namespace SuperSafeBank.Service.Core.Registries
             if (infraConfig.AggregateStore == "EventStore")
             {
                 var eventstoreConnStr = config.GetConnectionString("eventstore");
-                services.AddEventStore(eventstoreConnStr)
-                    .AddSingleton<IAggregateRepository<CustomerEmail, string>, EventStoreAggregateRepository<CustomerEmail, string>>()
-                    .AddTransient<ICustomerEmailsService, Persistence.EventStore.CustomerEmailsService>();
+                services.AddEventStorePersistence(eventstoreConnStr)
+                    .AddSingleton<IAggregateRepository<Persistence.EventStore.CustomerEmail, string>, EventStoreAggregateRepository<Persistence.EventStore.CustomerEmail, string>>()
+                    .AddTransient<ICustomerEmailsService, EventStoreCustomerEmailsService>();
             }else if (infraConfig.AggregateStore == "SQLServer")
             {
                 var sqlConnString = config.GetConnectionString("sql");
-                services.AddSQLServer(sqlConnString)
-                    //TODO
-                    .AddSingleton<IAggregateRepository<CustomerEmail, string>, EventStoreAggregateRepository<CustomerEmail, string>>()
-                    .AddTransient<ICustomerEmailsService, Persistence.EventStore.CustomerEmailsService>();
+                services.AddSQLServerPersistence(sqlConnString)
+                    .AddDbContextPool<CustomerDbContext>(builder =>
+                    {
+                        builder.UseSqlServer(sqlConnString, opts =>
+                        {
+                            opts.EnableRetryOnFailure();
+                        });
+                    }).AddTransient<ICustomerEmailsService, SQLCustomerEmailsService>();
             }
             else throw new ArgumentOutOfRangeException($"invalid aggregate store type: {infraConfig.AggregateStore}");
 

@@ -30,6 +30,7 @@
 		<ProjectReference Include="..\SuperSafeBank.Service.Core.Persistence.Mongo\SuperSafeBank.Service.Core.Persistence.Mongo.csproj" />
 		<ProjectReference Include="..\SuperSafeBank.Transport.Kafka\SuperSafeBank.Transport.Kafka.csproj" />
 		<ProjectReference Include="..\SuperSafeBank.Persistence.EventStore\SuperSafeBank.Persistence.EventStore.csproj" />
+		<ProjectReference Include="..\SuperSafeBank.Persistence.SQLServer\SuperSafeBank.Persistence.SQLServer.csproj" />
 	</ItemGroup>
 
 </Project>

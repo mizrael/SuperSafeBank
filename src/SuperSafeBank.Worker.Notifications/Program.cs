@@ -60,7 +60,7 @@ await Host.CreateDefaultBuilder(args)
                 var groupName = hostContext.Configuration["eventsTopicGroupName"];
                 return new EventsConsumerConfig(kafkaConnStr, eventsTopicName, groupName);
             })
-            .AddSingleton(typeof(IEventConsumer), typeof(EventConsumer))
+            .AddSingleton(typeof(IEventConsumer), typeof(KafkaEventConsumer))
             .AddHostedService(ctx =>
             {
                 var logger = ctx.GetRequiredService<ILogger<AccountEventsWorker>>();

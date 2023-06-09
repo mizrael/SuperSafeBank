@@ -1,5 +1,6 @@
 ﻿using SuperSafeBank.Common;
 using SuperSafeBank.Domain;
+using SuperSafeBank.Domain.DomainEvents;
 using SuperSafeBank.Persistence.Tests.Models;
 using System.ComponentModel;
 
@@ -25,7 +26,10 @@ namespace SuperSafeBank.Persistence.SQLServer.Tests.Integration
 
             var conn = await _fixture.CreateDbConnectionStringProviderAsync();
             var tableCreator = new AggregateTableCreator(conn);
-            var serializer = NSubstitute.Substitute.For<IEventSerializer>();
+            var serializer = new JsonEventSerializer(new[]
+            {
+                typeof(DummyAggregate).Assembly
+            });
             var sut = new SQLAggregateRepository<DummyAggregate, Guid>(conn, tableCreator, serializer);
 
             await sut.PersistAsync(aggregate);
@@ -40,7 +44,10 @@ namespace SuperSafeBank.Persistence.SQLServer.Tests.Integration
         {
             var conn = await _fixture.CreateDbConnectionStringProviderAsync();
             var tableCreator = new AggregateTableCreator(conn);
-            var serializer = NSubstitute.Substitute.For<IEventSerializer>();
+            var serializer = new JsonEventSerializer(new[]
+            {
+                typeof(DummyAggregate).Assembly
+            });
             var sut = new SQLAggregateRepository<Customer, Guid>(conn, tableCreator, serializer);
 
             var result = await sut.RehydrateAsync(Guid.NewGuid()).ConfigureAwait(false);

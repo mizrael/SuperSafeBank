@@ -1,6 +1,6 @@
-﻿using SuperSafeBank.Common.Models;
-using Dapper;
+﻿using Dapper;
 using Microsoft.Data.SqlClient;
+using SuperSafeBank.Common.Models;
 
 namespace SuperSafeBank.Persistence.SQLServer
 {
@@ -8,6 +8,8 @@ namespace SuperSafeBank.Persistence.SQLServer
     {
         private readonly string _dbConnString;
         private readonly string _schemaName;
+        private readonly HashSet<string> _cache = new();
+        private readonly SemaphoreSlim _lock = new (1,1);
 
         public AggregateTableCreator(SqlConnectionStringProvider dbConnStringProvider, string schemaName = "aggregates")
         {            
@@ -21,9 +23,14 @@ namespace SuperSafeBank.Persistence.SQLServer
         public async Task EnsureTableAsync<TA, TKey>(CancellationToken cancellationToken = default)
             where TA : class, IAggregateRoot<TKey>
         {
-            //TODO: caching
-
             var tableName = this.GetTableName<TA, TKey>();
+            if (_cache.Contains(tableName))
+                return;
+            
+            await _lock.WaitAsync(cancellationToken);
+
+            if (_cache.Contains(tableName))
+                return;
 
             var sql = $@"
             IF NOT EXISTS ( SELECT * FROM sys.schemas  WHERE name = N'{_schemaName}' ) BEGIN 
@@ -35,7 +42,7 @@ namespace SuperSafeBank.Persistence.SQLServer
                     aggregateId nvarchar(250) NOT NULL,
                     aggregateVersion bigint NOT NULL,
                     eventType nvarchar(250) NULL,
-                    data nvarchar(MAX) NOT NULL,                    
+                    data varchar(MAX) NOT NULL,                    
                     timestamp datetimeoffset NULL,
                     CONSTRAINT pk_{Guid.NewGuid().ToString("N")} PRIMARY KEY (aggregateId, aggregateVersion)
                 );
@@ -46,6 +53,10 @@ namespace SuperSafeBank.Persistence.SQLServer
             using var _dbConn = new SqlConnection(_dbConnString);
             await _dbConn.OpenAsync().ConfigureAwait(false);
             await _dbConn.ExecuteAsync(sql).ConfigureAwait(false);
+            
+            _cache.Add(tableName);
+
+            _lock.Release();
         }
 
         public string GetTableName<TA, TKey>()

@@ -7,7 +7,7 @@ namespace SuperSafeBank.Persistence.EventStore
 {
     public static class IServiceCollectionExtensions
     {
-        public static IServiceCollection AddEventStore(this IServiceCollection services, string connectionString)
+        public static IServiceCollection AddEventStorePersistence(this IServiceCollection services, string connectionString)
         {
             return services.AddSingleton<IEventStoreConnectionWrapper>(ctx =>
                 {

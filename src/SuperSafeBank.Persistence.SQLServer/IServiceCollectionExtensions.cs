@@ -6,7 +6,7 @@ namespace SuperSafeBank.Persistence.SQLServer
 {
     public static class IServiceCollectionExtensions
     {
-        public static IServiceCollection AddSQLServer(this IServiceCollection services, string connectionString)
+        public static IServiceCollection AddSQLServerPersistence(this IServiceCollection services, string connectionString)
         { 
             SqlMapper.AddTypeHandler(new ByteArrayTypeHandler());
 
