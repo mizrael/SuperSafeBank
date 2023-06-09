@@ -1,10 +1,4 @@
 ﻿using SuperSafeBank.Domain;
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SuperSafeBank.Persistence.SQLServer.Tests.Unit
 {
@@ -13,10 +7,10 @@ namespace SuperSafeBank.Persistence.SQLServer.Tests.Unit
         [Fact]
         public void GetTableName_should_return_valid_table_name()
         {
-            var dbConn = Substitute.For<IDbConnection>();
+            var dbConn = new SqlConnectionStringProvider("lorem");
             var sut = new AggregateTableCreator(dbConn, "testDbo");
             var table = sut.GetTableName<Customer, Guid>();
-            table.Should().Be("testDbo.customer");
+            table.Should().Be("testdbo.customer");
         }
     }
 }

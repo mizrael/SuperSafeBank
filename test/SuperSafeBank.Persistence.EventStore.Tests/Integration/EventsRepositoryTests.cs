@@ -29,7 +29,7 @@ namespace SuperSafeBank.Persistence.EventStore.Tests.Integration
 
             var serializer = NSubstitute.Substitute.For<IEventSerializer>();
 
-            var sut = new AggregateRepository<DummyAggregate, Guid>(conn, serializer);
+            var sut = new EventStoreAggregateRepository<DummyAggregate, Guid>(conn, serializer);
 
             var aggregate = new DummyAggregate(Guid.NewGuid());
             aggregate.DoSomething("foo");
@@ -51,7 +51,7 @@ namespace SuperSafeBank.Persistence.EventStore.Tests.Integration
 
             var serializer = NSubstitute.Substitute.For<IEventSerializer>();
 
-            var sut = new AggregateRepository<DummyAggregate, Guid>(conn, serializer);
+            var sut = new EventStoreAggregateRepository<DummyAggregate, Guid>(conn, serializer);
 
             var aggregate = new DummyAggregate(Guid.NewGuid());
             aggregate.DoSomething("foo");
@@ -73,7 +73,7 @@ namespace SuperSafeBank.Persistence.EventStore.Tests.Integration
 
             var serializer = NSubstitute.Substitute.For<IEventSerializer>();
 
-            var sut = new AggregateRepository<DummyAggregate, Guid>(conn, serializer);
+            var sut = new EventStoreAggregateRepository<DummyAggregate, Guid>(conn, serializer);
 
             var rehydrated = await sut.RehydrateAsync(Guid.NewGuid());
             rehydrated.Should().BeNull();

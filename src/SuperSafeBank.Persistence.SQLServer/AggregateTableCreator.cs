@@ -1,20 +1,21 @@
 ﻿using SuperSafeBank.Common.Models;
-using System.Data;
 using Dapper;
+using Microsoft.Data.SqlClient;
 
 namespace SuperSafeBank.Persistence.SQLServer
 {
     public class AggregateTableCreator : IAggregateTableCreator
     {
-        private readonly IDbConnection _dbConn;
+        private readonly string _dbConnString;
+        private readonly string _schemaName;
 
-        public AggregateTableCreator(IDbConnection dbConn, string schemaName = "aggregates")
-        {
+        public AggregateTableCreator(SqlConnectionStringProvider dbConnStringProvider, string schemaName = "aggregates")
+        {            
             if (string.IsNullOrWhiteSpace(schemaName))           
                 throw new ArgumentException($"'{nameof(schemaName)}' cannot be null or whitespace.", nameof(schemaName));
-            
-            _dbConn = dbConn ?? throw new ArgumentNullException(nameof(dbConn));
-            this.SchemaName = schemaName.ToLowerInvariant();
+                        
+            _schemaName = schemaName.ToLowerInvariant();
+            _dbConnString = dbConnStringProvider.ConnectionString;
         }
 
         public async Task EnsureTableAsync<TA, TKey>(CancellationToken cancellationToken = default)
@@ -25,8 +26,8 @@ namespace SuperSafeBank.Persistence.SQLServer
             var tableName = this.GetTableName<TA, TKey>();
 
             var sql = $@"
-            IF NOT EXISTS ( SELECT * FROM sys.schemas  WHERE name = N'{this.SchemaName}' ) BEGIN 
-                EXEC('CREATE SCHEMA [{this.SchemaName}] AUTHORIZATION [DBO]');  
+            IF NOT EXISTS ( SELECT * FROM sys.schemas  WHERE name = N'{_schemaName}' ) BEGIN 
+                EXEC('CREATE SCHEMA [{_schemaName}] AUTHORIZATION [DBO]');  
             END
 
             IF OBJECT_ID('{tableName}', 'U') IS NULL BEGIN
@@ -42,6 +43,8 @@ namespace SuperSafeBank.Persistence.SQLServer
                 CREATE INDEX ix_{Guid.NewGuid().ToString("N")}_aggregateId ON {tableName} (aggregateId);
             END";
 
+            using var _dbConn = new SqlConnection(_dbConnString);
+            await _dbConn.OpenAsync().ConfigureAwait(false);
             await _dbConn.ExecuteAsync(sql).ConfigureAwait(false);
         }
 
@@ -50,9 +53,7 @@ namespace SuperSafeBank.Persistence.SQLServer
         {
             var aggregateType = typeof(TA);
             var aggregateName = aggregateType.Name;
-            return $"{this.SchemaName}.{aggregateName}".ToLowerInvariant();
+            return $"{this._schemaName}.{aggregateName}".ToLowerInvariant();
         }
-
-        public string SchemaName { get; }
     }
 }

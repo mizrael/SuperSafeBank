@@ -23,7 +23,7 @@ namespace SuperSafeBank.Persistence.SQLServer.Tests.Integration
             aggregate.DoSomething("foo");
             aggregate.DoSomething("bar");
 
-            using var conn = await _fixture.CreateDbConnectionAsync();
+            var conn = await _fixture.CreateDbConnectionStringProviderAsync();
             var tableCreator = new AggregateTableCreator(conn);
             var serializer = NSubstitute.Substitute.For<IEventSerializer>();
             var sut = new SQLAggregateRepository<DummyAggregate, Guid>(conn, tableCreator, serializer);
@@ -38,7 +38,7 @@ namespace SuperSafeBank.Persistence.SQLServer.Tests.Integration
         [Fact]
         public async Task RehydrateAsync_should_return_null_when_id_invalid()
         {
-            using var conn = await _fixture.CreateDbConnectionAsync();
+            var conn = await _fixture.CreateDbConnectionStringProviderAsync();
             var tableCreator = new AggregateTableCreator(conn);
             var serializer = NSubstitute.Substitute.For<IEventSerializer>();
             var sut = new SQLAggregateRepository<Customer, Guid>(conn, tableCreator, serializer);

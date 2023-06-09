@@ -1,6 +1,6 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using Dapper;
+using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
-using System.Data;
 
 namespace SuperSafeBank.Persistence.SQLServer.Tests.Integration
 {
@@ -19,9 +19,11 @@ namespace SuperSafeBank.Persistence.SQLServer.Tests.Integration
             _baseConnStr = configuration.GetConnectionString("sql");
             if (string.IsNullOrWhiteSpace(_baseConnStr))
                 throw new ArgumentException("invalid connection string");
+
+            SqlMapper.AddTypeHandler(new ByteArrayTypeHandler());
         }
 
-        public async Task<IDbConnection> CreateDbConnectionAsync()
+        public async Task<SqlConnectionStringProvider> CreateDbConnectionStringProviderAsync()
         {
             var dbName = $"supersafebank_test_db_{Guid.NewGuid()}";
             var createDbConnStr = $"{_baseConnStr};Database=master";
@@ -34,10 +36,8 @@ namespace SuperSafeBank.Persistence.SQLServer.Tests.Integration
             _dbNames.Enqueue(dbName);
 
             var connectionString = $"{_baseConnStr};Database={dbName}";
-            var conn = new SqlConnection(connectionString);
-            await conn.OpenAsync();
             
-            return conn;
+            return new SqlConnectionStringProvider(connectionString);
         }
 
         public Task InitializeAsync()

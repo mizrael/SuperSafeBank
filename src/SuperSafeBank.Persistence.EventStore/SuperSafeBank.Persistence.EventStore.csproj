@@ -10,8 +10,8 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\SuperSafeBank.Domain\SuperSafeBank.Domain.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\SuperSafeBank.Common\SuperSafeBank.Common.csproj" />
+	</ItemGroup>
 
 </Project>

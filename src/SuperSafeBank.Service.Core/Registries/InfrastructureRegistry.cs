@@ -10,6 +10,7 @@ using SuperSafeBank.Service.Core.Persistence.Mongo;
 using SuperSafeBank.Service.Core.Persistence.Mongo.EventHandlers;
 using SuperSafeBank.Transport.Kafka;
 using System;
+using SuperSafeBank.Persistence.SQLServer;
 
 namespace SuperSafeBank.Service.Core.Registries
 {
@@ -39,7 +40,14 @@ namespace SuperSafeBank.Service.Core.Registries
             {
                 var eventstoreConnStr = config.GetConnectionString("eventstore");
                 services.AddEventStore(eventstoreConnStr)
-                    .AddSingleton<IAggregateRepository<CustomerEmail, string>, AggregateRepository<CustomerEmail, string>>()
+                    .AddSingleton<IAggregateRepository<CustomerEmail, string>, EventStoreAggregateRepository<CustomerEmail, string>>()
+                    .AddTransient<ICustomerEmailsService, Persistence.EventStore.CustomerEmailsService>();
+            }else if (infraConfig.AggregateStore == "SQLServer")
+            {
+                var sqlConnString = config.GetConnectionString("sql");
+                services.AddSQLServer(sqlConnString)
+                    //TODO
+                    .AddSingleton<IAggregateRepository<CustomerEmail, string>, EventStoreAggregateRepository<CustomerEmail, string>>()
                     .AddTransient<ICustomerEmailsService, Persistence.EventStore.CustomerEmailsService>();
             }
             else throw new ArgumentOutOfRangeException($"invalid aggregate store type: {infraConfig.AggregateStore}");

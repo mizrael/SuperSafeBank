@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using Microsoft.Data.SqlClient;
 using SuperSafeBank.Domain;
 using System.ComponentModel;
 
@@ -18,11 +19,13 @@ namespace SuperSafeBank.Persistence.SQLServer.Tests.Integration
         [Fact]
         public async Task EnsureTableAsync_should_create_table()
         {
-            using var conn = await _fixture.CreateDbConnectionAsync();
-            var sut = new AggregateTableCreator(conn);
+            var provider = await _fixture.CreateDbConnectionStringProviderAsync();
+            var sut = new AggregateTableCreator(provider);
             await sut.EnsureTableAsync<Customer, Guid>();
 
             var tableName = sut.GetTableName<Customer, Guid>();
+            using var conn = new SqlConnection(provider.ConnectionString);
+            await conn.OpenAsync();
             var res = await conn.QueryFirstOrDefaultAsync<int?>($"SELECT COUNT(1) FROM {tableName};").ConfigureAwait(false);
             res.Should().Be(0);
         }

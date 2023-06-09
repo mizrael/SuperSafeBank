@@ -1,28 +1,30 @@
 ﻿using Dapper;
+using Microsoft.Data.SqlClient;
 using SuperSafeBank.Common;
 using SuperSafeBank.Common.Models;
 using System.Data;
 
 namespace SuperSafeBank.Persistence.SQLServer
 {
+
     public class SQLAggregateRepository<TA, TKey> : IAggregateRepository<TA, TKey>
         where TA : class, IAggregateRoot<TKey>
     {
-        private readonly IDbConnection _dbConn;
+        private readonly string _dbConnString;
         private readonly IAggregateTableCreator _tableCreator;
         private readonly IEventSerializer _eventSerializer;
 
         public SQLAggregateRepository(
-            IDbConnection dbConn, 
+            SqlConnectionStringProvider connectionStringProvider, 
             IAggregateTableCreator tableCreator,
             IEventSerializer eventSerializer)
         {
-            _dbConn = dbConn ?? throw new ArgumentNullException(nameof(dbConn));
-            _tableCreator = tableCreator ?? throw new ArgumentNullException(nameof(tableCreator));
-            _eventSerializer = eventSerializer ?? throw new ArgumentNullException(nameof(eventSerializer));
+            if (connectionStringProvider is null)            
+                throw new ArgumentNullException(nameof(connectionStringProvider));
 
-            // TODO: move to DI
-            SqlMapper.AddTypeHandler(new ByteArrayTypeHandler());
+            _dbConnString = connectionStringProvider.ConnectionString;
+            _tableCreator = tableCreator ?? throw new ArgumentNullException(nameof(tableCreator));
+            _eventSerializer = eventSerializer ?? throw new ArgumentNullException(nameof(eventSerializer));           
         }
 
         public async Task PersistAsync(TA aggregateRoot, CancellationToken cancellationToken = default)
@@ -35,11 +37,14 @@ namespace SuperSafeBank.Persistence.SQLServer
             await _tableCreator.EnsureTableAsync<TA, TKey>(cancellationToken)
                                .ConfigureAwait(false);
 
-            using var transaction = _dbConn.BeginTransaction(IsolationLevel.Serializable);
+            using var dbConn = new SqlConnection(_dbConnString);
+            await dbConn.OpenAsync().ConfigureAwait(false);
+
+            using var transaction = dbConn.BeginTransaction(IsolationLevel.Serializable);
             
             try
             {
-                var lastVersion = await this.GetLastAggregateVersionAsync(transaction)
+                var lastVersion = await this.GetLastAggregateVersionAsync(dbConn, transaction)
                                   .ConfigureAwait(false);
                 if (lastVersion >= aggregateRoot.Version)
                     throw new ArgumentOutOfRangeException($"aggregate version mismatch, expected {aggregateRoot.Version}, got {lastVersion}");
@@ -50,7 +55,7 @@ namespace SuperSafeBank.Persistence.SQLServer
 
                 var entities = aggregateRoot.Events.Select(evt => AggregateEvent.Create(evt, _eventSerializer))
                                                    .ToList();
-                await _dbConn.ExecuteAsync(sql, param: entities, transaction: transaction)
+                await dbConn.ExecuteAsync(sql, param: entities, transaction: transaction)
                              .ConfigureAwait(false);
 
                 transaction.Commit();
@@ -72,9 +77,12 @@ namespace SuperSafeBank.Persistence.SQLServer
                          FROM {tableName}
                          WHERE aggregateId = @aggregateId
                          ORDER BY aggregateVersion ASC";
-                        
-            var aggregateEvents = await _dbConn.QueryAsync<AggregateEvent>(sql, new { aggregateId = key })
-                                                .ConfigureAwait(false);
+
+            using var dbConn = new SqlConnection(_dbConnString);
+            await dbConn.OpenAsync().ConfigureAwait(false);
+
+            var aggregateEvents = await dbConn.QueryAsync<AggregateEvent>(sql, new { aggregateId = key })
+                                               .ConfigureAwait(false);
             if (aggregateEvents?.Any() == false)
                 return null; 
             
@@ -90,11 +98,11 @@ namespace SuperSafeBank.Persistence.SQLServer
             return result;
         }
 
-        private async Task<long?> GetLastAggregateVersionAsync(IDbTransaction transaction)
+        private async Task<long?> GetLastAggregateVersionAsync(SqlConnection dbConn, IDbTransaction transaction)
         {
             var tableName = _tableCreator.GetTableName<TA, TKey>();
             var sql = $"SELECT TOP 1 aggregateVersion FROM {tableName} ORDER BY aggregateVersion DESC";
-            var result = await _dbConn.QueryFirstOrDefaultAsync<long?>(sql, transaction: transaction)
+            var result = await dbConn.QueryFirstOrDefaultAsync<long?>(sql, transaction: transaction)
                                       .ConfigureAwait(false);
             return result;
         }
