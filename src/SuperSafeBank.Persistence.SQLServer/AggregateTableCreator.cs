@@ -26,37 +26,42 @@ namespace SuperSafeBank.Persistence.SQLServer
             var tableName = this.GetTableName<TA, TKey>();
             if (_cache.Contains(tableName))
                 return;
-            
+
             await _lock.WaitAsync(cancellationToken);
 
-            if (_cache.Contains(tableName))
-                return;
+            try
+            {
+                if (_cache.Contains(tableName))
+                    return;
 
-            var sql = $@"
-            IF NOT EXISTS ( SELECT * FROM sys.schemas  WHERE name = N'{_schemaName}' ) BEGIN 
-                EXEC('CREATE SCHEMA [{_schemaName}] AUTHORIZATION [DBO]');  
-            END
+                var sql = $@"
+                    IF NOT EXISTS ( SELECT * FROM sys.schemas  WHERE name = N'{_schemaName}' ) BEGIN 
+                        EXEC('CREATE SCHEMA [{_schemaName}] AUTHORIZATION [DBO]');  
+                    END
 
-            IF OBJECT_ID('{tableName}', 'U') IS NULL BEGIN
-                CREATE TABLE {tableName} (
-                    aggregateId nvarchar(250) NOT NULL,
-                    aggregateVersion bigint NOT NULL,
-                    eventType nvarchar(250) NULL,
-                    data varchar(MAX) NOT NULL,                    
-                    timestamp datetimeoffset NULL,
-                    CONSTRAINT pk_{Guid.NewGuid().ToString("N")} PRIMARY KEY (aggregateId, aggregateVersion)
-                );
+                    IF OBJECT_ID('{tableName}', 'U') IS NULL BEGIN
+                        CREATE TABLE {tableName} (
+                            aggregateId nvarchar(250) NOT NULL,
+                            aggregateVersion bigint NOT NULL,
+                            eventType nvarchar(250) NULL,
+                            data varchar(MAX) NOT NULL,                    
+                            timestamp datetimeoffset NULL,
+                            CONSTRAINT pk_{Guid.NewGuid().ToString("N")} PRIMARY KEY (aggregateId, aggregateVersion)
+                        );
 
-                CREATE INDEX ix_{Guid.NewGuid().ToString("N")}_aggregateId ON {tableName} (aggregateId);
-            END";
+                        CREATE INDEX ix_{Guid.NewGuid().ToString("N")}_aggregateId ON {tableName} (aggregateId);
+                    END";
 
-            using var _dbConn = new SqlConnection(_dbConnString);
-            await _dbConn.OpenAsync().ConfigureAwait(false);
-            await _dbConn.ExecuteAsync(sql).ConfigureAwait(false);
-            
-            _cache.Add(tableName);
+                using var _dbConn = new SqlConnection(_dbConnString);
+                await _dbConn.OpenAsync().ConfigureAwait(false);
+                await _dbConn.ExecuteAsync(sql).ConfigureAwait(false);
 
-            _lock.Release();
+                _cache.Add(tableName);
+            }
+            finally
+            {
+                _lock.Release();
+            }
         }
 
         public string GetTableName<TA, TKey>()

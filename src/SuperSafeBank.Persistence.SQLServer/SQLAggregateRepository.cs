@@ -47,7 +47,7 @@ namespace SuperSafeBank.Persistence.SQLServer
                 var lastVersion = await this.GetLastAggregateVersionAsync(dbConn, transaction)
                                   .ConfigureAwait(false);
                 if (lastVersion >= aggregateRoot.Version)
-                    throw new ArgumentOutOfRangeException($"aggregate version mismatch, expected {aggregateRoot.Version}, got {lastVersion}");
+                    throw new ArgumentOutOfRangeException(nameof(aggregateRoot), $"aggregate version mismatch, expected {aggregateRoot.Version}, got {lastVersion}");
 
                 var tableName = _tableCreator.GetTableName<TA, TKey>();
                 var sql = $@"INSERT INTO {tableName} (aggregateId, aggregateVersion, eventType, data, timestamp)
