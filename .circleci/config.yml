@@ -9,7 +9,7 @@ jobs:
       - image: mcr.microsoft.com/dotnet/sdk:7.0
       - image: mcr.microsoft.com/azure-storage/azurite
         command: azurite --blobHost 0.0.0.0 --blobPort 10000 --queueHost 0.0.0.0 --queuePort 10001 --tableHost 0.0.0.0 --tablePort 10002
-      - image: eventstore/eventstore:20.10.2-buster-slim
+      - image: eventstore/eventstore:22.10.2-buster-slim
         environment:
           EVENTSTORE_CLUSTER_SIZE: 1
           EVENTSTORE_RUN_PROJECTIONS: All
@@ -23,6 +23,10 @@ jobs:
         environment:
           MONGO_INITDB_ROOT_USERNAME: root
           MONGO_INITDB_ROOT_PASSWORD: password
+      - image: "mcr.microsoft.com/mssql/server:latest"   
+        environment:
+          SA_PASSWORD: "Sup3r_Lam3_P4ss"
+          ACCEPT_EULA: "Y"    
       
     steps:
       - checkout
@@ -30,10 +34,12 @@ jobs:
       - run:
           name: Build solution
           command: |
+            cd ./src
             dotnet restore
             dotnet build --no-restore -c Debug
 
       - run:
           name: Test
           command: |            
+            cd ./src
             dotnet test -c Debug 
