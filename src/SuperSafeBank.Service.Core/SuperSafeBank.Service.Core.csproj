@@ -7,18 +7,20 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Hellang.Middleware.ProblemDetails" Version="6.5.1" />    
-    <PackageReference Include="Serilog.AspNetCore" Version="7.0.0" />        
+    <PackageReference Include="Hellang.Middleware.ProblemDetails" Version="6.5.1" />
+    <PackageReference Include="Serilog.AspNetCore" Version="7.0.0" />
     <PackageReference Include="Serilog.Sinks.Grafana.Loki" Version="8.1.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\SuperSafeBank.Domain\SuperSafeBank.Domain.csproj" />
-	<ProjectReference Include="..\SuperSafeBank.Persistence.EventStore\SuperSafeBank.Persistence.EventStore.csproj" />
-	<ProjectReference Include="..\SuperSafeBank.Service.Core.Common\SuperSafeBank.Service.Core.Common.csproj" />
-	<ProjectReference Include="..\SuperSafeBank.Service.Core.Persistence.EventStore\SuperSafeBank.Service.Core.Persistence.EventStore.csproj" />
-	<ProjectReference Include="..\SuperSafeBank.Service.Core.Persistence.Mongo\SuperSafeBank.Service.Core.Persistence.Mongo.csproj" />
-	<ProjectReference Include="..\SuperSafeBank.Transport.Kafka\SuperSafeBank.Transport.Kafka.csproj" />
+    <ProjectReference Include="..\SuperSafeBank.Persistence.EventStore\SuperSafeBank.Persistence.EventStore.csproj" />
+    <ProjectReference Include="..\SuperSafeBank.Persistence.SQLServer\SuperSafeBank.Persistence.SQLServer.csproj" />
+    <ProjectReference Include="..\SuperSafeBank.Service.Core.Common\SuperSafeBank.Service.Core.Common.csproj" />
+    <ProjectReference Include="..\SuperSafeBank.Service.Core.Persistence.EventStore\SuperSafeBank.Service.Core.Persistence.EventStore.csproj" />
+    <ProjectReference Include="..\SuperSafeBank.Service.Core.Persistence.Mongo\SuperSafeBank.Service.Core.Persistence.Mongo.csproj" />
+    <ProjectReference Include="..\SuperSafeBank.Service.Core.Persistence.SQLServer\SuperSafeBank.Service.Core.Persistence.SQLServer.csproj" />
+    <ProjectReference Include="..\SuperSafeBank.Transport.Kafka\SuperSafeBank.Transport.Kafka.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,15 +1,16 @@
 using SuperSafeBank.Service.Core.Persistence.Mongo;
+using SuperSafeBank.Service.Core.Persistence.Mongo.Tests.Integration;
 using System.ComponentModel;
 
 namespace SuperSafeBank.Persistence.Mongo.Tests.Integration
 {
     [Trait("Category", "Integration")]
     [Category("Integration")]
-    public class CustomerEmailsServiceTests : IClassFixture<Fixtures.MongoFixture>
+    public class CustomerEmailsServiceTests : IClassFixture<MongoFixture>
     {
-        private readonly Fixtures.MongoFixture _fixture;
+        private readonly MongoFixture _fixture;
 
-        public CustomerEmailsServiceTests(Fixtures.MongoFixture fixture)
+        public CustomerEmailsServiceTests(MongoFixture fixture)
         {
             _fixture = fixture;
         }

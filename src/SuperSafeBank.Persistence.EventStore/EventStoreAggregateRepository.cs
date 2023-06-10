@@ -10,14 +10,14 @@ using SuperSafeBank.Common.Models;
 
 namespace SuperSafeBank.Persistence.EventStore
 {
-    public class AggregateRepository<TA, TKey> : IAggregateRepository<TA, TKey>
+    public class EventStoreAggregateRepository<TA, TKey> : IAggregateRepository<TA, TKey>
         where TA : class, IAggregateRoot<TKey>
     {
         private readonly IEventStoreConnectionWrapper _connectionWrapper;
         private readonly string _streamBaseName;
         private readonly IEventSerializer _eventDeserializer;
 
-        public AggregateRepository(IEventStoreConnectionWrapper connectionWrapper, IEventSerializer eventDeserializer)
+        public EventStoreAggregateRepository(IEventStoreConnectionWrapper connectionWrapper, IEventSerializer eventDeserializer)
         {
             _connectionWrapper = connectionWrapper;
             _eventDeserializer = eventDeserializer;

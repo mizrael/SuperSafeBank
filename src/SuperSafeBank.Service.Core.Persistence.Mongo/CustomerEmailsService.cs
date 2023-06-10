@@ -2,6 +2,7 @@
 using SuperSafeBank.Domain.Services;
 using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace SuperSafeBank.Service.Core.Persistence.Mongo
@@ -17,9 +18,9 @@ namespace SuperSafeBank.Service.Core.Persistence.Mongo
             _coll = _db.GetCollection<CustomerEmail>("CustomerEmails");
         }
 
-        public async Task CreateAsync(string email, Guid customerId)
+        public async Task CreateAsync(string email, Guid customerId, CancellationToken cancellationToken = default)
         {
-            var indexes = await (await _coll.Indexes.ListAsync()).ToListAsync();
+            var indexes = await (await _coll.Indexes.ListAsync()).ToListAsync(cancellationToken);
             if (!indexes.Any())
             {
                 var indexKeys = Builders<CustomerEmail>.IndexKeys.Ascending(a => a.Email);
@@ -28,17 +29,17 @@ namespace SuperSafeBank.Service.Core.Persistence.Mongo
                     Unique = true,
                     Name = "email"
                 });
-                await _coll.Indexes.CreateOneAsync(createIndex);
+                await _coll.Indexes.CreateOneAsync(createIndex, cancellationToken: cancellationToken);
             }
 
             var update = Builders<CustomerEmail>.Update
                 .Set(a => a.Id, customerId)
                 .Set(a => a.Email, email);
 
-            await _coll.UpdateOneAsync(c => c.Email == email, update, options: new UpdateOptions() { IsUpsert = true });
+            await _coll.UpdateOneAsync(c => c.Email == email, update, options: new UpdateOptions() { IsUpsert = true }, cancellationToken: cancellationToken);
         }
 
-        public async Task<bool> ExistsAsync(string email)
+        public async Task<bool> ExistsAsync(string email, CancellationToken cancellationToken = default)
         {
             var filter = Builders<CustomerEmail>.Filter
                 .Eq(a => a.Email, email);
@@ -46,7 +47,7 @@ namespace SuperSafeBank.Service.Core.Persistence.Mongo
             var count = await _coll.CountDocumentsAsync(filter, new CountOptions()
             {
                 Limit = 1
-            });
+            }, cancellationToken: cancellationToken);
 
             return count > 0;
         }

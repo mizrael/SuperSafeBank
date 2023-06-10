@@ -1,15 +1,15 @@
 using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
 
-namespace SuperSafeBank.Persistence.Mongo.Tests.Integration.Fixtures
+namespace SuperSafeBank.Service.Core.Persistence.Mongo.Tests.Integration
 {
     public class MongoFixture : IDisposable
     {
         private MongoClient _mongoClient;
         private readonly string _dbName;
 
-        public IMongoDatabase Database { get; }        
-        
+        public IMongoDatabase Database { get; }
+
         public MongoFixture()
         {
             var configuration = new ConfigurationBuilder()
@@ -21,14 +21,14 @@ namespace SuperSafeBank.Persistence.Mongo.Tests.Integration.Fixtures
             _dbName = $"tests-{Guid.NewGuid()}";
 
             _mongoClient = new MongoClient(connectionString: connStr);
-            this.Database = _mongoClient.GetDatabase(_dbName);            
+            Database = _mongoClient.GetDatabase(_dbName);
         }
 
         public void Dispose()
         {
-            if(null != Database)
+            if (null != Database)
             {
-                _mongoClient.DropDatabase(_dbName);                
+                _mongoClient.DropDatabase(_dbName);
             }
         }
     }

@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Configuration;
 
-namespace SuperSafeBank.Persistence.EventStore.Tests.Integration.Fixtures
+namespace SuperSafeBank.Persistence.EventStore.Tests.Integration
 {
     public class EventStoreFixture
     {
