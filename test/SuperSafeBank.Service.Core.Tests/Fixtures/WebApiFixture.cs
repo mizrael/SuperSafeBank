@@ -1,9 +1,8 @@
-using System;
-using System.Net.Http;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
-using Serilog;
+using System;
+using System.Net.Http;
 
 namespace SuperSafeBank.Service.Core.Tests.Fixtures;
 

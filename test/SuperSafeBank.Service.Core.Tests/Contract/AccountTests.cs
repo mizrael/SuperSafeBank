@@ -74,7 +74,7 @@ namespace SuperSafeBank.Service.Core.Tests.Contract
             {
                 firstname = "Customer",
                 lastname = "WithAccount",
-                email = "customer-with-new-account@test.com"
+                email = $"customer-with-new-account_{Guid.NewGuid()}@test.com"
             };
             var response = await _fixture.HttpClient.PostAsJsonAsync("customers", createCustomerPayload);
             response.StatusCode.Should().Be(HttpStatusCode.Created);
@@ -111,7 +111,7 @@ namespace SuperSafeBank.Service.Core.Tests.Contract
             {
                 firstname = "Customer",
                 lastname = "WithAccount",
-                email = "customer-with-account@test.com"
+                email = $"customer-with-account_{Guid.NewGuid()}@test.com"
             };
             var response = await _fixture.HttpClient.PostAsJsonAsync("customers", createCustomerPayload);
             response.StatusCode.Should().Be(HttpStatusCode.Created);
@@ -146,7 +146,7 @@ namespace SuperSafeBank.Service.Core.Tests.Contract
             {
                 firstname = "Customer",
                 lastname = "WithAccount",
-                email = "not-enough-funds@test.com"
+                email = $"not-enough-funds_{Guid.NewGuid()}@test.com"
             };
             var response = await _fixture.HttpClient.PostAsJsonAsync("customers", createCustomerPayload);
             response.StatusCode.Should().Be(HttpStatusCode.Created);
@@ -181,7 +181,7 @@ namespace SuperSafeBank.Service.Core.Tests.Contract
             {
                 firstname = "Customer",
                 lastname = "WithAccount",
-                email = "enough-funds@test.com"
+                email = $"enough-funds_{Guid.NewGuid()}@test.com"
             };
             var response = await _fixture.HttpClient.PostAsJsonAsync("customers", createCustomerPayload);
             response.StatusCode.Should().Be(HttpStatusCode.Created);

@@ -1,11 +1,10 @@
 ﻿using SuperSafeBank.Common.Models;
+using System;
 
-namespace SuperSafeBank.Common
+namespace SuperSafeBank.Common;
+
+public interface IEventSerializer
 {
-    public interface IEventSerializer
-    {
-        IDomainEvent<TKey> Deserialize<TKey>(string type, byte[] data);
-        IDomainEvent<TKey> Deserialize<TKey>(string type, string data);
-        byte[] Serialize<TKey>(IDomainEvent<TKey> @event);
-    }
+    IDomainEvent<TKey> Deserialize<TKey>(string type, ReadOnlySpan<byte> data);
+    byte[] Serialize<TKey>(IDomainEvent<TKey> @event);
 }
