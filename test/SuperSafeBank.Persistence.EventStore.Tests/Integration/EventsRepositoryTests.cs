@@ -7,76 +7,85 @@ using Microsoft.Extensions.Logging;
 using SuperSafeBank.Common;
 using System.ComponentModel;
 
-namespace SuperSafeBank.Persistence.EventStore.Tests.Integration
+namespace SuperSafeBank.Persistence.EventStore.Tests.Integration;
+
+[Trait("Category", "Integration")]
+[Category("Integration")]
+public class EventsRepositoryTests : IClassFixture<EventStoreFixture>
 {
-    [Trait("Category", "Integration")]
-    [Category("Integration")]
-    public class EventsRepositoryTests : IClassFixture<EventStoreFixture>
+    private readonly EventStoreFixture _fixture;
+
+    public EventsRepositoryTests(EventStoreFixture fixture)
     {
-        private readonly EventStoreFixture _fixture;
+        _fixture = fixture;
+    }
 
-        public EventsRepositoryTests(EventStoreFixture fixture)
+    [Fact]
+    public async Task PersistAsync_should_store_events()
+    {
+        var connStr = new Uri(_fixture.ConnectionString);
+        var logger = NSubstitute.Substitute.For<ILogger<EventStoreConnectionWrapper>>();
+        using var conn = new EventStoreConnectionWrapper(connStr, logger);
+
+        var serializer = new JsonEventSerializer(new[]
         {
-            _fixture = fixture;
-        }
+            typeof(DummyAggregate).Assembly
+        });
 
-        [Fact]
-        public async Task PersistAsync_should_store_events()
+        var sut = new EventStoreAggregateRepository<DummyAggregate, Guid>(conn, serializer);
+
+        var aggregate = new DummyAggregate(Guid.NewGuid());
+        aggregate.DoSomething("foo");
+        aggregate.DoSomething("bar");
+
+        await sut.PersistAsync(aggregate);
+
+        var rehydrated = await sut.RehydrateAsync(aggregate.Id);        
+        rehydrated.Should().NotBeNull();
+        rehydrated.Id.Should().Be(aggregate.Id);
+        rehydrated.Version.Should().Be(3);
+    }
+
+    [Fact]
+    public async Task PersistAsync_should_clear_Aggregate_events()
+    {
+        var connStr = new Uri(_fixture.ConnectionString);
+        var logger = NSubstitute.Substitute.For<ILogger<EventStoreConnectionWrapper>>();
+        using var conn = new EventStoreConnectionWrapper(connStr, logger);
+
+        var serializer = new JsonEventSerializer(new[]
         {
-            var connStr = new Uri(_fixture.ConnectionString);
-            var logger = NSubstitute.Substitute.For<ILogger<EventStoreConnectionWrapper>>();
-            using var conn = new EventStoreConnectionWrapper(connStr, logger);
+            typeof(DummyAggregate).Assembly
+        });
 
-            var serializer = NSubstitute.Substitute.For<IEventSerializer>();
+        var sut = new EventStoreAggregateRepository<DummyAggregate, Guid>(conn, serializer);
 
-            var sut = new EventStoreAggregateRepository<DummyAggregate, Guid>(conn, serializer);
+        var aggregate = new DummyAggregate(Guid.NewGuid());
+        aggregate.DoSomething("foo");
+        aggregate.DoSomething("bar");
 
-            var aggregate = new DummyAggregate(Guid.NewGuid());
-            aggregate.DoSomething("foo");
-            aggregate.DoSomething("bar");
+        aggregate.Events.Should().NotBeEmpty();
 
-            await sut.PersistAsync(aggregate);
+        await sut.PersistAsync(aggregate);
 
-            var rehydrated = await sut.RehydrateAsync(aggregate.Id);
-            rehydrated.Should().NotBeNull();
-            rehydrated.Version.Should().Be(3);
-        }
+        aggregate.Events.Should().BeEmpty();
+    }
 
-        [Fact]
-        public async Task PersistAsync_should_clear_Aggregate_events()
+    [Fact]
+    public async Task RehydrateAsync_should_return_null_when_id_invalid()
+    {
+        var connStr = new Uri(_fixture.ConnectionString);
+        var logger = NSubstitute.Substitute.For<ILogger<EventStoreConnectionWrapper>>();
+        using var conn = new EventStoreConnectionWrapper(connStr, logger);
+
+        var serializer = new JsonEventSerializer(new[]
         {
-            var connStr = new Uri(_fixture.ConnectionString);
-            var logger = NSubstitute.Substitute.For<ILogger<EventStoreConnectionWrapper>>();
-            using var conn = new EventStoreConnectionWrapper(connStr, logger);
+            typeof(DummyAggregate).Assembly
+        });
 
-            var serializer = NSubstitute.Substitute.For<IEventSerializer>();
+        var sut = new EventStoreAggregateRepository<DummyAggregate, Guid>(conn, serializer);
 
-            var sut = new EventStoreAggregateRepository<DummyAggregate, Guid>(conn, serializer);
-
-            var aggregate = new DummyAggregate(Guid.NewGuid());
-            aggregate.DoSomething("foo");
-            aggregate.DoSomething("bar");
-
-            aggregate.Events.Should().NotBeEmpty();
-
-            await sut.PersistAsync(aggregate);
-
-            aggregate.Events.Should().BeEmpty();
-        }
-
-        [Fact]
-        public async Task RehydrateAsync_should_return_null_when_id_invalid()
-        {
-            var connStr = new Uri(_fixture.ConnectionString);
-            var logger = NSubstitute.Substitute.For<ILogger<EventStoreConnectionWrapper>>();
-            using var conn = new EventStoreConnectionWrapper(connStr, logger);
-
-            var serializer = NSubstitute.Substitute.For<IEventSerializer>();
-
-            var sut = new EventStoreAggregateRepository<DummyAggregate, Guid>(conn, serializer);
-
-            var rehydrated = await sut.RehydrateAsync(Guid.NewGuid());
-            rehydrated.Should().BeNull();
-        }
+        var rehydrated = await sut.RehydrateAsync(Guid.NewGuid());
+        rehydrated.Should().BeNull();
     }
 }

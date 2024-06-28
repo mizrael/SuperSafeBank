@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+	  
+	  
+  </PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="EvenireDB.Client" Version="0.0.4" />
+	</ItemGroup>
+	
+	<ItemGroup>
+		<ProjectReference Include="..\SuperSafeBank.Common\SuperSafeBank.Common.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<InternalsVisibleTo Include="SuperSafeBank.Persistence.EvenireDB.Tests" />
+	</ItemGroup>
+
+</Project>
