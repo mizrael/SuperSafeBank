@@ -23,9 +23,13 @@ An ASP.NET Core API is used as entry-point for all the client-facing operations:
 The Cloud can be hosted on Azure, using Azure Functions, [Storage Table](https://azure.microsoft.com/en-ca/services/storage/tables/?WT.mc_id=DOP-MVP-5003878) to persist Events and Materialized Views, and [ServiceBus](https://docs.microsoft.com/en-us/azure/service-bus-messaging/service-bus-messaging-overview?WT.mc_id=DOP-MVP-5003878) to broadcast the Events.
 
 An "on-premise" version is available as well, which uses
-- [EventStore](https://eventstore.com/) or SQLServer can be used as persistence layer for aggregates.
 - Kafka to broadcast the integration events
 - MongoDb to store the QueryModels used by the API
+ or SQLServer can be used as persistence layer for aggregates.
+- several options are available for the Persistence layer to store aggregates:
+  - SQLServer
+  - [EventStore](https://eventstore.com/)
+  - [EvenireDB](https://github.com/mizrael/EvenireDB)
 
 The on-premise infrastructure can be spin up by simply running `docker-compose up` from the root folder. 
 
