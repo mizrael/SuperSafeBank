@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <Configurations>Debug;Release</Configurations>
   </PropertyGroup>
 
 <ItemGroup>
-	<PackageReference Include="Polly" Version="7.2.3" />
+	<PackageReference Include="Polly" Version="8.4.0" />
 	<PackageReference Include="scrutor" Version="4.2.2" />
 </ItemGroup>
 

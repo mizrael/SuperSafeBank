@@ -16,72 +16,73 @@ using SuperSafeBank.Service.Core.Registries;
 using System;
 using System.Net;
 
-namespace SuperSafeBank.Service.Core
+namespace SuperSafeBank.Service.Core;
+
+public class Startup
 {
-    public class Startup
+    public Startup(IConfiguration configuration)
     {
-        public Startup(IConfiguration configuration)
+        Configuration = configuration;
+    }
+
+    public IConfiguration Configuration { get; }
+
+    // This method gets called by the runtime. Use this method to add services to the container.
+    public void ConfigureServices(IServiceCollection services)
+    {
+        services.AddControllers();
+
+        services.AddSerilog();
+
+        services.AddTransient<ICurrencyConverter, FakeCurrencyConverter>();
+
+        services.AddSingleton<IEventSerializer>(new JsonEventSerializer(new[]
         {
-            Configuration = configuration;
+            typeof(CustomerEvents.CustomerCreated).Assembly
+        })).AddInfrastructure(this.Configuration);
+
+        services.AddScoped<IMediator, Mediator>();
+
+        services.Scan(scan =>
+        {
+            scan.FromAssembliesOf(typeof(CreateCustomer))
+                .RegisterHandlers(typeof(IRequestHandler<>))
+                .RegisterHandlers(typeof(IRequestHandler<,>))
+                .RegisterHandlers(typeof(INotificationHandler<>));
+        });            
+
+        services.AddProblemDetails(opts =>
+        {
+            opts.IncludeExceptionDetails = (ctx, ex) =>
+            {
+                var env = ctx.RequestServices.GetRequiredService<IHostEnvironment>();
+                return env.IsDevelopment() || env.IsStaging();
+            };
+
+            opts.MapToStatusCode<ArgumentOutOfRangeException>((int) HttpStatusCode.BadRequest);
+            opts.MapToStatusCode<ValidationException>((int)HttpStatusCode.BadRequest);
+            opts.MapToStatusCode<AccountTransactionException>((int)HttpStatusCode.BadRequest);
+        });
+    }
+
+    // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+    public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+    {
+        if (env.IsDevelopment())
+        {
+            app.UseDeveloperExceptionPage();
         }
 
-        public IConfiguration Configuration { get; }
+        app.UseSerilogRequestLogging();
 
-        // This method gets called by the runtime. Use this method to add services to the container.
-        public void ConfigureServices(IServiceCollection services)
-        {
-            services.AddControllers();
+        app.UseProblemDetails();
 
-            services.AddTransient<ICurrencyConverter, FakeCurrencyConverter>();
+        app.UseHttpsRedirection();
 
-            services.AddSingleton<IEventSerializer>(new JsonEventSerializer(new[]
-            {
-                typeof(CustomerEvents.CustomerCreated).Assembly
-            })).AddInfrastructure(this.Configuration);
+        app.UseRouting();
 
-            services.AddScoped<IMediator, Mediator>();
+        app.UseAuthorization();
 
-            services.Scan(scan =>
-            {
-                scan.FromAssembliesOf(typeof(CreateCustomer))
-                    .RegisterHandlers(typeof(IRequestHandler<>))
-                    .RegisterHandlers(typeof(IRequestHandler<,>))
-                    .RegisterHandlers(typeof(INotificationHandler<>));
-            });            
-
-            services.AddProblemDetails(opts =>
-            {
-                opts.IncludeExceptionDetails = (ctx, ex) =>
-                {
-                    var env = ctx.RequestServices.GetRequiredService<IHostEnvironment>();
-                    return env.IsDevelopment() || env.IsStaging();
-                };
-
-                opts.MapToStatusCode<ArgumentOutOfRangeException>((int) HttpStatusCode.BadRequest);
-                opts.MapToStatusCode<ValidationException>((int)HttpStatusCode.BadRequest);
-                opts.MapToStatusCode<AccountTransactionException>((int)HttpStatusCode.BadRequest);
-            });
-        }
-
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
-        {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
-
-            app.UseSerilogRequestLogging();
-
-            app.UseProblemDetails();
-
-            app.UseHttpsRedirection();
-
-            app.UseRouting();
-
-            app.UseAuthorization();
-
-            app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
-        }
+        app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
     }
 }

@@ -59,7 +59,7 @@ namespace SuperSafeBank.Persistence.EventStore
 
         public async Task<TA> RehydrateAsync(TKey key, CancellationToken cancellationToken = default)
         {
-            var connection = await _connectionWrapper.GetConnectionAsync().ConfigureAwait(false); ;
+            var connection = await _connectionWrapper.GetConnectionAsync().ConfigureAwait(false); 
             
             var streamName = GetStreamName(key);
 
