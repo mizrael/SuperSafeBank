@@ -16,7 +16,7 @@ namespace SuperSafeBank.Worker.Core.Azure.EventHandlers
     public class CustomerDetailsHandler :
         INotificationHandler<CustomerCreated>,
         INotificationHandler<AccountCreated>,
-        INotificationHandler<TransactionHappened>
+        INotificationHandler<AccountUpdated>
     {
         private readonly IViewsContext _dbContext;
         private readonly ILogger<CustomerDetailsHandler> _logger;
@@ -56,7 +56,7 @@ namespace SuperSafeBank.Worker.Core.Azure.EventHandlers
             await SaveCustomerViewAsync(customerView, cancellationToken);
         }
 
-        public async Task Handle(TransactionHappened @event, CancellationToken cancellationToken)
+        public async Task Handle(AccountUpdated @event, CancellationToken cancellationToken)
         {
             var account = await _accountsRepo.RehydrateAsync(@event.AccountId, cancellationToken);
             

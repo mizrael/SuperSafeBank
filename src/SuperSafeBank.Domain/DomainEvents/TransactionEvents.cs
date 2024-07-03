@@ -7,6 +7,18 @@ namespace SuperSafeBank.Domain.DomainEvents;
 
 public static class TransactionEvents
 {
+    public record StepForward : BaseDomainEvent<Transaction, Guid>
+    {
+        private StepForward() { }
+
+        public StepForward(Transaction transaction) : base(transaction)
+        {
+            OldState = transaction.CurrentState;
+        }
+
+        public string OldState { get; init; }
+    }
+
     public record TransactionCreated : BaseDomainEvent<Transaction, Guid>
     {
         private TransactionCreated() { }

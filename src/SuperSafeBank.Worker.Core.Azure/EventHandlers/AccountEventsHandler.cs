@@ -14,7 +14,7 @@ namespace SuperSafeBank.Worker.Core.Azure.EventHandlers
 {
     public class AccountEventsHandler :
         INotificationHandler<AccountCreated>,
-        INotificationHandler<TransactionHappened>
+        INotificationHandler<AccountUpdated>
     {
         private readonly IAggregateRepository<Customer, Guid> _customersRepo;
         private readonly IAggregateRepository<Account, Guid> _accountsRepo;
@@ -41,7 +41,7 @@ namespace SuperSafeBank.Worker.Core.Azure.EventHandlers
             await UpsertAccountViewAsync(accountView, cancellationToken);
         }
 
-        public async Task Handle(TransactionHappened @event, CancellationToken cancellationToken)
+        public async Task Handle(AccountUpdated @event, CancellationToken cancellationToken)
         {
             _logger.LogInformation("processing transaction on account {AccountId} ...", @event.AccountId);
 

@@ -45,7 +45,7 @@ namespace SuperSafeBank.Domain.Commands
 
             await _accountEventsService.PersistAsync(account);
 
-            var @event = new TransactionHappened(Guid.NewGuid(), account.Id);
+            var @event = new AccountUpdated(Guid.NewGuid(), account.Id);
             await _eventProducer.DispatchAsync(@event, cancellationToken);
         }
     }

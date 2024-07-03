@@ -1,55 +1,64 @@
 ﻿using SuperSafeBank.Domain.Services;
 using System;
 
-namespace SuperSafeBank.Domain
+namespace SuperSafeBank.Domain;
+
+public record Money
 {
-    public record Money
+    public Money(Currency currency, decimal value)
     {
-        public Money(Currency currency, decimal value)
+        Value = value;
+        Currency = currency ?? throw new ArgumentNullException(nameof(currency));
+    }
+
+    public decimal Value { get; }
+    public Currency Currency { get; }
+
+    public Money Subtract(Money other, ICurrencyConverter converter = null)
+    {
+        if (other is null)            
+            throw new ArgumentNullException(nameof(other));            
+
+        if (other.Currency != this.Currency)
         {
-            Value = value;
-            Currency = currency ?? throw new ArgumentNullException(nameof(currency));
+            if (converter is null)
+                throw new ArgumentNullException(nameof(converter), "Currency Converter is requried when currencies don't match");
+
+            var converted = converter.Convert(other, this.Currency);
+            return new Money(this.Currency, this.Value - converted.Value);
         }
 
-        public decimal Value { get; }
-        public Currency Currency { get; }
+        return new Money(this.Currency, this.Value - other.Value);
+    }
 
-        public Money Subtract(Money other, ICurrencyConverter converter = null)
+    public Money Add(Money other, ICurrencyConverter converter = null)
+    {
+        if (other is null)
+            throw new ArgumentNullException(nameof(other));
+
+        if (other.Currency != this.Currency)
         {
-            if (other is null)            
-                throw new ArgumentNullException(nameof(other));            
+            if (converter is null)
+                throw new ArgumentNullException(nameof(converter), "Currency Converter is requried when currencies don't match");
 
-            if (other.Currency != this.Currency)
-            {
-                if (converter is null)
-                    throw new ArgumentNullException(nameof(converter), "Currency Converter is requried when currencies don't match");
-
-                var converted = converter.Convert(other, this.Currency);
-                return new Money(this.Currency, this.Value - converted.Value);
-            }
-
-            return new Money(this.Currency, this.Value - other.Value);
+            var converted = converter.Convert(other, this.Currency);
+            return new Money(this.Currency, this.Value + converted.Value);
         }
 
-        public Money Add(Money other, ICurrencyConverter converter = null)
-        {
-            if (other is null)
-                throw new ArgumentNullException(nameof(other));
+        return new Money(this.Currency, this.Value + other.Value);
+    }
 
-            if (other.Currency != this.Currency)
-            {
-                if (converter is null)
-                    throw new ArgumentNullException(nameof(converter), "Currency Converter is requried when currencies don't match");
+    public override string ToString() => $"{Value} {Currency}";
 
-                var converted = converter.Convert(other, this.Currency);
-                return new Money(this.Currency, this.Value + converted.Value);
-            }
+    public static Money Zero(Currency currency) => new Money(currency, 0);
 
-            return new Money(this.Currency, this.Value + other.Value);
-        }
-
-        public override string ToString() => $"{Value} {Currency}";
-
-        public static Money Zero(Currency currency) => new Money(currency, 0);
+    public static Money Parse(string s)
+    {
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(s);
+        var parts = s.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        ArgumentOutOfRangeException.ThrowIfLessThan(parts.Length, 2, nameof(s));
+        var value = decimal.Parse(parts[0]);
+        var currency = Currency.FromCode(parts[1]);
+        return new Money(currency, value);
     }
 }

@@ -9,6 +9,7 @@ using SuperSafeBank.Domain.DomainEvents;
 using SuperSafeBank.Domain.Services;
 using SuperSafeBank.Service.Core.Common;
 using SuperSafeBank.Service.Core.Common.EventHandlers;
+using SuperSafeBank.Service.Core.EventHandlers;
 using SuperSafeBank.Service.Core.Persistence.Mongo.EventHandlers;
 using SuperSafeBank.Worker.Core.Registries;
 
@@ -39,7 +40,7 @@ await Host.CreateDefaultBuilder(args)
     {       
         services.Scan(scan =>
         {
-            scan.FromAssembliesOf(typeof(AccountEventsHandler))                
+            scan.FromAssembliesOf(typeof(AccountEventsHandler), typeof(TransactionEventHandlers))                
                 .RegisterHandlers(typeof(INotificationHandler<>));
         }).Decorate(typeof(INotificationHandler<>), typeof(RetryDecorator<>))
             .AddTransient<ICurrencyConverter, FakeCurrencyConverter>()            

@@ -34,7 +34,7 @@ namespace SuperSafeBank.Worker.Notifications
             var notification = @event switch
             {
                 AccountCreated newAccount => await _notificationsFactory.CreateNewAccountNotificationAsync(newAccount.AccountId),
-                TransactionHappened transaction => await _notificationsFactory.CreateTransactionNotificationAsync(transaction.AccountId),
+                AccountUpdated transaction => await _notificationsFactory.CreateTransactionNotificationAsync(transaction.AccountId),
                 _ => (Notification)null
             };
 

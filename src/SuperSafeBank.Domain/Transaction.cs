@@ -11,7 +11,7 @@ public record Transaction : BaseAggregateRoot<Transaction, Guid>
 
     public Transaction(Guid id, string type, string[] states, IDictionary<string, string> properties) : base(id)
     {
-        ArgumentNullException.ThrowIfNullOrWhiteSpace(type, nameof(type));
+        ArgumentException.ThrowIfNullOrWhiteSpace(type, nameof(type));
         ArgumentNullException.ThrowIfNull(states, nameof(states));
         ArgumentNullException.ThrowIfNull(properties, nameof(properties));
         
@@ -27,6 +27,18 @@ public record Transaction : BaseAggregateRoot<Transaction, Guid>
                 this.States = tc.States;
                 this.Properties = tc.Properties;
                 break;
+            case TransactionEvents.StepForward sf:
+
+                if (string.IsNullOrWhiteSpace(sf.OldState))
+                    CurrentState = States[0];
+                else
+                {
+                    var index = Array.IndexOf(States, sf.OldState);
+                    if (index == States.Length - 1)
+                        throw new InvalidOperationException("transaction already completed");
+                    CurrentState = States[index + 1];
+                }
+                break;
         }
     }
 
@@ -36,7 +48,26 @@ public record Transaction : BaseAggregateRoot<Transaction, Guid>
 
     public string CurrentState { get; private set; }
 
-    public bool IsCompleted => States.Length > 0 && States[States.Length-1] == CurrentState;
+    public bool IsCompleted => States.Length > 0 && States[^1] == CurrentState;
 
     public string Type { get; private set; }
+
+    public static Transaction Transfer(Guid sourceAccount, Guid destinationAccount, Money amount)
+    {
+        return new Transaction(
+            Guid.NewGuid(),
+            TransactionTypes.Transfer,
+            TransactionTypes.TransferStates,
+            new Dictionary<string, string>
+            {
+                { "SourceAccount", sourceAccount.ToString() },
+                { "DestinationAccount", destinationAccount.ToString() },
+                { "Amount", amount.ToString() }
+            });
+    }
+
+    public void StepForward()
+    {
+        this.Append(new TransactionEvents.StepForward(this));
+    }
 }

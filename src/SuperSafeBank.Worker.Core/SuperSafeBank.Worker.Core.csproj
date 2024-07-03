@@ -33,4 +33,8 @@
 		<ProjectReference Include="..\SuperSafeBank.Persistence.SQLServer\SuperSafeBank.Persistence.SQLServer.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Folder Include="EventHandlers\" />
+	</ItemGroup>
+
 </Project>
