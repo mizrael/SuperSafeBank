@@ -11,7 +11,6 @@ namespace SuperSafeBank.Domain.Tests;
 
 public class AccountTests
 {
-
     [Fact]
     public void Create_should_create_valid_Account_instance()
     {
@@ -69,6 +68,28 @@ public class AccountTests
         createdEvent.AggregateVersion.Should().Be(0);
         createdEvent.OwnerId.Should().Be(customer.Id);
         createdEvent.Currency.Should().Be(Currency.CanadianDollar);
+    }
+
+    [Fact]
+    public void Deposit_should_throw_when_transaction_invalid()
+    {
+        var customer = Customer.Create(Guid.NewGuid(), "lorem", "ipsum", "test@test.com");
+        var sut = Account.Create(Guid.NewGuid(), customer, Currency.CanadianDollar);
+        var currencyConverter = new FakeCurrencyConverter();
+
+        Assert.Throws<ArgumentException>(() =>
+            sut.Deposit(Transaction.Withdraw(sut, new Money(Currency.CanadianDollar, 1)), currencyConverter));
+    }
+
+    [Fact]
+    public void Withdraw_should_throw_when_transaction_invalid()
+    {
+        var customer = Customer.Create(Guid.NewGuid(), "lorem", "ipsum", "test@test.com");
+        var sut = Account.Create(Guid.NewGuid(), customer, Currency.CanadianDollar);
+        var currencyConverter = new FakeCurrencyConverter();
+
+        Assert.Throws<ArgumentException>(() =>
+            sut.Withdraw(Transaction.Deposit(sut, new Money(Currency.CanadianDollar, 1)), currencyConverter));
     }
 
     [Fact]

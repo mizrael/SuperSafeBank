@@ -53,7 +53,7 @@ public class TransactionEventHandlersTests
         var sourceAccount = new Account(Guid.NewGuid(), customer, Currency.CanadianDollar);
         
         var deposit = Transaction.Deposit(sourceAccount, Money.Parse("100 CAD"));
-        sourceAccount.Deposit(currencyConverter, Money.Parse("100 CAD"), deposit);
+        sourceAccount.Deposit(deposit, currencyConverter);
 
         var destinationAccount = new Account(Guid.NewGuid(), customer, Currency.CanadianDollar);
 

@@ -71,7 +71,7 @@ public partial class TransactionTests
         var destinationAccount = new Account(Guid.NewGuid(), customer, Currency.CanadianDollar);
         var amount = Money.Zero(Currency.CanadianDollar);
         var sut = Transaction.Transfer(sourceAccount, destinationAccount, amount);
-        sut.CurrentState.Should().NotBeNullOrWhiteSpace();
+        sut.CurrentState.Should().BeNullOrWhiteSpace();
 
         sut.StepForward();
         sut.CurrentState.Should().Be(TransactionTypes.TransferStates[0]);

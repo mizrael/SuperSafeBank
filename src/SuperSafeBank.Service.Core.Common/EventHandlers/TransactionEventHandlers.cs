@@ -82,7 +82,7 @@ public class TransactionEventHandlers : INotificationHandler<TransactionStarted>
             if (sourceAccount is null)
                 throw new InvalidOperationException($"source account {sourceAccountId} not found");
 
-            sourceAccount.Withdraw(_currencyConverter, amount, transaction);
+            sourceAccount.Withdraw(transaction, _currencyConverter);
             await _accountsRepo.PersistAsync(sourceAccount, cancellationToken)
                                .ConfigureAwait(false);
         }
@@ -95,7 +95,7 @@ public class TransactionEventHandlers : INotificationHandler<TransactionStarted>
             if (destinationAccount is null)
                 throw new InvalidOperationException($"destination account {destinationAccountId} not found");
             
-            destinationAccount.Deposit(_currencyConverter, amount, transaction);
+            destinationAccount.Deposit(transaction, _currencyConverter);
             await _accountsRepo.PersistAsync(destinationAccount, cancellationToken)
                                .ConfigureAwait(false);
         }

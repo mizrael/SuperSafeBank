@@ -30,7 +30,8 @@ namespace SuperSafeBank.Domain
             ArgumentNullException.ThrowIfNull(transaction, nameof(transaction));
             ArgumentNullException.ThrowIfNull(currencyConverter, nameof(currencyConverter));
 
-            ArgumentOutOfRangeException.ThrowIfNotEqual(transaction.Type, TransactionTypes.Deposit, nameof(transaction.Type));
+            if (transaction.Type != TransactionTypes.Withdraw && transaction.Type != TransactionTypes.Transfer)
+                throw new ArgumentException("invalid transaction type", nameof(transaction));
 
             if (!transaction.TryGetSourceAccountId(out var sourceAccountId) || sourceAccountId != this.Id)
                 throw new ArgumentException("invalid source account id", nameof(transaction));
@@ -55,8 +56,9 @@ namespace SuperSafeBank.Domain
             ArgumentNullException.ThrowIfNull(transaction, nameof(transaction));
             ArgumentNullException.ThrowIfNull(currencyConverter, nameof(currencyConverter)); 
             
-            ArgumentOutOfRangeException.ThrowIfNotEqual(transaction.Type, TransactionTypes.Deposit, nameof(transaction.Type));
-            
+            if(transaction.Type != TransactionTypes.Deposit && transaction.Type != TransactionTypes.Transfer)
+                throw new ArgumentException("invalid transaction type", nameof(transaction));
+
             if(!transaction.TryGetDestinationAccountId(out var destinationAccountId) || destinationAccountId != this.Id)
                 throw new ArgumentException("invalid destination account id", nameof(transaction)); 
             
