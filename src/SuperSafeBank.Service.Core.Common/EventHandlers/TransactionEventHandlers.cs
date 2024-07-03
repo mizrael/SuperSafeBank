@@ -72,8 +72,6 @@ public class TransactionEventHandlers : INotificationHandler<TransactionStarted>
         var amount = Money.Parse(transaction.Properties["Amount"]);
 
         //TODO: outbox
-        //TODO: add transaction id to account operations
-        //TODO: check if transaction already processed on account
 
         if (transaction.CurrentState == "Pending")
         {
@@ -84,7 +82,7 @@ public class TransactionEventHandlers : INotificationHandler<TransactionStarted>
             if (sourceAccount is null)
                 throw new InvalidOperationException($"source account {sourceAccountId} not found");
 
-            sourceAccount.Withdraw(amount, _currencyConverter);
+            sourceAccount.Withdraw(_currencyConverter, amount, transaction);
             await _accountsRepo.PersistAsync(sourceAccount, cancellationToken)
                                .ConfigureAwait(false);
         }
@@ -97,7 +95,7 @@ public class TransactionEventHandlers : INotificationHandler<TransactionStarted>
             if (destinationAccount is null)
                 throw new InvalidOperationException($"destination account {destinationAccountId} not found");
             
-            destinationAccount.Deposit(amount, _currencyConverter);
+            destinationAccount.Deposit(_currencyConverter, amount, transaction);
             await _accountsRepo.PersistAsync(destinationAccount, cancellationToken)
                                .ConfigureAwait(false);
         }

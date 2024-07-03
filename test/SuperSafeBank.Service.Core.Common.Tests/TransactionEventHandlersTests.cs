@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using SuperSafeBank.Domain.Services;
 using SuperSafeBank.Common.EventBus;
 using SuperSafeBank.Domain.IntegrationEvents;
+using Castle.Core.Resource;
 
 namespace SuperSafeBank.Service.Core.Common.Tests;
 
@@ -15,7 +16,10 @@ public class TransactionEventHandlersTests
     [Fact]
     public async Task Handle_should_process_new_Transaction()
     {
-        var transaction = Transaction.Transfer(Guid.NewGuid(), Guid.NewGuid(), Money.Zero(Currency.CanadianDollar));
+        var customer = Customer.Create(Guid.NewGuid(), "john", "doe", "test@test.com");
+        var sourceAccount = new Account(Guid.NewGuid(), customer, Currency.CanadianDollar);
+        var destinationAccount = new Account(Guid.NewGuid(), customer, Currency.CanadianDollar);
+        var transaction = Transaction.Transfer(sourceAccount, destinationAccount, Money.Zero(Currency.CanadianDollar));
         var @event = new TransactionStarted(Guid.NewGuid(), transaction.Id);
 
         var transactionsRepo = NSubstitute.Substitute.For<IAggregateRepository<Transaction, Guid>>();
@@ -47,9 +51,13 @@ public class TransactionEventHandlersTests
 
         var customer = Customer.Create(Guid.NewGuid(), "john", "doe", "test@test.com");
         var sourceAccount = new Account(Guid.NewGuid(), customer, Currency.CanadianDollar);
-        sourceAccount.Deposit(Money.Parse("100 CAD"), currencyConverter);
         
-        var transaction = Transaction.Transfer(sourceAccount.Id, Guid.NewGuid(), Money.Parse("50 CAD"));
+        var deposit = Transaction.Deposit(sourceAccount, Money.Parse("100 CAD"));
+        sourceAccount.Deposit(currencyConverter, Money.Parse("100 CAD"), deposit);
+
+        var destinationAccount = new Account(Guid.NewGuid(), customer, Currency.CanadianDollar);
+
+        var transaction = Transaction.Transfer(sourceAccount, destinationAccount, Money.Parse("50 CAD"));
         transaction.StepForward();
         var @event = new TransactionStarted(Guid.NewGuid(), transaction.Id);
 
@@ -90,7 +98,7 @@ public class TransactionEventHandlersTests
         var sourceAccount = new Account(Guid.NewGuid(), customer, Currency.CanadianDollar);
         var destinationAccount = new Account(Guid.NewGuid(), customer, Currency.CanadianDollar);
 
-        var transaction = Transaction.Transfer(sourceAccount.Id, destinationAccount.Id, Money.Parse("50 CAD"));
+        var transaction = Transaction.Transfer(sourceAccount, destinationAccount, Money.Parse("50 CAD"));
         transaction.StepForward();
         transaction.StepForward();
         var @event = new TransactionStarted(Guid.NewGuid(), transaction.Id);

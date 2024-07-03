@@ -32,12 +32,15 @@ namespace SuperSafeBank.Domain.DomainEvents
             /// </summary>
             private Deposit() { }
 
-            public Deposit(Account account, Money amount) : base(account)
+            public Deposit(Account account, Money amount, Transaction transaction) : base(account)
             {
                 Amount = amount;
+                TransactionId = transaction.Id;
             }
 
             public Money Amount { get; init; }
+
+            public Guid TransactionId { get; init; }
         }
 
         public record Withdrawal : BaseDomainEvent<Account, Guid>
@@ -47,12 +50,14 @@ namespace SuperSafeBank.Domain.DomainEvents
             /// </summary>
             private Withdrawal() { }
 
-            public Withdrawal(Account account, Money amount) : base(account)
+            public Withdrawal(Account account, Money amount, Transaction transaction) : base(account)
             {
                 Amount = amount;
+                TransactionId = transaction.Id;
             }
 
             public Money Amount { get; init; }
+            public Guid TransactionId { get; init; }
         }
     }
 }

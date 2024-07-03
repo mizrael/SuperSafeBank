@@ -61,4 +61,16 @@ public record Money
         var currency = Currency.FromCode(parts[1]);
         return new Money(currency, value);
     }
+
+    public static bool TryParse(string s, out Money? result)
+    {
+        result = null;
+        try
+        {
+            result = Parse(s);
+            return true;
+        }catch{
+            return false;
+        }
+    }
 }

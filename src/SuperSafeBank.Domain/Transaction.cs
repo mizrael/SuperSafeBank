@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Security.Principal;
 using SuperSafeBank.Common.Models;
 using SuperSafeBank.Domain.DomainEvents;
 
@@ -41,6 +42,10 @@ public record Transaction : BaseAggregateRoot<Transaction, Guid>
                 break;
         }
     }
+    public void StepForward()
+    {
+        this.Append(new TransactionEvents.StepForward(this));
+    }
 
     public IReadOnlyDictionary<string, string> Properties { get; private set; }
 
@@ -52,22 +57,72 @@ public record Transaction : BaseAggregateRoot<Transaction, Guid>
 
     public string Type { get; private set; }
 
-    public static Transaction Transfer(Guid sourceAccount, Guid destinationAccount, Money amount)
+    #region helpers
+
+    public bool TryGetSourceAccountId(out Guid accountId)
     {
-        return new Transaction(
+        if (Properties.TryGetValue(TransactionProperties.SourceAccount, out var value))
+            return Guid.TryParse(value, out accountId);
+
+        accountId = Guid.Empty;
+        return false;
+    }
+
+    public bool TryGetDestinationAccountId(out Guid accountId)
+    {
+        if (Properties.TryGetValue(TransactionProperties.DestinationAccount, out var value))
+            return Guid.TryParse(value, out accountId);
+
+        accountId = Guid.Empty;
+        return false;
+    }
+
+    public bool TryGetAmount(out Money? amount)
+    {
+        if (Properties.TryGetValue(TransactionProperties.Amount, out var value))
+            return Money.TryParse(value, out amount);
+
+        amount = null;
+        return false;
+    }
+
+    #endregion helpers
+
+    #region factories
+
+    public static Transaction Transfer(Account sourceAccount, Account destinationAccount, Money amount)
+    => new Transaction(
             Guid.NewGuid(),
             TransactionTypes.Transfer,
             TransactionTypes.TransferStates,
             new Dictionary<string, string>
             {
-                { "SourceAccount", sourceAccount.ToString() },
-                { "DestinationAccount", destinationAccount.ToString() },
-                { "Amount", amount.ToString() }
+                { TransactionProperties.SourceAccount, sourceAccount.Id.ToString() },
+                { TransactionProperties.DestinationAccount, destinationAccount.Id.ToString() },
+                { TransactionProperties.Amount, amount.ToString() }
             });
-    }
 
-    public void StepForward()
-    {
-        this.Append(new TransactionEvents.StepForward(this));
-    }
+    public static Transaction Deposit(Account account, Money amount)
+    => new Transaction(
+            Guid.NewGuid(),
+            TransactionTypes.Deposit,
+            TransactionTypes.DepositStates,
+            new Dictionary<string, string>
+            {
+                { TransactionProperties.DestinationAccount, account.Id.ToString() },
+                { TransactionProperties.Amount, amount.ToString() }
+            });
+
+    public static Transaction Withdraw(Account account, Money amount)
+    => new Transaction(
+            Guid.NewGuid(),
+            TransactionTypes.Withdraw,
+            TransactionTypes.WithdrawStates,
+            new Dictionary<string, string>
+            {
+                { TransactionProperties.SourceAccount, account.Id.ToString() },
+                { TransactionProperties.Amount, amount.ToString() }
+            });
+
+    #endregion factories
 }

@@ -1,11 +1,10 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using MediatR;
+﻿using MediatR;
 using SuperSafeBank.Common;
 using SuperSafeBank.Common.EventBus;
 using SuperSafeBank.Domain.IntegrationEvents;
-using SuperSafeBank.Domain.Services;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace SuperSafeBank.Domain.Commands;
 
@@ -24,25 +23,36 @@ public record Transfer : IRequest
 
 public class TransferHandler : IRequestHandler<Transfer>
 {
-    private readonly IAggregateRepository<Transaction, Guid> _repo;
-    private readonly ICurrencyConverter _currencyConverter;
+    private readonly IAggregateRepository<Account, Guid> _accountEventsService;
+    private readonly IAggregateRepository<Transaction, Guid> _transactionRepo;
     private readonly IEventProducer _eventProducer;
 
-    public TransferHandler(IAggregateRepository<Transaction, Guid> repo, ICurrencyConverter currencyConverter, IEventProducer eventProducer)
+    public TransferHandler(
+        IAggregateRepository<Account, Guid> accountsRepo,
+        IAggregateRepository<Transaction, Guid> transactionsRepo,
+        IEventProducer eventProducer)
     {
-        _repo = repo;
-        _currencyConverter = currencyConverter;
+        _accountEventsService = accountsRepo;
+        _transactionRepo = transactionsRepo;
         _eventProducer = eventProducer;
     }
 
     public async Task Handle(Transfer command, CancellationToken cancellationToken)
     {
+        var sourceAccount = await _accountEventsService.RehydrateAsync(command.SourceAccountId);
+        if (null == sourceAccount)
+            throw new ArgumentOutOfRangeException(nameof(Transfer.SourceAccountId), "invalid source account id");
+
+        var destinationAccount = await _accountEventsService.RehydrateAsync(command.DestinationAccountId);
+        if (null == destinationAccount)
+            throw new ArgumentOutOfRangeException(nameof(Transfer.DestinationAccountId), "invalid destination account id");
+
         var transaction = Transaction.Transfer(
-            command.SourceAccountId,
-            command.DestinationAccountId,
+            sourceAccount,
+            destinationAccount,
             command.Amount);
 
-        await _repo.PersistAsync(transaction, cancellationToken)
+        await _transactionRepo.PersistAsync(transaction, cancellationToken)
                    .ConfigureAwait(false);
 
         var @event = new TransactionStarted(Guid.NewGuid(), transaction.Id);

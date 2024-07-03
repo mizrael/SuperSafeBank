@@ -1,11 +1,10 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using MediatR;
+﻿using MediatR;
 using SuperSafeBank.Common;
 using SuperSafeBank.Common.EventBus;
 using SuperSafeBank.Domain.IntegrationEvents;
-using SuperSafeBank.Domain.Services;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace SuperSafeBank.Domain.Commands;
 
@@ -24,13 +23,16 @@ public record Deposit : IRequest
 public class DepositHandler : IRequestHandler<Deposit>
 {
     private readonly IAggregateRepository<Account, Guid> _accountEventsService;
-    private readonly ICurrencyConverter _currencyConverter;
+    private readonly IAggregateRepository<Transaction, Guid> _transactionRepo;
     private readonly IEventProducer _eventProducer;
 
-    public DepositHandler(IAggregateRepository<Account, Guid> accountEventsService, ICurrencyConverter currencyConverter, IEventProducer eventProducer)
+    public DepositHandler(
+        IAggregateRepository<Account, Guid> accountsRepo,
+        IAggregateRepository<Transaction, Guid> transactionsRepo, 
+        IEventProducer eventProducer)
     {
-        _accountEventsService = accountEventsService;
-        _currencyConverter = currencyConverter;
+        _accountEventsService = accountsRepo;
+        _transactionRepo = transactionsRepo;
         _eventProducer = eventProducer;
     }
 
@@ -40,11 +42,12 @@ public class DepositHandler : IRequestHandler<Deposit>
         if(null == account)
             throw new ArgumentOutOfRangeException(nameof(Deposit.AccountId), "invalid account id");
 
-        account.Deposit(command.Amount, _currencyConverter);
+        var transaction = Transaction.Deposit(account, command.Amount);
+        
+        await _transactionRepo.PersistAsync(transaction);
 
-        await _accountEventsService.PersistAsync(account);
-
-        var @event = new AccountUpdated(Guid.NewGuid(), account.Id);
-        await _eventProducer.DispatchAsync(@event, cancellationToken);
+        var @event = new TransactionStarted(Guid.NewGuid(), transaction.Id);
+        await _eventProducer.DispatchAsync(@event, cancellationToken)
+                            .ConfigureAwait(false);
     }
 }
