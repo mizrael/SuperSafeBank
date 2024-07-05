@@ -10,7 +10,7 @@ using SuperSafeBank.Common.Models;
 
 namespace SuperSafeBank.Persistence.EventStore
 {
-    public class EventStoreAggregateRepository<TA, TKey> : IAggregateRepository<TA, TKey>
+    public class EventStoreAggregateRepository<TA, TKey> : BaseAggregateRepository<TA, TKey>
         where TA : class, IAggregateRoot<TKey>
     {
         private readonly IEventStoreConnectionWrapper _connectionWrapper;
@@ -26,14 +26,8 @@ namespace SuperSafeBank.Persistence.EventStore
             _streamBaseName = aggregateType.Name;
         }
 
-        public async Task PersistAsync(TA aggregateRoot, CancellationToken cancellationToken = default)
-        {
-            if (null == aggregateRoot)
-                throw new ArgumentNullException(nameof(aggregateRoot));
-
-            if (!aggregateRoot.Events.Any())
-                return;
-            
+        protected override async Task PersistCoreAsync(TA aggregateRoot, CancellationToken cancellationToken = default)
+        {            
             var streamName = GetStreamName(aggregateRoot.Id);
 
             var firstEvent = aggregateRoot.Events.First();
@@ -53,11 +47,9 @@ namespace SuperSafeBank.Persistence.EventStore
                 transaction.Rollback();
                 throw;
             }
-
-            aggregateRoot.ClearEvents();
         }
 
-        public async Task<TA> RehydrateAsync(TKey key, CancellationToken cancellationToken = default)
+        public override async Task<TA> RehydrateAsync(TKey key, CancellationToken cancellationToken = default)
         {
             var connection = await _connectionWrapper.GetConnectionAsync().ConfigureAwait(false); 
             

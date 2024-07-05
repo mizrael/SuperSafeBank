@@ -55,7 +55,7 @@ namespace SuperSafeBank.Service.Core.Azure.Tests
             var client = new TableClient(_connStr, tableName);
             client.CreateIfNotExists();
 
-            var repo = new AggregateRepository<TA, TKey>(client, _eventSerializer);
+            var repo = new StorageTableAggregateRepository<TA, TKey>(client, _eventSerializer);
 
             _tableClients.Enqueue(client);
 

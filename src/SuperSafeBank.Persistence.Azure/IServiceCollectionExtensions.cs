@@ -35,7 +35,7 @@ namespace SuperSafeBank.Persistence.Azure
                 client.CreateIfNotExists();
 
                 var eventDeserializer = ctx.GetRequiredService<IEventSerializer>();
-                return new AggregateRepository<TA, TK>(client, eventDeserializer);
+                return new StorageTableAggregateRepository<TA, TK>(client, eventDeserializer);
             });
         }
     }

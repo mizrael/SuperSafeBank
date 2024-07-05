@@ -5,7 +5,7 @@ using SuperSafeBank.Common.Models;
 
 namespace SuperSafeBank.Persistence.EvenireDB;
 
-internal class AggregateRepository<TA, TKey> : IAggregateRepository<TA, TKey>
+internal class AggregateRepository<TA, TKey> : BaseAggregateRepository<TA, TKey>
         where TA : class, IAggregateRoot<TKey>        
 {
     private readonly IEventsClient _client;
@@ -17,13 +17,8 @@ internal class AggregateRepository<TA, TKey> : IAggregateRepository<TA, TKey>
         _eventDeserializer = eventDeserializer ?? throw new ArgumentNullException(nameof(eventDeserializer));
     }
 
-    public async Task PersistAsync(TA aggregateRoot, CancellationToken cancellationToken = default)
+    protected override async Task PersistCoreAsync(TA aggregateRoot, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(aggregateRoot);
-
-        if (!aggregateRoot.Events.Any())
-            return;
-
         if (aggregateRoot.Id is not Guid streamKey)
             throw new NotSupportedException("only Guid keys are currently supported.");
 
@@ -35,11 +30,9 @@ internal class AggregateRepository<TA, TKey> : IAggregateRepository<TA, TKey>
 
         await _client.AppendAsync(streamId, events, cancellationToken)
                     .ConfigureAwait(false);
-
-        aggregateRoot.ClearEvents();
     }
 
-    public async Task<TA?> RehydrateAsync(TKey key, CancellationToken cancellationToken = default)
+    public override async Task<TA?> RehydrateAsync(TKey key, CancellationToken cancellationToken = default)
     {
         if (key is not Guid streamKey)
             throw new NotSupportedException("only Guid keys are currently supported.");

@@ -32,7 +32,7 @@ namespace SuperSafeBank.Persistence.Azure.Tests.Integration
         {
             var client = await _fixture.CreateTableClientAsync<DummyAggregate, Guid>();
 
-            var sut = new AggregateRepository<DummyAggregate, Guid>(client, _eventSerializer);
+            var sut = new StorageTableAggregateRepository<DummyAggregate, Guid>(client, _eventSerializer);
 
             var aggregate = new DummyAggregate(Guid.NewGuid());
             aggregate.DoSomething("foo");
@@ -55,7 +55,7 @@ namespace SuperSafeBank.Persistence.Azure.Tests.Integration
         {
             var client = await _fixture.CreateTableClientAsync<DummyAggregate, Guid>();
 
-            var sut = new AggregateRepository<DummyAggregate, Guid>(client, _eventSerializer);
+            var sut = new StorageTableAggregateRepository<DummyAggregate, Guid>(client, _eventSerializer);
 
             var aggregate = new DummyAggregate(Guid.NewGuid());
             aggregate.DoSomething("foo");
@@ -73,7 +73,7 @@ namespace SuperSafeBank.Persistence.Azure.Tests.Integration
         {
             var db = await _fixture.CreateTableClientAsync<DummyAggregate, Guid>();
 
-            var sut = new AggregateRepository<DummyAggregate, Guid>(db, _eventSerializer);
+            var sut = new StorageTableAggregateRepository<DummyAggregate, Guid>(db, _eventSerializer);
 
             var aggregateId = Guid.NewGuid();
 
@@ -93,7 +93,7 @@ namespace SuperSafeBank.Persistence.Azure.Tests.Integration
         {
             var db = await _fixture.CreateTableClientAsync<DummyAggregate, Guid>();
 
-            var sut = new AggregateRepository<DummyAggregate, Guid>(db, _eventSerializer);
+            var sut = new StorageTableAggregateRepository<DummyAggregate, Guid>(db, _eventSerializer);
 
             var aggregate = new DummyAggregate(Guid.NewGuid());
             aggregate.DoSomething("lorem");
