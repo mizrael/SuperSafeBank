@@ -111,6 +111,21 @@ public class AccountTests
     }
 
     [Fact]
+    public void Deposit_should_be_idempotent()
+    {
+        var customer = Customer.Create(Guid.NewGuid(), "lorem", "ipsum", "test@test.com");
+        var sut = Account.Create(Guid.NewGuid(), customer, Currency.CanadianDollar);
+        var currencyConverter = new FakeCurrencyConverter();
+
+        var transaction = Transaction.Deposit(sut, new Money(Currency.CanadianDollar, 1));
+        sut.Deposit(transaction, currencyConverter);
+        sut.Deposit(transaction, currencyConverter);
+
+        sut.Balance.Should().Be(new Money(Currency.CanadianDollar, 1));
+        sut.Version.Should().Be(2);
+    }
+
+    [Fact]
     public void Withdraw_should_throw_if_current_balance_is_below_amount()
     {
         var customer = Customer.Create(Guid.NewGuid(), "lorem", "ipsum", "test@test.com");
@@ -132,6 +147,23 @@ public class AccountTests
 
         sut.Deposit(Transaction.Deposit(sut, new Money(Currency.CanadianDollar, 10)), currencyConverter);
         sut.Withdraw(Transaction.Withdraw(sut, new Money(Currency.CanadianDollar, 1)), currencyConverter);
+
+        sut.Balance.Should().Be(new Money(Currency.CanadianDollar, 9));
+        sut.Version.Should().Be(3);
+    }
+
+    [Fact]
+    public void Withdraw_should_be_idempotent()
+    {
+        var customer = Customer.Create(Guid.NewGuid(), "lorem", "ipsum", "test@test.com");
+        var sut = Account.Create(Guid.NewGuid(), customer, Currency.CanadianDollar);
+        var currencyConverter = new FakeCurrencyConverter();
+
+        sut.Deposit(Transaction.Deposit(sut, new Money(Currency.CanadianDollar, 10)), currencyConverter);
+
+        var transaction = Transaction.Withdraw(sut, new Money(Currency.CanadianDollar, 1));
+        sut.Withdraw(transaction, currencyConverter);
+        sut.Withdraw(transaction, currencyConverter);
 
         sut.Balance.Should().Be(new Money(Currency.CanadianDollar, 9));
         sut.Version.Should().Be(3);

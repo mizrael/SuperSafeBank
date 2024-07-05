@@ -16,15 +16,18 @@ public partial class TransactionTests
 
         var sut = Transaction.Transfer(sourceAccount, destinationAccount, amount);
 
-        Assert.NotNull(sut);
-        Assert.Equal("Transfer", sut.Type);
-        Assert.Equal(3, sut.States.Length);
-        Assert.Equal("Pending", sut.States[0]);
-        Assert.Equal("Withdrawn", sut.States[1]);
-        Assert.Equal("Deposited", sut.States[2]);
-        Assert.Equal(sourceAccount.Id.ToString(), sut.Properties["SourceAccount"]);
-        Assert.Equal(destinationAccount.Id.ToString(), sut.Properties["DestinationAccount"]);
-        Assert.Equal(amount.ToString(), sut.Properties["Amount"]);
+        sut.Should().NotBeNull();
+        sut.Type.Should().Be("Transfer");
+        sut.States.Should().HaveCount(2);
+        sut.States[0].Should().Be("Withdrawn");
+        sut.States[1].Should().Be("Deposited");
+
+        sut.Properties.Should().ContainKey("SourceAccount")
+            .WhoseValue.Should().Be(sourceAccount.Id.ToString());
+        sut.Properties.Should().ContainKey("DestinationAccount")
+            .WhoseValue.Should().Be(destinationAccount.Id.ToString());
+        sut.Properties.Should().ContainKey("Amount")
+            .WhoseValue.Should().Be(amount.ToString());
     }
 
     [Fact]
@@ -35,14 +38,15 @@ public partial class TransactionTests
         var amount = Money.Zero(Currency.CanadianDollar);
 
         var sut = Transaction.Deposit(destinationAccount, amount);
-
-        Assert.NotNull(sut);
-        Assert.Equal("Deposit", sut.Type);
-        Assert.Equal(2, sut.States.Length);
-        Assert.Equal("Pending", sut.States[0]);
-        Assert.Equal("Deposited", sut.States[1]);
-        Assert.Equal(destinationAccount.Id.ToString(), sut.Properties["DestinationAccount"]);
-        Assert.Equal(amount.ToString(), sut.Properties["Amount"]);
+        sut.Should().NotBeNull();
+        sut.Type.Should().Be("Deposit");
+        sut.CurrentState.Should().BeNullOrEmpty();
+        sut.States.Should().HaveCount(1);
+        sut.States[0].Should().Be("Deposited");
+        sut.Properties.Should().ContainKey("DestinationAccount")
+            .WhoseValue.Should().Be(destinationAccount.Id.ToString());
+        sut.Properties.Should().ContainKey("Amount")
+            .WhoseValue.Should().Be(amount.ToString());
     }
 
     [Fact]
@@ -54,13 +58,15 @@ public partial class TransactionTests
 
         var sut = Transaction.Withdraw(account, amount);
 
-        Assert.NotNull(sut);
-        Assert.Equal("Withdraw", sut.Type);
-        Assert.Equal(2, sut.States.Length);
-        Assert.Equal("Pending", sut.States[0]);
-        Assert.Equal("Withdrawn", sut.States[1]);
-        Assert.Equal(account.Id.ToString(), sut.Properties["SourceAccount"]);
-        Assert.Equal(amount.ToString(), sut.Properties["Amount"]);
+        sut.Should().NotBeNull();
+        sut.Type.Should().Be("Withdraw");
+        sut.CurrentState.Should().BeNullOrEmpty();
+        sut.States.Should().HaveCount(1);
+        sut.States[0].Should().Be("Withdrawn");
+        sut.Properties.Should().ContainKey("SourceAccount")
+            .WhoseValue.Should().Be(account.Id.ToString());
+        sut.Properties.Should().ContainKey("Amount")
+            .WhoseValue.Should().Be(amount.ToString());
     }
 
     [Fact]
@@ -79,7 +85,6 @@ public partial class TransactionTests
         sut.StepForward();
         sut.CurrentState.Should().Be(TransactionTypes.TransferStates[1]);
 
-        sut.StepForward();
-        sut.CurrentState.Should().Be(TransactionTypes.TransferStates[2]);
+        sut.IsCompleted.Should().BeTrue();
     }
 }

@@ -42,8 +42,20 @@ public class TransactionEventHandlers : INotificationHandler<TransactionStarted>
 
         _logger.LogInformation("handling transaction {transactionId} of type {transactionType}...", transaction.Id, transaction.Type);
 
+        if (transaction.IsCompleted)
+        {
+            _logger.LogInformation("transaction {transactionId} already completed", transaction.Id);
+            return;
+        }
+
         switch (transaction.Type)
         {
+            case TransactionTypes.Withdraw:
+                await HandleWihdrawAsync(transaction, cancellationToken).ConfigureAwait(false);
+                break;
+            case TransactionTypes.Deposit:
+                await HandleDepositAsync(transaction, cancellationToken).ConfigureAwait(false);
+                break;
             case TransactionTypes.Transfer:
                 await HandleTransferAsync(transaction, cancellationToken).ConfigureAwait(false);
                 break;
@@ -52,28 +64,70 @@ public class TransactionEventHandlers : INotificationHandler<TransactionStarted>
         }
     }
 
-    private async Task HandleTransferAsync(Transaction transaction, CancellationToken cancellationToken)
+    private async Task HandleDepositAsync(Transaction transaction, CancellationToken cancellationToken)
     {
-        if (transaction.IsCompleted)
+        if (!transaction.TryGetAmount(out var amount))
+            throw new ArgumentException("missing Amount");
+        if (!transaction.TryGetDestinationAccountId(out var destinationAccountId))
+            throw new ArgumentException("missing Destination Account");
+
+        if (string.IsNullOrWhiteSpace(transaction.CurrentState))
         {
-            _logger.LogInformation("transaction {transactionId} already completed", transaction.Id);
-            return;
+            _logger.LogInformation("transaction {transactionId}: depositing {amount} into account {destinationAccountId}", transaction.Id, amount, destinationAccountId);
+
+            var destinationAccount = await _accountsRepo.RehydrateAsync(destinationAccountId, CancellationToken.None)
+                                                           .ConfigureAwait(false);
+            if (destinationAccount is null)
+                throw new InvalidOperationException($"destination account {destinationAccountId} not found");
+
+            destinationAccount.Deposit(transaction, _currencyConverter);
+            await _accountsRepo.PersistAsync(destinationAccount, cancellationToken)
+                               .ConfigureAwait(false);
         }
 
-        if (!transaction.Properties.ContainsKey("SourceAccount"))
-            throw new ArgumentException("missing SourceAccount");
-        if (!transaction.Properties.ContainsKey("DestinationAccount"))
-            throw new ArgumentException("missing DestinationAccount");
-        if (!transaction.Properties.ContainsKey("Amount"))
-            throw new ArgumentException("missing Amount");
+        transaction.StepForward();
+        await _transactionsRepo.PersistAsync(transaction, cancellationToken)
+                               .ConfigureAwait(false);
+    }
 
-        var sourceAccountId = Guid.Parse(transaction.Properties["SourceAccount"]);
-        var destinationAccountId = Guid.Parse(transaction.Properties["DestinationAccount"]);
-        var amount = Money.Parse(transaction.Properties["Amount"]);
+    private async Task HandleWihdrawAsync(Transaction transaction, CancellationToken cancellationToken)
+    {
+        if (!transaction.TryGetAmount(out var amount))
+            throw new ArgumentException("missing Amount");
+        if (!transaction.TryGetSourceAccountId(out var sourceAccountId))
+            throw new ArgumentException("missing Source Account");
+
+        if (string.IsNullOrWhiteSpace(transaction.CurrentState))
+        {
+            _logger.LogInformation("transaction {transactionId}: withdrawing {amount} from account {sourceAccountId}", transaction.Id, amount, sourceAccountId);
+
+            var sourceAccount = await _accountsRepo.RehydrateAsync(sourceAccountId, CancellationToken.None)
+                                                      .ConfigureAwait(false);
+            if (sourceAccount is null)
+                throw new InvalidOperationException($"source account {sourceAccountId} not found");
+
+            sourceAccount.Withdraw(transaction, _currencyConverter);
+            await _accountsRepo.PersistAsync(sourceAccount, cancellationToken)
+                               .ConfigureAwait(false);
+        }
+
+        transaction.StepForward();
+        await _transactionsRepo.PersistAsync(transaction, cancellationToken)
+                               .ConfigureAwait(false);
+    }
+
+    private async Task HandleTransferAsync(Transaction transaction, CancellationToken cancellationToken)
+    {
+        if(!transaction.TryGetAmount(out var amount))
+            throw new ArgumentException("missing Amount");
+        if(!transaction.TryGetSourceAccountId(out var sourceAccountId))
+            throw new ArgumentException("missing Source Account");
+        if(!transaction.TryGetDestinationAccountId(out var destinationAccountId))
+            throw new ArgumentException("missing Destination Account");
 
         //TODO: outbox
 
-        if (transaction.CurrentState == "Pending")
+        if (string.IsNullOrWhiteSpace(transaction.CurrentState))
         {
             _logger.LogInformation("transaction {transactionId}: withdrawing {amount} from account {sourceAccountId}", transaction.Id, amount, sourceAccountId);
 
@@ -88,7 +142,7 @@ public class TransactionEventHandlers : INotificationHandler<TransactionStarted>
         }
         else if (transaction.CurrentState == "Withdrawn")
         {
-            _logger.LogInformation("transaction {transactionId}: depositing {amount} to account {destinationAccountId}", transaction.Id, amount, destinationAccountId);
+            _logger.LogInformation("transaction {transactionId}: depositing {amount} into account {destinationAccountId}", transaction.Id, amount, destinationAccountId);
 
             var destinationAccount = await _accountsRepo.RehydrateAsync(destinationAccountId, CancellationToken.None)
                                                            .ConfigureAwait(false);
