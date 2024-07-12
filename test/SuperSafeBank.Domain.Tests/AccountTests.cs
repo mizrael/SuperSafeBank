@@ -18,7 +18,7 @@ public class AccountTests
         var account = Account.Create(Guid.NewGuid(), customer, Currency.CanadianDollar);
         account.Deposit(Transaction.Deposit(account, new Money(Currency.CanadianDollar, 10)), currencyConverter);
         account.Deposit(Transaction.Deposit(account, new Money(Currency.CanadianDollar, 42)), currencyConverter);
-        account.Withdraw(Transaction.Withdraw(account, new Money(Currency.CanadianDollar, 4)), currencyConverter);
+        account.Withdraw(Transaction.Withdraw(account, new Money(Currency.CanadianDollar, 4), currencyConverter), currencyConverter);
         account.Deposit(Transaction.Deposit(account, new Money(Currency.CanadianDollar, 71)), currencyConverter);
 
         var instance = BaseAggregateRoot<Account, Guid>.Create(account.NewEvents);
@@ -77,7 +77,7 @@ public class AccountTests
         var currencyConverter = new FakeCurrencyConverter();
 
         Assert.Throws<ArgumentException>(() =>
-            sut.Deposit(Transaction.Withdraw(sut, new Money(Currency.CanadianDollar, 1)), currencyConverter));
+            sut.Deposit(Transaction.Withdraw(sut, new Money(Currency.CanadianDollar, 1), currencyConverter), currencyConverter));
     }
 
     [Fact]
@@ -134,7 +134,7 @@ public class AccountTests
         sut.Balance.Should().Be(Money.Zero(Currency.CanadianDollar));
         
         Assert.Throws<AccountTransactionException>(() =>
-            sut.Withdraw(Transaction.Withdraw(sut, new Money(Currency.CanadianDollar, 1)), currencyConverter));
+            sut.Withdraw(Transaction.Withdraw(sut, new Money(Currency.CanadianDollar, 1), currencyConverter), currencyConverter));
     }
 
     [Fact]
@@ -145,7 +145,7 @@ public class AccountTests
         var currencyConverter = new FakeCurrencyConverter();
 
         sut.Deposit(Transaction.Deposit(sut, new Money(Currency.CanadianDollar, 10)), currencyConverter);
-        sut.Withdraw(Transaction.Withdraw(sut, new Money(Currency.CanadianDollar, 1)), currencyConverter);
+        sut.Withdraw(Transaction.Withdraw(sut, new Money(Currency.CanadianDollar, 1), currencyConverter), currencyConverter);
 
         sut.Balance.Should().Be(new Money(Currency.CanadianDollar, 9));
         sut.Version.Should().Be(3);
@@ -160,7 +160,7 @@ public class AccountTests
 
         sut.Deposit(Transaction.Deposit(sut, new Money(Currency.CanadianDollar, 10)), currencyConverter);
 
-        var transaction = Transaction.Withdraw(sut, new Money(Currency.CanadianDollar, 1));
+        var transaction = Transaction.Withdraw(sut, new Money(Currency.CanadianDollar, 1), currencyConverter);
         sut.Withdraw(transaction, currencyConverter);
         sut.Withdraw(transaction, currencyConverter);
 

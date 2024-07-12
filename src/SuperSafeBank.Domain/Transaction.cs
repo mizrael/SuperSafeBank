@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Security.Principal;
 using SuperSafeBank.Common.Models;
 using SuperSafeBank.Domain.DomainEvents;
+using SuperSafeBank.Domain.Services;
 
 namespace SuperSafeBank.Domain;
 
@@ -113,8 +114,15 @@ public record Transaction : BaseAggregateRoot<Transaction, Guid>
                 { TransactionProperties.Amount, amount.ToString() }
             });
 
-    public static Transaction Withdraw(Account account, Money amount)
-    => new Transaction(
+    public static Transaction Withdraw(Account account, Money amount, ICurrencyConverter currencyConverter)
+    {
+        ArgumentOutOfRangeException.ThrowIfLessThan(amount.Value, 0, nameof(amount));
+
+        var normalizedAmount = currencyConverter.Convert(amount, account.Balance.Currency);
+        if (normalizedAmount.Value > account.Balance.Value)
+            throw new AccountTransactionException($"unable to withdrawn {normalizedAmount} from account {account.Id}", account);
+
+        return new Transaction(
             Guid.NewGuid(),
             TransactionTypes.Withdraw,
             TransactionTypes.WithdrawStates,
@@ -123,6 +131,7 @@ public record Transaction : BaseAggregateRoot<Transaction, Guid>
                 { TransactionProperties.SourceAccount, account.Id.ToString() },
                 { TransactionProperties.Amount, amount.ToString() }
             });
+    }
 
     #endregion factories
 }

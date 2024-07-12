@@ -2,6 +2,7 @@
 using SuperSafeBank.Common;
 using SuperSafeBank.Common.EventBus;
 using SuperSafeBank.Domain.IntegrationEvents;
+using SuperSafeBank.Domain.Services;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -26,15 +27,18 @@ public class WithdrawHandler : IRequestHandler<Withdraw>
     private readonly IAggregateRepository<Account, Guid> _accountEventsService;
     private readonly IAggregateRepository<Transaction, Guid> _transactionRepo;
     private readonly IEventProducer _eventProducer;
+    private readonly ICurrencyConverter _currencyConverter;
 
     public WithdrawHandler(
         IAggregateRepository<Account, Guid> accountsRepo,
         IAggregateRepository<Transaction, Guid> transactionsRepo,
-        IEventProducer eventProducer)
+        IEventProducer eventProducer,
+        ICurrencyConverter currencyConverter)
     {
         _accountEventsService = accountsRepo;
         _transactionRepo = transactionsRepo;
         _eventProducer = eventProducer;
+        _currencyConverter = currencyConverter;
     }
 
     public async Task Handle(Withdraw command, CancellationToken cancellationToken)
@@ -43,7 +47,7 @@ public class WithdrawHandler : IRequestHandler<Withdraw>
         if (null == account)
             throw new ArgumentOutOfRangeException(nameof(Withdraw.AccountId), "invalid account id");
 
-        var transaction = Transaction.Withdraw(account, command.Amount);
+        var transaction = Transaction.Withdraw(account, command.Amount, _currencyConverter);
 
         await _transactionRepo.PersistAsync(transaction);
 

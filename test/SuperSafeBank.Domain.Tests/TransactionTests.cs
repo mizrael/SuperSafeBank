@@ -1,4 +1,6 @@
 ﻿using FluentAssertions;
+using NSubstitute;
+using SuperSafeBank.Domain.Services;
 using System;
 using Xunit;
 
@@ -56,7 +58,11 @@ public partial class TransactionTests
         var account = new Account(Guid.NewGuid(), customer, Currency.CanadianDollar);
         var amount = Money.Zero(Currency.CanadianDollar);
 
-        var sut = Transaction.Withdraw(account, amount);
+        var currencyConverter = Substitute.For<ICurrencyConverter>();
+        currencyConverter.Convert(amount, account.Balance.Currency)
+                         .Returns(amount);
+
+        var sut = Transaction.Withdraw(account, amount, currencyConverter);
 
         sut.Should().NotBeNull();
         sut.Type.Should().Be("Withdraw");
@@ -67,6 +73,31 @@ public partial class TransactionTests
             .WhoseValue.Should().Be(account.Id.ToString());
         sut.Properties.Should().ContainKey("Amount")
             .WhoseValue.Should().Be(amount.ToString());
+    }
+
+    [Fact]
+    public void Withdraw_should_throw_if_less_than_zero()
+    {
+        var customer = Customer.Create(Guid.NewGuid(), "john", "doe", "test@test.com");
+        var account = new Account(Guid.NewGuid(), customer, Currency.CanadianDollar);
+        var amount = Money.Parse("-42, CAD");
+        var currencyConverter = Substitute.For<ICurrencyConverter>();
+
+        Assert.Throws<ArgumentOutOfRangeException>(() => Transaction.Withdraw(account, amount, currencyConverter));
+    }
+
+    [Fact]
+    public void Withdraw_should_throw_if_amount_too_big()
+    {
+        var customer = Customer.Create(Guid.NewGuid(), "john", "doe", "test@test.com");
+        var account = new Account(Guid.NewGuid(), customer, Currency.CanadianDollar);
+        var amount = Money.Parse("42, CAD");
+
+        var currencyConverter = Substitute.For<ICurrencyConverter>();
+        currencyConverter.Convert(amount, account.Balance.Currency)
+                        .Returns(amount);
+
+        Assert.Throws<AccountTransactionException>(() => Transaction.Withdraw(account, amount, currencyConverter));
     }
 
     [Fact]

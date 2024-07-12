@@ -23,7 +23,7 @@ public class TransactionEventHandlersTests
         var deposit = Transaction.Deposit(sourceAccount, Money.Parse("100 CAD"));
         sourceAccount.Deposit(deposit, currencyConverter);
 
-        var transaction = Transaction.Withdraw(sourceAccount, Money.Parse("50 CAD"));
+        var transaction = Transaction.Withdraw(sourceAccount, Money.Parse("50 CAD"), currencyConverter);
         var @event = new TransactionStarted(Guid.NewGuid(), transaction.Id);
 
         var transactionsRepo = Substitute.For<IAggregateRepository<Transaction, Guid>>();
