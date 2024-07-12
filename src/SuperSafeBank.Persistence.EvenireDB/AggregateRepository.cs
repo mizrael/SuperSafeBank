@@ -25,7 +25,7 @@ internal class AggregateRepository<TA, TKey> : BaseAggregateRepository<TA, TKey>
         string streamType = GetStreamType();
         var streamId = new StreamId(streamKey, streamType);
 
-        var events = aggregateRoot.Events.Select(evt => Event.Create(evt, evt.GetType().FullName))
+        var events = aggregateRoot.NewEvents.Select(evt => Event.Create(evt, evt.GetType().FullName))
                                          .ToArray();
 
         await _client.AppendAsync(streamId, events, cancellationToken)

@@ -61,11 +61,11 @@ namespace SuperSafeBank.Persistence.Azure.Tests.Integration
             aggregate.DoSomething("foo");
             aggregate.DoSomething("bar");
 
-            aggregate.Events.Should().NotBeEmpty();
+            aggregate.NewEvents.Should().NotBeEmpty();
 
             await sut.PersistAsync(aggregate);
 
-            aggregate.Events.Should().BeEmpty();
+            aggregate.NewEvents.Should().BeEmpty();
         }
 
         [Fact]
@@ -104,7 +104,7 @@ namespace SuperSafeBank.Persistence.Azure.Tests.Integration
             var rehydrated = await sut.RehydrateAsync(aggregate.Id);
             rehydrated.Should().NotBeNull();
             rehydrated.Id.Should().Be(aggregate.Id);
-            rehydrated.Events.Should().BeEmpty();
+            rehydrated.NewEvents.Should().BeEmpty();
             rehydrated.WhatHappened.Should().HaveCount(3)
                 .And.Contain("created")
                 .And.Contain("lorem")

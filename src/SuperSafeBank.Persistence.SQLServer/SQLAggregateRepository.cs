@@ -47,7 +47,7 @@ public class SQLAggregateRepository<TA, TKey> : BaseAggregateRepository<TA, TKey
             var sql = $@"INSERT INTO {tableName} (aggregateId, aggregateVersion, eventType, data, timestamp)
                          VALUES (@aggregateId, @aggregateVersion, @eventType, @data, @timestamp);";
 
-            var entities = aggregateRoot.Events.Select(evt => AggregateEvent.Create(evt, _eventSerializer))
+            var entities = aggregateRoot.NewEvents.Select(evt => AggregateEvent.Create(evt, _eventSerializer))
                                                .ToList();
             await dbConn.ExecuteAsync(sql, param: entities, transaction: transaction)
                          .ConfigureAwait(false);

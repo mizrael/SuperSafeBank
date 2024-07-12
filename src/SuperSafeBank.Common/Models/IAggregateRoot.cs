@@ -5,7 +5,10 @@ namespace SuperSafeBank.Common.Models
     public interface IAggregateRoot<out TKey> : IEntity<TKey>
     {
         long Version { get; }
-        IReadOnlyCollection<IDomainEvent<TKey>> Events { get; }
-        void ClearEvents();
+
+        /// <summary>
+        /// list of events that have been applied but not persisted yet.
+        /// </summary>
+        IReadOnlyCollection<IDomainEvent<TKey>> NewEvents { get; }
     }
 }

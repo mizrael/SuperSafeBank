@@ -15,7 +15,7 @@ namespace SuperSafeBank.Domain.Tests
         {
             var customer = Customer.Create(Guid.NewGuid(), "lorem", "ipsum", "test@test.com");
 
-            var sut = BaseAggregateRoot<Customer, Guid>.Create(customer.Events);
+            var sut = BaseAggregateRoot<Customer, Guid>.Create(customer.NewEvents);
             sut.Should().NotBeNull();
             sut.Id.Should().Be(customer.Id);
             sut.Firstname.Should().Be(customer.Firstname);
@@ -45,9 +45,9 @@ namespace SuperSafeBank.Domain.Tests
             var expectedId = Guid.NewGuid();
             var sut = Customer.Create(expectedId, "lorem", "ipsum", "test@test.com");
 
-            sut.Events.Count.Should().Be(1);
+            sut.NewEvents.Count.Should().Be(1);
 
-            var createdEvent = sut.Events.First() as CustomerEvents.CustomerCreated;
+            var createdEvent = sut.NewEvents.First() as CustomerEvents.CustomerCreated;
             createdEvent.Should().NotBeNull()
                 .And.BeOfType<CustomerEvents.CustomerCreated>();
             createdEvent.AggregateId.Should().Be(expectedId);

@@ -39,11 +39,11 @@ public class AggregateRepositoryTests
         aggregate.DoSomething("foo");
         aggregate.DoSomething("bar");
 
-        aggregate.Events.Should().NotBeEmpty();
+        aggregate.NewEvents.Should().NotBeEmpty();
 
         await sut.PersistAsync(aggregate);
 
-        aggregate.Events.Should().BeEmpty();
+        aggregate.NewEvents.Should().BeEmpty();
     }
 
     [Fact]

@@ -1,10 +1,9 @@
-using System;
-using System.Linq;
-using System.Security.Principal;
 using FluentAssertions;
 using SuperSafeBank.Common.Models;
 using SuperSafeBank.Domain.DomainEvents;
 using SuperSafeBank.Domain.Services;
+using System;
+using System.Linq;
 using Xunit;
 
 namespace SuperSafeBank.Domain.Tests;
@@ -22,7 +21,7 @@ public class AccountTests
         account.Withdraw(Transaction.Withdraw(account, new Money(Currency.CanadianDollar, 4)), currencyConverter);
         account.Deposit(Transaction.Deposit(account, new Money(Currency.CanadianDollar, 71)), currencyConverter);
 
-        var instance = BaseAggregateRoot<Account, Guid>.Create(account.Events);
+        var instance = BaseAggregateRoot<Account, Guid>.Create(account.NewEvents);
         instance.Should().NotBeNull();
         instance.Id.Should().Be(account.Id);
         instance.OwnerId.Should().Be(customer.Id);
@@ -59,9 +58,9 @@ public class AccountTests
         var accountId = Guid.NewGuid();
         var sut = new Account(accountId, customer, Currency.CanadianDollar);
         
-        sut.Events.Count.Should().Be(1);
+        sut.NewEvents.Count.Should().Be(1);
 
-        var createdEvent = sut.Events.First() as AccountEvents.AccountCreated;
+        var createdEvent = sut.NewEvents.First() as AccountEvents.AccountCreated;
         createdEvent.Should().NotBeNull()
             .And.BeOfType<AccountEvents.AccountCreated>();
         createdEvent.AggregateId.Should().Be(accountId);

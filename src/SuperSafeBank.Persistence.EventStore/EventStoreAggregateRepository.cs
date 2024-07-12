@@ -30,7 +30,7 @@ namespace SuperSafeBank.Persistence.EventStore
         {            
             var streamName = GetStreamName(aggregateRoot.Id);
 
-            var firstEvent = aggregateRoot.Events.First();
+            var firstEvent = aggregateRoot.NewEvents.First();
             var version = firstEvent.AggregateVersion - 1;
 
             var connection = await _connectionWrapper.GetConnectionAsync().ConfigureAwait(false);
@@ -38,7 +38,7 @@ namespace SuperSafeBank.Persistence.EventStore
 
             try
             {
-                var newEvents = aggregateRoot.Events.Select(Map).ToArray();
+                var newEvents = aggregateRoot.NewEvents.Select(Map).ToArray();
                 await transaction.WriteAsync(newEvents).ConfigureAwait(false);
                 await transaction.CommitAsync().ConfigureAwait(false);
             }

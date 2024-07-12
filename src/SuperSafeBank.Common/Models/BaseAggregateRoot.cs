@@ -9,7 +9,7 @@ namespace SuperSafeBank.Common.Models;
 public abstract record BaseAggregateRoot<TA, TKey> : BaseEntity<TKey>, IAggregateRoot<TKey>
     where TA : class, IAggregateRoot<TKey>
 {
-    private readonly Queue<IDomainEvent<TKey>> _events = new Queue<IDomainEvent<TKey>>();
+    private readonly Queue<IDomainEvent<TKey>> _newEvents = new Queue<IDomainEvent<TKey>>();
 
     protected BaseAggregateRoot() { }
     
@@ -17,20 +17,19 @@ public abstract record BaseAggregateRoot<TA, TKey> : BaseEntity<TKey>, IAggregat
     {
     }
 
-    public IReadOnlyCollection<IDomainEvent<TKey>> Events => _events.ToImmutableArray();
+    /// <inheritdoc />
+    public IReadOnlyCollection<IDomainEvent<TKey>> NewEvents => _newEvents.ToImmutableArray();
 
     public long Version { get; private set; }
 
-    public DateTimeOffset LastUpdate => _events.Last().When;
-
-    public void ClearEvents()
+    internal void ClearEvents()
     {
-        _events.Clear();
+        _newEvents.Clear();
     }
 
     protected void Append(IDomainEvent<TKey> @event)
     {
-        _events.Enqueue(@event);
+        _newEvents.Enqueue(@event);
        
         this.When(@event);
 
@@ -49,7 +48,7 @@ public abstract record BaseAggregateRoot<TA, TKey> : BaseEntity<TKey>, IAggregat
         CTor = aggregateType.GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public,
             null, new Type[0], new ParameterModifier[0]);
         if (null == CTor)
-            throw new InvalidOperationException($"Unable to find required private parameterless constructor for Aggregate of type '{aggregateType.Name}'");
+            throw new InvalidOperationException($"Unable to find required parameterless constructor for Aggregate of type '{aggregateType.Name}'");
     }
 
     public static TA Create(IEnumerable<IDomainEvent<TKey>> events)
@@ -59,11 +58,13 @@ public abstract record BaseAggregateRoot<TA, TKey> : BaseEntity<TKey>, IAggregat
         var result = (TA)CTor.Invoke(new object[0]);
 
         var baseAggregate =  result as BaseAggregateRoot<TA, TKey>;
-        if (baseAggregate != null) 
+        if (baseAggregate != null)
+        {
             foreach (var @event in events)
                 baseAggregate.Append(@event);
 
-        result.ClearEvents();
+            baseAggregate.ClearEvents();
+        }
 
         return result;
     }
