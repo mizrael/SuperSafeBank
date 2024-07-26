@@ -25,21 +25,14 @@ namespace SuperSafeBank.Domain.Commands
         public string Email { get; }
     }
 
-    public class CreateCustomerHandler : IRequestHandler<CreateCustomer>
+    public class CreateCustomerHandler(
+        IAggregateRepository<Customer, Guid> eventsService,
+        ICustomerEmailsService customerEmailsRepository,
+        IEventProducer eventProducer) : IRequestHandler<CreateCustomer>
     {
-        private readonly IAggregateRepository<Customer, Guid> _eventsService;
-        private readonly ICustomerEmailsService _customerEmailsRepository;
-        private readonly IEventProducer _eventProducer;
-
-        public CreateCustomerHandler(
-            IAggregateRepository<Customer, Guid> eventsService, 
-            ICustomerEmailsService customerEmailsRepository, 
-            IEventProducer eventProducer)
-        {
-            _eventsService = eventsService ?? throw new ArgumentNullException(nameof(eventsService));
-            _customerEmailsRepository = customerEmailsRepository ?? throw new ArgumentNullException(nameof(customerEmailsRepository));
-            _eventProducer = eventProducer ?? throw new ArgumentNullException(nameof(eventProducer));
-        }
+        private readonly IAggregateRepository<Customer, Guid> _eventsService = eventsService ?? throw new ArgumentNullException(nameof(eventsService));
+        private readonly ICustomerEmailsService _customerEmailsRepository = customerEmailsRepository ?? throw new ArgumentNullException(nameof(customerEmailsRepository));
+        private readonly IEventProducer _eventProducer = eventProducer ?? throw new ArgumentNullException(nameof(eventProducer));
 
         public async Task Handle(CreateCustomer command, CancellationToken cancellationToken)
         {

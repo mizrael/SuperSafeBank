@@ -12,14 +12,9 @@ namespace SuperSafeBank.Service.Core.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class AccountsController : ControllerBase
+    public class AccountsController(IMediator mediator) : ControllerBase
     {
-        private readonly IMediator _mediator;
-
-        public AccountsController(IMediator mediator)
-        {
-            _mediator = mediator;
-        }
+        private readonly IMediator _mediator = mediator;
 
         [HttpGet, Route("{id:guid}", Name = "GetAccount")]
         public async Task<IActionResult> GetAccount(Guid id, CancellationToken cancellationToken = default)

@@ -12,14 +12,9 @@ namespace SuperSafeBank.Service.Core.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class CustomersController : ControllerBase
+    public class CustomersController(IMediator mediator) : ControllerBase
     {
-        private readonly IMediator _mediator;
-
-        public CustomersController(IMediator mediator)
-        {
-            _mediator = mediator;
-        }
+        private readonly IMediator _mediator = mediator;
 
         [HttpPost]
         public async Task<IActionResult> Create(CreateCustomerDto dto, CancellationToken cancellationToken = default)

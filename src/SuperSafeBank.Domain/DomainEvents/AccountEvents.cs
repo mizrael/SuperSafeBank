@@ -32,10 +32,7 @@ namespace SuperSafeBank.Domain.DomainEvents
             /// </summary>
             private Deposit() { }
 
-            public Deposit(Account account, Money amount) : base(account)
-            {
-                Amount = amount;
-            }
+            public Deposit(Account account, Money amount) : base(account) => Amount = amount;
 
             public Money Amount { get; init; }
         }
@@ -47,10 +44,7 @@ namespace SuperSafeBank.Domain.DomainEvents
             /// </summary>
             private Withdrawal() { }
 
-            public Withdrawal(Account account, Money amount) : base(account)
-            {
-                Amount = amount;
-            }
+            public Withdrawal(Account account, Money amount) : base(account) => Amount = amount;
 
             public Money Amount { get; init; }
         }

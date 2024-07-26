@@ -9,14 +9,9 @@ using System.Threading.Tasks;
 
 namespace SuperSafeBank.Worker.Core.Azure.Triggers
 {
-    public class Triggers
+    public class Triggers(IMediator mediator)
     {
-        private readonly IMediator _mediator;
-
-        public Triggers(IMediator mediator)
-        {
-            _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
-        }
+        private readonly IMediator _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
 
         [Function("CustomerTriggers")]
         public async Task Run([ServiceBusTrigger("bank-events", "worker", Connection = "EventsBus")] string message, IDictionary<string, object> userProperties, string messageId)

@@ -12,30 +12,21 @@ using System.Threading.Tasks;
 
 namespace SuperSafeBank.Service.Core.Persistence.Mongo.EventHandlers
 {
-    public class CustomerDetailsHandler :
+    public class CustomerDetailsHandler(
+        IQueryDbContext db,
+        IAggregateRepository<Customer, Guid> customersRepo,
+        IAggregateRepository<Account, Guid> accountsRepo,
+        ICurrencyConverter currencyConverter,
+        ILogger<CustomerDetailsHandler> logger) :
         INotificationHandler<CustomerCreated>,
         INotificationHandler<AccountCreated>,
         INotificationHandler<TransactionHappened>
     {
-        private readonly IQueryDbContext _db;
-        private readonly IAggregateRepository<Customer, Guid> _customersRepo;
-        private readonly IAggregateRepository<Account, Guid> _accountsRepo;
-        private readonly ICurrencyConverter _currencyConverter;
-        private readonly ILogger<CustomerDetailsHandler> _logger;
-
-        public CustomerDetailsHandler(
-            IQueryDbContext db,
-            IAggregateRepository<Customer, Guid> customersRepo,
-            IAggregateRepository<Account, Guid> accountsRepo,
-            ICurrencyConverter currencyConverter,
-            ILogger<CustomerDetailsHandler> logger)
-        {
-            _db = db ?? throw new ArgumentNullException(nameof(db));
-            _customersRepo = customersRepo ?? throw new ArgumentNullException(nameof(customersRepo));
-            _accountsRepo = accountsRepo ?? throw new ArgumentNullException(nameof(accountsRepo));
-            _currencyConverter = currencyConverter ?? throw new ArgumentNullException(nameof(currencyConverter));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        }
+        private readonly IQueryDbContext _db = db ?? throw new ArgumentNullException(nameof(db));
+        private readonly IAggregateRepository<Customer, Guid> _customersRepo = customersRepo ?? throw new ArgumentNullException(nameof(customersRepo));
+        private readonly IAggregateRepository<Account, Guid> _accountsRepo = accountsRepo ?? throw new ArgumentNullException(nameof(accountsRepo));
+        private readonly ICurrencyConverter _currencyConverter = currencyConverter ?? throw new ArgumentNullException(nameof(currencyConverter));
+        private readonly ILogger<CustomerDetailsHandler> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
         public async Task Handle(CustomerCreated @event, CancellationToken cancellationToken)
         {

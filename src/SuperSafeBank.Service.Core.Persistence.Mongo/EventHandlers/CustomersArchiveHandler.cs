@@ -11,22 +11,15 @@ using System;
 
 namespace SuperSafeBank.Service.Core.Persistence.Mongo.EventHandlers
 {
-    public class CustomersArchiveHandler : 
+    public class CustomersArchiveHandler(
+        IAggregateRepository<Customer, Guid> customersRepo,
+        IQueryDbContext db,
+        ILogger<CustomersArchiveHandler> logger) : 
         INotificationHandler<CustomerCreated>
     {
-        private readonly IQueryDbContext _db;
-        private readonly IAggregateRepository<Customer, Guid> _customersRepo; 
-        private readonly ILogger<CustomersArchiveHandler> _logger;
-
-        public CustomersArchiveHandler(
-            IAggregateRepository<Customer, Guid> customersRepo,
-            IQueryDbContext db, 
-            ILogger<CustomersArchiveHandler> logger)
-        {
-            _customersRepo = customersRepo ?? throw new ArgumentNullException(nameof(customersRepo));
-            _db = db ?? throw new ArgumentNullException(nameof(db));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        }
+        private readonly IQueryDbContext _db = db ?? throw new ArgumentNullException(nameof(db));
+        private readonly IAggregateRepository<Customer, Guid> _customersRepo = customersRepo ?? throw new ArgumentNullException(nameof(customersRepo)); 
+        private readonly ILogger<CustomersArchiveHandler> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
         public async Task Handle(CustomerCreated @event, CancellationToken cancellationToken)
         {

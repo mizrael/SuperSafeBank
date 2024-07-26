@@ -55,9 +55,7 @@ namespace SuperSafeBank.Domain
             }
         }
 
-        public static Customer Create(Guid customerId, string firstName, string lastName, string email)
-        {
-            return new Customer(customerId, firstName, lastName, new Email(email));
-        }
+        public static Customer Create(Guid customerId, string firstName, string lastName, string email) =>
+            new Customer(customerId, firstName, lastName, new Email(email));
     }
 }

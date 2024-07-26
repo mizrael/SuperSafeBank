@@ -11,26 +11,18 @@ using System.Threading.Tasks;
 
 namespace SuperSafeBank.Service.Core.Persistence.Mongo.EventHandlers
 {
-    public class AccountEventsHandler : 
+    public class AccountEventsHandler(
+        IQueryDbContext db,
+        IAggregateRepository<Customer, Guid> customersRepo,
+        IAggregateRepository<Account, Guid> accountsRepo,
+        ILogger<AccountEventsHandler> logger) : 
         INotificationHandler<AccountCreated>,
         INotificationHandler<TransactionHappened>
     {
-        private readonly IQueryDbContext _db;
-        private readonly IAggregateRepository<Customer, Guid> _customersRepo;
-        private readonly IAggregateRepository<Account, Guid> _accountsRepo;
-        private readonly ILogger<AccountEventsHandler> _logger;
-
-        public AccountEventsHandler(
-            IQueryDbContext db,
-            IAggregateRepository<Customer, Guid> customersRepo,
-            IAggregateRepository<Account, Guid> accountsRepo,
-            ILogger<AccountEventsHandler> logger)
-        {
-            _db = db ?? throw new ArgumentNullException(nameof(db));
-            _customersRepo = customersRepo ?? throw new ArgumentNullException(nameof(customersRepo));
-            _accountsRepo = accountsRepo ?? throw new ArgumentNullException(nameof(accountsRepo));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        }
+        private readonly IQueryDbContext _db = db ?? throw new ArgumentNullException(nameof(db));
+        private readonly IAggregateRepository<Customer, Guid> _customersRepo = customersRepo ?? throw new ArgumentNullException(nameof(customersRepo));
+        private readonly IAggregateRepository<Account, Guid> _accountsRepo = accountsRepo ?? throw new ArgumentNullException(nameof(accountsRepo));
+        private readonly ILogger<AccountEventsHandler> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
         public async Task Handle(AccountCreated @event, CancellationToken cancellationToken)
         {

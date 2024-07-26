@@ -8,14 +8,9 @@ using System.Threading.Tasks;
 
 namespace SuperSafeBank.Worker.Notifications.ApiClients
 {
-    public class CustomersApiClient : ICustomersApiClient
+    public class CustomersApiClient(HttpClient client) : ICustomersApiClient
     {
-        private readonly HttpClient _client;
-        
-        public CustomersApiClient(HttpClient client)
-        {
-            _client = client ?? throw new ArgumentNullException(nameof(client));
-        }
+        private readonly HttpClient _client = client ?? throw new ArgumentNullException(nameof(client));
 
         public async Task<CustomerDetails> GetCustomerAsync(Guid customerId, CancellationToken cancellationToken = default)
         {            

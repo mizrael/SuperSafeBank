@@ -10,20 +10,15 @@ using System.Threading.Tasks;
 
 namespace SuperSafeBank.Persistence.Azure
 {
-    public class AggregateRepository<TA, TKey> : IAggregateRepository<TA, TKey>
+    public class AggregateRepository<TA, TKey>(TableClient tableClient, IEventSerializer eventDeserializer)
+        : IAggregateRepository<TA, TKey>
         where TA : class, IAggregateRoot<TKey>
     {
-        private readonly TableClient _client;
+        private readonly TableClient _client = tableClient ?? throw new ArgumentNullException(nameof(tableClient));
                 
-        private readonly IEventSerializer _eventSerializer;
+        private readonly IEventSerializer _eventSerializer = eventDeserializer ?? throw new ArgumentNullException(nameof(eventDeserializer));
 
         private static readonly ConcurrentDictionary<TKey, SemaphoreSlim> _locks = new();
-
-        public AggregateRepository(TableClient tableClient, IEventSerializer eventDeserializer)
-        {
-            _client = tableClient ?? throw new ArgumentNullException(nameof(tableClient));
-            _eventSerializer = eventDeserializer ?? throw new ArgumentNullException(nameof(eventDeserializer));         
-        }
 
         public async Task PersistAsync(TA aggregateRoot, CancellationToken cancellationToken = default)
         {

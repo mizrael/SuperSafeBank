@@ -17,12 +17,10 @@ namespace SuperSafeBank.Worker.Notifications.ApiClients
             System.Net.HttpStatusCode.ServiceUnavailable,
         };
 
-        public static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy(int retryCount = 3)
-        {
-            return HttpPolicyExtensions
+        public static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy(int retryCount = 3) 
+            => HttpPolicyExtensions
                 .HandleTransientHttpError()
                 .OrResult(msg => RetryableCodes.Contains(msg.StatusCode))
                 .WaitAndRetryAsync(retryCount, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
-        }
     }
 }

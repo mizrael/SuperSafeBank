@@ -3,14 +3,9 @@ using SuperSafeBank.Domain.Services;
 
 namespace SuperSafeBank.Service.Core.Persistence.SQLServer
 {
-    public class SQLCustomerEmailsService : ICustomerEmailsService
+    public class SQLCustomerEmailsService(CustomerDbContext dbContext) : ICustomerEmailsService
     {
-        private readonly CustomerDbContext _dbContext;
-
-        public SQLCustomerEmailsService(CustomerDbContext dbContext)
-        {
-            _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
-        }
+        private readonly CustomerDbContext _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
 
         public async Task CreateAsync(string email, Guid customerId, CancellationToken cancellationToken = default)
         {

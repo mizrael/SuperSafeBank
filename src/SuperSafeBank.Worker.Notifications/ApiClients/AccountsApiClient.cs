@@ -8,14 +8,9 @@ using SuperSafeBank.Worker.Notifications.ApiClients.Models;
 
 namespace SuperSafeBank.Worker.Notifications.ApiClients
 {
-    public class AccountsApiClient : IAccountsApiClient
+    public class AccountsApiClient(HttpClient client) : IAccountsApiClient
     {
-        private readonly HttpClient _client;
-
-        public AccountsApiClient(HttpClient client)
-        {
-            _client = client ?? throw new ArgumentNullException(nameof(client));
-        }
+        private readonly HttpClient _client = client ?? throw new ArgumentNullException(nameof(client));
 
         public async Task<AccountDetails> GetAccountAsync(Guid accountId, CancellationToken cancellationToken = default)
         {

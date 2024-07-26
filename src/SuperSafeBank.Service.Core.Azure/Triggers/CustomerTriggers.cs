@@ -11,14 +11,9 @@ using System.Threading.Tasks;
 
 namespace SuperSafeBank.Service.Core.Azure.Triggers
 {
-    public class CustomerTriggers
+    public class CustomerTriggers(IMediator mediator)
     {
-        private readonly IMediator _mediator;
-
-        public CustomerTriggers(IMediator mediator)
-        {
-            _mediator = mediator ?? throw new System.ArgumentNullException(nameof(mediator));
-        }
+        private readonly IMediator _mediator = mediator ?? throw new System.ArgumentNullException(nameof(mediator));
 
         [Function(nameof(GetCustomers))]
         public async Task<HttpResponseData> GetCustomers([HttpTrigger(AuthorizationLevel.Function, "get", Route = "customers")] HttpRequestData req)

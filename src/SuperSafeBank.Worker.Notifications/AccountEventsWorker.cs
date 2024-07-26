@@ -43,14 +43,10 @@ namespace SuperSafeBank.Worker.Notifications
         }
 
         private void OnExceptionThrown(object s, Exception ex)
-        {
-            _logger.LogError(ex, $"an exception has occurred while consuming a message: {ex.Message}");
-        }
+            => _logger.LogError(ex, $"an exception has occurred while consuming a message: {ex.Message}");
 
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-        {
-            await _consumer.StartConsumeAsync(stoppingToken);
-        }
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken) 
+            => await _consumer.StartConsumeAsync(stoppingToken);
 
         public override Task StopAsync(CancellationToken cancellationToken)
         {

@@ -21,10 +21,7 @@ namespace SuperSafeBank.Common.Models
 
         public long Version { get; private set; }
 
-        public void ClearEvents()
-        {
-            _events.Clear();
-        }
+        public void ClearEvents() => _events.Clear();
 
         protected void Append(IDomainEvent<TKey> @event)
         {

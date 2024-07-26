@@ -7,14 +7,9 @@ using System.Threading.Tasks;
 
 namespace SuperSafeBank.Service.Core.Azure.Services
 {
-    public class CustomerEmailsService : ICustomerEmailsService
+    public class CustomerEmailsService(TableClient client) : ICustomerEmailsService
     {
-        private readonly TableClient _client;        
-
-        public CustomerEmailsService(TableClient client)
-        {
-            _client = client;
-        }
+        private readonly TableClient _client = client;
 
         public async Task<bool> ExistsAsync(string email, CancellationToken cancellationToken = default)
         {

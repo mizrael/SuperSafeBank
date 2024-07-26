@@ -12,26 +12,18 @@ using System.Threading.Tasks;
 
 namespace SuperSafeBank.Worker.Core.Azure.EventHandlers
 {
-    public class AccountEventsHandler :
+    public class AccountEventsHandler(
+        IAggregateRepository<Customer, Guid> customersRepo,
+        IAggregateRepository<Account, Guid> accountsRepo,
+        IViewsContext dbContext,
+        ILogger<AccountEventsHandler> logger) :
         INotificationHandler<AccountCreated>,
         INotificationHandler<TransactionHappened>
     {
-        private readonly IAggregateRepository<Customer, Guid> _customersRepo;
-        private readonly IAggregateRepository<Account, Guid> _accountsRepo;
-        private readonly IViewsContext _dbContext;
-        private readonly ILogger<AccountEventsHandler> _logger;
-
-        public AccountEventsHandler(
-            IAggregateRepository<Customer, Guid> customersRepo,
-            IAggregateRepository<Account, Guid> accountsRepo, 
-            IViewsContext dbContext, 
-            ILogger<AccountEventsHandler> logger)
-        {
-            _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _customersRepo = customersRepo ?? throw new ArgumentNullException(nameof(customersRepo));
-            _accountsRepo = accountsRepo ?? throw new ArgumentNullException(nameof(accountsRepo));
-        }
+        private readonly IAggregateRepository<Customer, Guid> _customersRepo = customersRepo ?? throw new ArgumentNullException(nameof(customersRepo));
+        private readonly IAggregateRepository<Account, Guid> _accountsRepo = accountsRepo ?? throw new ArgumentNullException(nameof(accountsRepo));
+        private readonly IViewsContext _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
+        private readonly ILogger<AccountEventsHandler> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
         public async Task Handle(AccountCreated @event, CancellationToken cancellationToken)
         {

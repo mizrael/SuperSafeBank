@@ -2,7 +2,7 @@
 
 namespace SuperSafeBank.Service.Core.DTOs
 {
-    public class CreateCustomerDto
+    public record CreateCustomerDto
     {
         [Required]
         public string FirstName { get; set; }

@@ -12,19 +12,13 @@ using System.Threading.Tasks;
 
 namespace SuperSafeBank.Worker.Core.Azure.EventHandlers
 {
-    public class CustomersArchiveHandler : 
-        INotificationHandler<CustomerCreated>
+    public class CustomersArchiveHandler(IViewsContext dbContext, 
+        IAggregateRepository<Customer, Guid> customersRepo,
+        ILogger<CustomersArchiveHandler> logger) :  INotificationHandler<CustomerCreated>
     {
-        private readonly ILogger<CustomersArchiveHandler> _logger;
-        private readonly IViewsContext _dbContext;
-        private readonly IAggregateRepository<Customer, Guid> _customersRepo;
-
-        public CustomersArchiveHandler(IViewsContext dbContext, IAggregateRepository<Customer, Guid> customersRepo, ILogger<CustomersArchiveHandler> logger)
-        {
-            _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _customersRepo = customersRepo ?? throw new ArgumentNullException(nameof(customersRepo));
-        }
+        private readonly ILogger<CustomersArchiveHandler> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        private readonly IViewsContext _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
+        private readonly IAggregateRepository<Customer, Guid> _customersRepo = customersRepo ?? throw new ArgumentNullException(nameof(customersRepo));
 
         public async Task Handle(CustomerCreated @event, CancellationToken cancellationToken)
         {

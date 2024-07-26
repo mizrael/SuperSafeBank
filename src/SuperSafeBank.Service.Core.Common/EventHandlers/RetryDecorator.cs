@@ -20,9 +20,7 @@ namespace SuperSafeBank.Service.Core.Common.EventHandlers
                     i => TimeSpan.FromSeconds(i));
         }
 
-        public Task Handle(TNotification notification, CancellationToken cancellationToken)
-        {
-            return _retryPolicy.ExecuteAsync(() => _inner.Handle(notification, cancellationToken));
-        }
+        public Task Handle(TNotification notification, CancellationToken cancellationToken) 
+            => _retryPolicy.ExecuteAsync(() => _inner.Handle(notification, cancellationToken));
     }
 }

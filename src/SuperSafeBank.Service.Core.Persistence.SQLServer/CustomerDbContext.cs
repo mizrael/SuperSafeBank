@@ -4,10 +4,7 @@ namespace SuperSafeBank.Service.Core.Persistence.SQLServer
 {
     public class CustomerDbContext : DbContext
     {
-        public CustomerDbContext(DbContextOptions<CustomerDbContext> opts) : base(opts)
-        {
-            Database.EnsureCreated();
-        }
+        public CustomerDbContext(DbContextOptions<CustomerDbContext> opts) : base(opts) => Database.EnsureCreated();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

@@ -5,15 +5,10 @@ using SuperSafeBank.Common.EventBus;
 
 namespace SuperSafeBank.Worker.Core
 {
-    public class EventsConsumerWorker : BackgroundService
+    public class EventsConsumerWorker(IServiceScopeFactory scopeFactory) : BackgroundService
     {
-        private readonly IServiceScopeFactory _scopeFactory;
+        private readonly IServiceScopeFactory _scopeFactory = scopeFactory ?? throw new ArgumentNullException(nameof(scopeFactory));
         private IEventConsumer _consumer;
-
-        public EventsConsumerWorker(IServiceScopeFactory scopeFactory)
-        {
-            _scopeFactory = scopeFactory ?? throw new ArgumentNullException(nameof(scopeFactory));
-        }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {

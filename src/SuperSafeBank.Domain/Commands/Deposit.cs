@@ -21,18 +21,12 @@ namespace SuperSafeBank.Domain.Commands
         public Money Amount { get; }
     }
 
-    public class DepositHandler : IRequestHandler<Deposit>
+    public class DepositHandler(IAggregateRepository<Account, Guid> accountEventsService, 
+        ICurrencyConverter currencyConverter, IEventProducer eventProducer) : IRequestHandler<Deposit>
     {
-        private readonly IAggregateRepository<Account, Guid> _accountEventsService;
-        private readonly ICurrencyConverter _currencyConverter;
-        private readonly IEventProducer _eventProducer;
-
-        public DepositHandler(IAggregateRepository<Account, Guid> accountEventsService, ICurrencyConverter currencyConverter, IEventProducer eventProducer)
-        {
-            _accountEventsService = accountEventsService;
-            _currencyConverter = currencyConverter;
-            _eventProducer = eventProducer;
-        }
+        private readonly IAggregateRepository<Account, Guid> _accountEventsService = accountEventsService;
+        private readonly ICurrencyConverter _currencyConverter = currencyConverter;
+        private readonly IEventProducer _eventProducer = eventProducer;
 
         public async Task Handle(Deposit command, CancellationToken cancellationToken)
         {

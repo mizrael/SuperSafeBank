@@ -22,18 +22,12 @@ namespace SuperSafeBank.Domain.Commands
         public Currency Currency { get; }
     }
 
-    public class CreateAccountHandler : IRequestHandler<CreateAccount>
+    public class CreateAccountHandler(IAggregateRepository<Customer, Guid> customerEventsService, 
+        IAggregateRepository<Account, Guid> accountEventsService, IEventProducer eventProducer) : IRequestHandler<CreateAccount>
     {
-        private readonly IAggregateRepository<Customer, Guid> _customerEventsService;
-        private readonly IAggregateRepository<Account, Guid> _accountEventsService;
-        private readonly IEventProducer _eventProducer;
-
-        public CreateAccountHandler(IAggregateRepository<Customer, Guid> customerEventsService, IAggregateRepository<Account, Guid> accountEventsService, IEventProducer eventProducer)
-        {
-            _customerEventsService = customerEventsService;
-            _accountEventsService = accountEventsService;
-            _eventProducer = eventProducer;
-        }
+        private readonly IAggregateRepository<Customer, Guid> _customerEventsService = customerEventsService;
+        private readonly IAggregateRepository<Account, Guid> _accountEventsService = accountEventsService;
+        private readonly IEventProducer _eventProducer = eventProducer;
 
         public async Task Handle(CreateAccount command, CancellationToken cancellationToken)
         {

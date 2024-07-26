@@ -1,8 +1,10 @@
-﻿namespace SuperSafeBank.Common
+﻿using System.Text.Json;
+
+namespace SuperSafeBank.Common
 {
     public static class JsonSerializerDefaultOptions
     {
-        public static readonly System.Text.Json.JsonSerializerOptions Defaults = new() 
+        public static readonly JsonSerializerOptions Defaults = new() 
         {            
             PropertyNameCaseInsensitive = true,            
         };

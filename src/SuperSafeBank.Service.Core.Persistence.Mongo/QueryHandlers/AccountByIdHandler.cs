@@ -6,14 +6,9 @@ using SuperSafeBank.Service.Core.Common.Queries;
 
 namespace SuperSafeBank.Service.Core.Persistence.Mongo.QueryHandlers
 {
-    public class AccountByIdHandler : IRequestHandler<AccountById, AccountDetails>
+    public class AccountByIdHandler(IQueryDbContext db) : IRequestHandler<AccountById, AccountDetails>
     {
-        private readonly IQueryDbContext _db;
-
-        public AccountByIdHandler(IQueryDbContext db)
-        {
-            _db = db;
-        }
+        private readonly IQueryDbContext _db = db;
 
         public async Task<AccountDetails> Handle(AccountById request, CancellationToken cancellationToken)
         {

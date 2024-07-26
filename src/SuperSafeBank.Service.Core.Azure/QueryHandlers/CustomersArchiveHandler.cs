@@ -5,17 +5,13 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Text.Json;
 
 namespace SuperSafeBank.Service.Core.Azure.QueryHandlers
 {
-    public class CustomersArchiveHandler : IRequestHandler<CustomersArchive, IEnumerable<CustomerArchiveItem>>
+    public class CustomersArchiveHandler(IViewsContext dbContext) : IRequestHandler<CustomersArchive, IEnumerable<CustomerArchiveItem>>
     {
-        private readonly IViewsContext _dbContext;
-
-        public CustomersArchiveHandler(IViewsContext dbContext)
-        {
-            _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
-        }
+        private readonly IViewsContext _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
 
         public async Task<IEnumerable<CustomerArchiveItem>> Handle(CustomersArchive request, CancellationToken cancellationToken)
         {
@@ -24,7 +20,7 @@ namespace SuperSafeBank.Service.Core.Azure.QueryHandlers
             var entities = _dbContext.CustomersArchive.QueryAsync<ViewTableEntity>(cancellationToken: cancellationToken);
             await foreach(var entity in entities)
             {
-                var model = System.Text.Json.JsonSerializer.Deserialize<CustomerArchiveItem>(entity.Data);
+                var model = JsonSerializer.Deserialize<CustomerArchiveItem>(entity.Data);
                 results.Add(model);
             }
 

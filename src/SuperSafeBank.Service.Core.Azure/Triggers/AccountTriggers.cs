@@ -11,14 +11,9 @@ using System.Threading.Tasks;
 
 namespace SuperSafeBank.Service.Core.Azure.Triggers
 {
-    public class AccountTriggers
+    public class AccountTriggers(IMediator mediator)
     {
-        private readonly IMediator _mediator;
-
-        public AccountTriggers(IMediator mediator)
-        {
-            _mediator = mediator ?? throw new System.ArgumentNullException(nameof(mediator));
-        }
+        private readonly IMediator _mediator = mediator ?? throw new System.ArgumentNullException(nameof(mediator));
 
         [Function(nameof(GetAccount))]
         public async Task<HttpResponseData> GetAccount([HttpTrigger(AuthorizationLevel.Function, "get", Route = "accounts/{accountId:guid}")] HttpRequestData req, Guid accountId)

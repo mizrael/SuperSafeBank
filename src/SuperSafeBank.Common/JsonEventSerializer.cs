@@ -27,10 +27,8 @@ public class JsonEventSerializer : IEventSerializer
         ContractResolver = new PrivateSetterContractResolver()
     };
 
-    public JsonEventSerializer(IEnumerable<Assembly> assemblies)
-    {
-        _assemblies = assemblies ?? new[] {Assembly.GetExecutingAssembly()};
-    }
+    public JsonEventSerializer(IEnumerable<Assembly> assemblies) =>
+        _assemblies = assemblies ?? new[] { Assembly.GetExecutingAssembly() };
 
     public IDomainEvent<TKey> Deserialize<TKey>(string type, ReadOnlySpan<byte> data)
     {

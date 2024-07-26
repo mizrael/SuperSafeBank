@@ -5,17 +5,12 @@ using SuperSafeBank.Common.Models;
 
 namespace SuperSafeBank.Persistence.EvenireDB;
 
-internal class AggregateRepository<TA, TKey> : IAggregateRepository<TA, TKey>
+internal class AggregateRepository<TA, TKey>(IEventsClient client, IEventSerializer eventDeserializer)
+    : IAggregateRepository<TA, TKey>
         where TA : class, IAggregateRoot<TKey>        
 {
-    private readonly IEventsClient _client;
-    private readonly IEventSerializer _eventDeserializer;
-
-    public AggregateRepository(IEventsClient client, IEventSerializer eventDeserializer)
-    {
-        _client = client ?? throw new ArgumentNullException(nameof(client));
-        _eventDeserializer = eventDeserializer ?? throw new ArgumentNullException(nameof(eventDeserializer));
-    }
+    private readonly IEventsClient _client = client ?? throw new ArgumentNullException(nameof(client));
+    private readonly IEventSerializer _eventDeserializer = eventDeserializer ?? throw new ArgumentNullException(nameof(eventDeserializer));
 
     public async Task PersistAsync(TA aggregateRoot, CancellationToken cancellationToken = default)
     {

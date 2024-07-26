@@ -5,17 +5,13 @@ using SuperSafeBank.Service.Core.Common.Queries;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Text.Json;
 
 namespace SuperSafeBank.Service.Core.Azure.QueryHandlers
 {
-    public class AccountByIdHandler : IRequestHandler<AccountById, AccountDetails>
+    public class AccountByIdHandler(IViewsContext dbContext) : IRequestHandler<AccountById, AccountDetails>
     {
-        private readonly IViewsContext _dbContext;
-
-        public AccountByIdHandler(IViewsContext dbContext)
-        {
-            _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
-        }
+        private readonly IViewsContext _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
 
         public async Task<AccountDetails> Handle(AccountById request, CancellationToken cancellationToken)
         {
@@ -37,7 +33,7 @@ namespace SuperSafeBank.Service.Core.Azure.QueryHandlers
             if (response?.Value is null)
                 return null;
 
-            return System.Text.Json.JsonSerializer.Deserialize<AccountDetails>(response.Value.Data);
+            return JsonSerializer.Deserialize<AccountDetails>(response.Value.Data);
         }
     }
 }

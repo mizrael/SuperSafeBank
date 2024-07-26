@@ -28,10 +28,7 @@ namespace SuperSafeBank.Domain.DomainEvents
         {
             private AccountAdded() { }
 
-            public AccountAdded(Customer customer, Guid accountId) : base(customer)
-            {
-                AccountId = accountId;
-            }
+            public AccountAdded(Customer customer, Guid accountId) : base(customer) => AccountId = accountId;
 
             public Guid AccountId { get; init; }
         }

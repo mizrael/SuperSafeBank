@@ -4,14 +4,9 @@ using Microsoft.Extensions.Logging;
 
 namespace SuperSafeBank.Worker.Notifications
 {
-    public class FakeNotificationsService : INotificationsService
+    public class FakeNotificationsService(ILogger<FakeNotificationsService> logger) : INotificationsService
     {
-        private readonly ILogger<FakeNotificationsService> _logger;
-
-        public FakeNotificationsService(ILogger<FakeNotificationsService> logger)
-        {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        }
+        private readonly ILogger<FakeNotificationsService> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
         public Task DispatchAsync(Notification notification)
         {

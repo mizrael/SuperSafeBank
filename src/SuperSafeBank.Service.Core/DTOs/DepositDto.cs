@@ -2,7 +2,7 @@
 
 namespace SuperSafeBank.Service.Core.DTOs
 {
-    public class DepositDto
+    public record DepositDto
     {
         [Required]
         public string CurrencyCode { get; set; }

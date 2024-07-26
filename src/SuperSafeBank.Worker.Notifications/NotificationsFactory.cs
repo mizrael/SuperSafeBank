@@ -4,14 +4,9 @@ using System.Threading.Tasks;
 
 namespace SuperSafeBank.Worker.Notifications
 {
-    public class NotificationsFactory : INotificationsFactory
+    public class NotificationsFactory(IAccountsApiClient accountsApiClient) : INotificationsFactory
     {
-        private readonly IAccountsApiClient _accountsApiClient;
-
-        public NotificationsFactory(IAccountsApiClient accountsApiClient)
-        {     
-            _accountsApiClient = accountsApiClient ?? throw new ArgumentNullException(nameof(accountsApiClient));
-        }
+        private readonly IAccountsApiClient _accountsApiClient = accountsApiClient ?? throw new ArgumentNullException(nameof(accountsApiClient));
 
         public async Task<Notification> CreateNewAccountNotificationAsync(Guid accountId)
         {
