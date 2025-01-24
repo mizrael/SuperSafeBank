@@ -8,3 +8,4 @@ public interface IEventSerializer
     IDomainEvent<TKey> Deserialize<TKey>(string type, ReadOnlySpan<byte> data);
     byte[] Serialize<TKey>(IDomainEvent<TKey> @event);
 }
+
